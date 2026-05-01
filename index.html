@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punto Digital | Tecnología y Telefonía</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --gold-primary: #d4a843;
+    --gold-light: #f0d68a;
+    --gold-dark: #b89344;
+    --black-bg: #0a0a0a;
+    --black-card: #1a1a1a;
+    --black-light: #2a2a2a;
+    --text-white: #ffffff;
+    --text-gray: #aaaaaa;
+    --text-dark: #888888;
+    --border-color: rgba(212, 168, 67, 0.1);
+    --shadow-color: rgba(0,0,0,0.5);
+  }
+
+  [data-theme="light"] {
+    --black-bg: #f5f5f5;
+    --black-card: #ffffff;
+    --black-light: #e0e0e0;
+    --text-white: #1a1a1a;
+    --text-gray: #555555;
+    --text-dark: #777777;
+    --border-color: rgba(212, 168, 67, 0.2);
+    --shadow-color: rgba(0,0,0,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--black-bg);
+    color: var(--text-white);
+    overflow-x: hidden;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+  }
+
+  /* ===== NAVBAR ===== */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;    right: 0;
+    z-index: 1000;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px 0;
+    transition: all 0.3s ease;
+  }
+
+  [data-theme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .navbar.scrolled {
+    box-shadow: 0 5px 30px var(--shadow-color);
+  }
+
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .nav-logo-icon {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--black-bg);
+  }
+
+  .nav-logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;    color: var(--text-white);
+  }
+
+  .nav-logo-text span { color: var(--gold-primary); }
+
+  .nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 35px;
+    align-items: center;
+  }
+
+  .nav-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .nav-link {
+    color: var(--text-gray);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.3s ease;
+    position: relative;
+  }
+
+  .nav-link:hover { color: var(--gold-primary); }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gold-primary);
+    transition: width 0.3s ease;
+  }
+
+  .nav-link:hover::after { width: 100%; }
+
+  .nav-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-gray);
+    cursor: pointer;    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    font-size: 16px;
+  }
+
+  .nav-icon-btn:hover {
+    background: rgba(212,168,67,0.1);
+    border-color: var(--gold-primary);
+    color: var(--gold-primary);
+    transform: translateY(-2px);
+  }
+
+  .nav-cta {
+    padding: 10px 25px;
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+    color: var(--black-bg) !important;
+    border-radius: 25px;
+    font-weight: 600;
+  }
+
+  .nav-cta::after { display: none; }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 5px;
+  }
+
+  .hamburger span {
+    width: 25px;
+    height: 2px;
+    background: var(--gold-primary);
+    transition: all 0.3s ease;
+  }
+
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+  }
+  /* ===== PARTICLES ===== */
+  #particles-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ===== HERO SECTION ===== */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 140px 30px 80px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(184,147,68,0.15) 0%, transparent 60%);
+  }
+
+  .hero-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .hero-text h1 {
+    font-size: clamp(36px, 6vw, 58px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 25px;
+  }
+
+  .hero-text .gold { 
+    color: var(--gold-primary);
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-text .white { color: var(--text-white); }
+  .hero-text p {
+    font-size: 17px;
+    color: var(--text-gray);
+    margin-bottom: 35px;
+    max-width: 550px;
+    line-height: 1.8;
+  }
+
+  .btn-gold {
+    display: inline-block;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light), var(--gold-primary));
+    background-size: 200% 200%;
+    color: var(--black-bg);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    text-decoration: none;
+    animation: shimmer 3s ease-in-out infinite;
+    box-shadow: 0 10px 30px rgba(212,168,67,0.3);
+  }
+
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .btn-gold:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(212,168,67,0.5);
+  }
+
+  .hero-carousel {
+    position: relative;
+    height: 550px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1000px;
+  }
+
+  .carousel-slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;    opacity: 0;
+    transition: all 1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.9);
+  }
+
+  .carousel-slide.active { 
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .phone-group {
+    position: relative;
+    width: 100%;
+    max-width: 550px;
+    height: 450px;
+  }
+
+  .phone-item {
+    position: absolute;
+    border-radius: 25px;
+    overflow: hidden;
+    border: 3px solid rgba(212,168,67,0.4);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,168,67,0.2);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+
+  .phone-item:hover {
+    transform: translateY(-20px) scale(1.15) rotate(0deg) !important;
+    z-index: 100 !important;
+    box-shadow: 0 30px 80px rgba(212,168,67,0.4), 0 0 60px rgba(212,168,67,0.3);
+    border-color: var(--gold-primary);
+  }
+
+  .phone-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+  }
+
+  .phone-item:hover img {
+    transform: scale(1.1);
+  }
+
+  .phone-1 { left: 0; top: 30%; width: 140px; height: 280px; transform: rotate(-15deg); z-index: 1; }
+  .phone-2 { left: 25%; top: 0; width: 150px; height: 300px; transform: rotate(-8deg); z-index: 2; }  .phone-3 { right: 25%; top: 10%; width: 150px; height: 300px; transform: rotate(8deg); z-index: 3; }
+  .phone-4 { right: 0; top: 35%; width: 140px; height: 280px; transform: rotate(15deg); z-index: 1; }
+
+  .golden-orb {
+    position: absolute;
+    background: radial-gradient(circle, var(--gold-light), var(--gold-primary));
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(212,168,67,0.8);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .orb-1 { width: 35px; height: 35px; bottom: 25%; left: 5%; animation-delay: 0s; }
+  .orb-2 { width: 25px; height: 25px; bottom: 15%; right: 5%; animation-delay: 2s; }
+  .orb-3 { width: 20px; height: 20px; top: 5%; right: 15%; animation-delay: 4s; }
+
+  /* ===== ADMIN MODE STYLES ===== */
+  body.admin-mode {
+    padding-left: 300px;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 300px;
+    background: var(--black-card);
+    border-right: 2px solid var(--border-color);
+    z-index: 2000;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 5px 0 30px var(--shadow-color);
+  }
+
+  body.admin-mode .admin-sidebar {
+    transform: translateX(0);
+  }
+
+  .admin-sidebar-header {
+    background: linear-gradient(135deg, rgba(212,168,67,0.1), transparent);
+    padding: 30px 25px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .admin-sidebar-header h2 {
+    color: var(--gold-primary);
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+
+  .admin-sidebar-header p {
+    color: var(--text-dark);
+    font-size: 13px;
+  }
+
+  .admin-menu {
+    padding: 20px 0;
+  }
+
+  .admin-menu-item {
+    padding: 18px 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-left: 3px solid transparent;
+  }
+
+  .admin-menu-item:hover,
+  .admin-menu-item.active {
+    background: rgba(212,168,67,0.05);
+    border-left-color: var(--gold-primary);
+    color: var(--gold-primary);
+  }
+
+  .admin-menu-item i {
+    width: 24px;
+    font-size: 18px;
+  }
+
+  .admin-menu-item span {
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .admin-content-area {
+    position: fixed;
+    right: 0;
+    top: 80px;
+    bottom: 0;
+    left: 300px;
+    background: var(--black-bg);
+    overflow-y: auto;    padding: 40px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s;
+  }
+
+  body.admin-mode .admin-content-area {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .admin-section-panel {
+    display: none;
+  }
+
+  .admin-section-panel.active {
+    display: block;
+    animation: fadeIn 0.5s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .admin-panel-header {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .admin-panel-header h3 {
+    color: var(--gold-primary);
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  .admin-panel-header p {
+    color: var(--text-gray);
+  }
+
+  .editor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+  }
+
+  .editor-card {
+    background: var(--black-card);
+    border: 1px solid var(--border-color);    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+  }
+
+  .editor-card h4 {
+    color: var(--gold-primary);
+    margin-bottom: 20px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  .form-group label {
+    display: block;
+    color: var(--text-gray);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--black-light);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-white);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 0 4px rgba(212,168,67,0.1);
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .color-picker-wrapper input[type="color"] {
+    width: 60px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .btn-save {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+    border: none;
+    border-radius: 10px;
+    color: var(--black-bg);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+  }
+
+  .btn-save:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(212,168,67,0.4);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+  }
+  .btn-danger:hover {
+    box-shadow: 0 10px 30px rgba(220,53,69,0.4);
+  }
+
+  .item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .item-card {
+    background: var(--black-light);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: start;
+    transition: all 0.3s;
+  }
+
+  .item-card:hover {
+    border-color: var(--gold-primary);
+    transform: translateX(5px);
+  }
+
+  .item-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+  }
+
+  .item-info {
+    flex: 1;
+  }
+
+  .item-info h5 {
+    color: var(--text-white);
+    margin-bottom: 5px;
+    font-size: 15px;
+  }
+
+  .item-info p {
+    color: var(--text-dark);
+    font-size: 13px;
+  }
+  .item-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+  }
+
+  .btn-edit {
+    background: rgba(212,168,67,0.2);
+    color: var(--gold-primary);
+  }
+
+  .btn-edit:hover {
+    background: var(--gold-primary);
+    color: var(--black-bg);
+  }
+
+  .btn-delete {
+    background: rgba(220,53,69,0.2);
+    color: #dc3545;
+  }
+
+  .btn-delete:hover {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-add-new {
+    width: 100%;
+    padding: 18px;
+    border: 2px dashed var(--border-color);
+    background: transparent;
+    color: var(--text-gray);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    transition: all 0.3s;
+    margin-top: 20px;
+    display: flex;    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-add-new:hover {
+    border-color: var(--gold-primary);
+    color: var(--gold-primary);
+    background: rgba(212,168,67,0.05);
+  }
+
+  /* ===== LOGIN MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--black-card);
+    border: 2px solid var(--gold-primary);
+    border-radius: 25px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 25px 80px rgba(212,168,67,0.3);
+    overflow: hidden;
+    animation: modalSlide 0.4s;
+  }
+
+  @keyframes modalSlide {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, rgba(212,168,67,0.2), transparent);
+    padding: 35px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modal-header i {    font-size: 48px;
+    color: var(--gold-primary);
+    margin-bottom: 15px;
+  }
+
+  .modal-header h3 {
+    color: var(--gold-primary);
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+
+  .modal-header p {
+    color: var(--text-dark);
+    font-size: 14px;
+  }
+
+  .modal-body { padding: 35px; }
+
+  .btn-close-modal {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .btn-close-modal:hover { color: var(--gold-primary); }
+
+  /* Exit Admin Button */
+  .exit-admin-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1500;
+    box-shadow: 0 10px 30px rgba(220,53,69,0.4);
+    transition: all 0.3s;
+    display: none;
+    align-items: center;
+    gap: 10px;  }
+
+  body.admin-mode .exit-admin-btn {
+    display: flex;
+  }
+
+  .exit-admin-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(220,53,69,0.5);
+  }
+
+  /* ===== SECTIONS GENERAL ===== */
+  .section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold-primary);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .section-title::before,
+  .section-title::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+  }
+
+  .section-title::before { right: 140%; }
+  .section-title::after { left: 140%; }
+
+  /* ===== FEATURES BAR ===== */
+  .features-bar {    position: relative;
+    z-index: 1;
+    background: rgba(26,26,26,0.5);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 50px 30px;
+  }
+
+  [data-theme="light"] .features-bar {
+    background: rgba(255,255,255,0.5);
+  }
+
+  .features-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(212,168,67,0.1);
+    border: 2px solid rgba(212,168,67,0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--gold-primary);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .feature-item:hover .feature-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: rgba(212,168,67,0.2);
+  }
+
+  .feature-text h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-white);    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+  }
+
+  .feature-text p {
+    font-size: 13px;
+    color: var(--text-dark);
+    line-height: 1.5;
+  }
+
+  /* ===== CATEGORIES & PRODUCTS ===== */
+  .categories-grid,
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+
+  .category-card,
+  .product-card {
+    background: var(--black-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-card::before,
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+  }
+
+  .category-card:hover::before,
+  .product-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .category-card:hover,
+  .product-card:hover {
+    transform: translateY(-15px);
+    border-color: rgba(212,168,67,0.3);    box-shadow: 0 25px 50px rgba(212,168,67,0.15);
+  }
+
+  .category-image,
+  .product-image {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+
+  .category-image img,
+  .product-image img {
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    transition: transform 0.4s;
+  }
+
+  .category-card:hover .category-image img,
+  .product-card:hover .product-image img {
+    transform: scale(1.1);
+  }
+
+  .category-card h3,
+  .product-card h4 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-white);
+    margin-bottom: 15px;
+  }
+
+  .product-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold-primary);
+    margin-bottom: 20px;
+  }
+
+  .btn-outline {
+    display: inline-block;
+    padding: 12px 30px;
+    background: transparent;
+    color: var(--gold-primary);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    border: 2px solid rgba(212,168,67,0.4);    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .btn-outline:hover {
+    background: rgba(212,168,67,0.15);
+    border-color: var(--gold-primary);
+    transform: translateY(-3px);
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    position: relative;
+    z-index: 1;
+    background: rgba(26,26,26,0.8);
+    border-top: 2px solid var(--border-color);
+    padding: 60px 30px 30px;
+  }
+
+  [data-theme="light"] .footer {
+    background: rgba(240,240,240,0.8);
+  }
+
+  .footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .footer-social {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .footer-social span {
+    font-size: 13px;    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 15px;
+  }
+
+  .social-links a {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid rgba(212,168,67,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-primary);
+    font-size: 18px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .social-links a:hover {
+    background: rgba(212,168,67,0.2);
+    border-color: var(--gold-primary);
+    transform: translateY(-5px) scale(1.1);
+  }
+
+  .footer-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-dark);
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .contact-item:hover { color: var(--gold-primary); }
+
+  .contact-item i {    color: var(--gold-primary);
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .footer-bottom {
+    text-align: center;
+    padding-top: 30px;
+    color: var(--text-dark);
+    font-size: 14px;
+  }
+
+  /* ===== MOBILE RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    body.admin-mode {
+      padding-left: 0;
+    }
+    
+    .admin-sidebar {
+      transform: translateX(-100%);
+    }
+    
+    body.admin-mode.mobile-sidebar .admin-sidebar {
+      transform: translateX(0);
+    }
+    
+    .admin-content-area {
+      left: 0;
+    }
+    
+    .categories-grid,
+    .products-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hamburger { display: flex; }
+    
+    .nav-menu {
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      background: var(--black-card);
+      flex-direction: column;
+      padding: 30px 20px;
+      gap: 20px;
+      border-bottom: 2px solid var(--gold-primary);      transform: translateY(-150%);
+      transition: transform 0.3s ease;
+      z-index: 999;
+    }
+    
+    .nav-menu.active {
+      transform: translateY(0);
+    }
+    
+    .hero-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 50px;
+    }
+    
+    .hero-text p { margin: 0 auto 30px; }
+    
+    .hero-carousel {
+      height: 400px;
+      order: -1;
+    }
+    
+    .phone-group {
+      max-width: 350px;
+      height: 320px;
+    }
+    
+    .phone-1 { width: 100px; height: 200px; }
+    .phone-2 { width: 110px; height: 220px; }
+    .phone-3 { width: 110px; height: 220px; }
+    .phone-4 { width: 100px; height: 200px; }
+    
+    .features-container {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    
+    .categories-grid,
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .section-title::before,
+    .section-title::after {
+      display: none;
+    }
+    
+    .footer-content {
+      flex-direction: column;
+      text-align: center;    }
+    
+    .footer-contact {
+      align-items: center;
+    }
+    
+    .editor-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .admin-content-area {
+      padding: 20px;
+      top: 70px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .phone-group {
+      max-width: 280px;
+      height: 280px;
+    }
+    
+    .phone-1, .phone-4 { display: none; }
+    
+    .nav-actions {
+      gap: 8px;
+    }
+    
+    .nav-icon-btn {
+      width: 35px;
+      height: 35px;
+      font-size: 14px;
+    }
+  }
+
+  /* Utility Classes */
+  .hidden { display: none !important; }
+  
+  .fade-in {
+    animation: fadeIn 0.8s ease;
+  }
+
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: var(--gold-primary);
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(212,168,67,0.2);
+    color: var(--gold-primary);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>
+      <div class="nav-logo-text"><span>PUNTO</span> DIGITAL</div>
+    </a>
+    
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="#inicio" class="nav-link">Inicio</a></li>
+      <li><a href="#productos" class="nav-link">Productos</a></li>
+      <li><a href="#destacados" class="nav-link">Destacados</a></li>
+      <li><a href="#contacto" class="nav-link">Contacto</a></li>
+      <li><a href="#productos" class="nav-link nav-cta">Ver Catálogo</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <!-- Theme Toggle -->
+      <button class="nav-icon-btn" id="themeToggle" onclick="toggleTheme()" title="Cambiar tema">
+        <i class="fas fa-moon"></i>
+      </button>
+            <!-- Admin Login -->
+      <button class="nav-icon-btn" id="adminLoginBtn" onclick="openLoginModal()" title="Admin">
+        <i class="fas fa-lock"></i>
+      </button>
+      
+      <!-- Mobile Menu -->
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ADMIN SIDEBAR -->
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="admin-sidebar-header">
+    <h2><i class="fas fa-cog"></i> Panel Admin</h2>
+    <p>Edición completa del sitio</p>
+  </div>
+  
+  <div class="admin-menu">
+    <div class="admin-menu-item active" onclick="showAdminSection('general')">
+      <i class="fas fa-paint-brush"></i>
+      <span>General & Colores</span>
+    </div>
+    <div class="admin-menu-item" onclick="showAdminSection('hero')">
+      <i class="fas fa-image"></i>
+      <span>Hero / Banner</span>
+    </div>
+    <div class="admin-menu-item" onclick="showAdminSection('features')">
+      <i class="fas fa-star"></i>
+      <span>Características</span>
+    </div>
+    <div class="admin-menu-item" onclick="showAdminSection('categories')">
+      <i class="fas fa-th-large"></i>
+      <span>Categorías</span>
+    </div>
+    <div class="admin-menu-item" onclick="showAdminSection('products')">
+      <i class="fas fa-box"></i>
+      <span>Productos</span>
+    </div>
+    <div class="admin-menu-item" onclick="showAdminSection('footer')">
+      <i class="fas fa-info-circle"></i>
+      <span>Footer</span>
+    </div>
+    <div class="admin-menu-item" onclick="showAdminSection('typography')">
+      <i class="fas fa-font"></i>
+      <span>Tipografía</span>    </div>
+  </div>
+</aside>
+
+<!-- ADMIN CONTENT AREA -->
+<div class="admin-content-area" id="adminContentArea">
+  <!-- General Settings -->
+  <div class="admin-section-panel active" id="section-general">
+    <div class="admin-panel-header">
+      <h3>Configuración General</h3>
+      <p>Colores principales y configuración del sitio</p>
+    </div>
+    
+    <div class="editor-grid">
+      <div class="editor-card">
+        <h4><i class="fas fa-palette"></i> Colores Principales</h4>
+        <div class="form-group">
+          <label>Color Dorado Principal</label>
+          <div class="color-picker-wrapper">
+            <input type="color" id="colorGoldPrimary" value="#d4a843">
+            <input type="text" value="#d4a843" onchange="updateColor('goldPrimary', this.value)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Color Dorado Claro</label>
+          <div class="color-picker-wrapper">
+            <input type="color" id="colorGoldLight" value="#f0d68a">
+            <input type="text" value="#f0d68a" onchange="updateColor('goldLight', this.value)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Color Dorado Oscuro</label>
+          <div class="color-picker-wrapper">
+            <input type="color" id="colorGoldDark" value="#b89344">
+            <input type="text" value="#b89344" onchange="updateColor('goldDark', this.value)">
+          </div>
+        </div>
+        <button class="btn-save" onclick="saveColors()">Aplicar Colores</button>
+      </div>
+      
+      <div class="editor-card">
+        <h4><i class="fas fa-info-circle"></i> Información del Sitio</h4>
+        <div class="form-group">
+          <label>Nombre del Sitio</label>
+          <input type="text" id="siteName" value="Punto Digital">
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="siteDescription">Tienda de tecnología y telefonía</textarea>
+        </div>        <button class="btn-save" onclick="saveSiteInfo()">Guardar Información</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="admin-section-panel" id="section-hero">
+    <div class="admin-panel-header">
+      <h3>Editor Hero / Banner Principal</h3>
+      <p>Configura el contenido principal de la página</p>
+    </div>
+    
+    <div class="editor-grid">
+      <div class="editor-card">
+        <h4><i class="fas fa-heading"></i> Contenido de Texto</h4>
+        <div class="form-group">
+          <label>Título Principal</label>
+          <textarea id="heroTitle">Los Mejores Productos de Tecnología y Telefonía</textarea>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="heroDesc">Encuentra aquí lo último en smartphones, gadgets y accesorios de las mejores marcas.</textarea>
+        </div>
+        <div class="form-group">
+          <label>Texto del Botón</label>
+          <input type="text" id="heroBtnText" value="VER PRODUCTOS">
+        </div>
+        <button class="btn-save" onclick="saveHero()">Guardar Hero</button>
+      </div>
+      
+      <div class="editor-card">
+        <h4><i class="fas fa-images"></i> Imágenes del Carousel</h4>
+        <div id="heroImagesList" class="item-list"></div>
+        <button class="btn-add-new" onclick="addHeroImage()">
+          <i class="fas fa-plus"></i> Agregar Imagen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="admin-section-panel" id="section-features">
+    <div class="admin-panel-header">
+      <h3>Editor de Características</h3>
+      <p>Configura las características destacadas</p>
+    </div>
+    
+    <div class="editor-card">
+      <h4><i class="fas fa-list"></i> Lista de Características</h4>
+      <div id="featuresList" class="item-list"></div>      <button class="btn-add-new" onclick="addFeature()">
+        <i class="fas fa-plus"></i> Agregar Característica
+      </button>
+    </div>
+  </div>
+
+  <!-- Categories Section -->
+  <div class="admin-section-panel" id="section-categories">
+    <div class="admin-panel-header">
+      <h3>Editor de Categorías</h3>
+      <p>Gestiona las categorías de productos</p>
+    </div>
+    
+    <div class="editor-card">
+      <h4><i class="fas fa-th"></i> Categorías</h4>
+      <div id="categoriesList" class="item-list"></div>
+      <button class="btn-add-new" onclick="addCategory()">
+        <i class="fas fa-plus"></i> Agregar Categoría
+      </button>
+    </div>
+  </div>
+
+  <!-- Products Section -->
+  <div class="admin-section-panel" id="section-products">
+    <div class="admin-panel-header">
+      <h3>Editor de Productos Destacados</h3>
+      <p>Gestiona los productos destacados</p>
+    </div>
+    
+    <div class="editor-card">
+      <h4><i class="fas fa-box-open"></i> Productos</h4>
+      <div id="productsList" class="item-list"></div>
+      <button class="btn-add-new" onclick="addProduct()">
+        <i class="fas fa-plus"></i> Agregar Producto
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer Section -->
+  <div class="admin-section-panel" id="section-footer">
+    <div class="admin-panel-header">
+      <h3>Editor de Footer</h3>
+      <p>Configura el pie de página</p>
+    </div>
+    
+    <div class="editor-grid">
+      <div class="editor-card">
+        <h4><i class="fas fa-address-card"></i> Información de Contacto</h4>
+        <div class="form-group">
+          <label>Teléfono</label>          <input type="text" id="footerPhone" value="+57 301 234 5678">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="footerEmail" value="info@puntodigital.co">
+        </div>
+        <div class="form-group">
+          <label>Dirección</label>
+          <input type="text" id="footerAddress" value="Colombia">
+        </div>
+        <button class="btn-save" onclick="saveFooter()">Guardar Footer</button>
+      </div>
+      
+      <div class="editor-card">
+        <h4><i class="fas fa-share-alt"></i> Redes Sociales</h4>
+        <div class="form-group">
+          <label>Facebook URL</label>
+          <input type="text" id="socialFacebook" value="#">
+        </div>
+        <div class="form-group">
+          <label>Instagram URL</label>
+          <input type="text" id="socialInstagram" value="#">
+        </div>
+        <div class="form-group">
+          <label>Twitter URL</label>
+          <input type="text" id="socialTwitter" value="#">
+        </div>
+        <button class="btn-save" onclick="saveSocial()">Guardar Redes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typography Section -->
+  <div class="admin-section-panel" id="section-typography">
+    <div class="admin-panel-header">
+      <h3>Configuración de Tipografía</h3>
+      <p>Personaliza las fuentes del sitio</p>
+    </div>
+    
+    <div class="editor-grid">
+      <div class="editor-card">
+        <h4><i class="fas fa-text-height"></i> Tamaños de Fuente</h4>
+        <div class="form-group">
+          <label>Título Hero (px)</label>
+          <input type="number" id="fontHeroTitle" value="58">
+        </div>
+        <div class="form-group">
+          <label>Título Sección (px)</label>
+          <input type="number" id="fontSectionTitle" value="28">
+        </div>        <div class="form-group">
+          <label>Tamaño Base (px)</label>
+          <input type="number" id="fontBase" value="16">
+        </div>
+        <button class="btn-save" onclick="saveTypography()">Aplicar Tipografía</button>
+      </div>
+      
+      <div class="editor-card">
+        <h4><i class="fas fa-font"></i> Familias de Fuente</h4>
+        <div class="form-group">
+          <label>Fuente Principal</label>
+          <select id="fontFamily">
+            <option value="Poppins">Poppins</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Open Sans">Open Sans</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Playfair Display">Playfair Display</option>
+          </select>
+        </div>
+        <button class="btn-save" onclick="saveFontFamily()">Cambiar Fuente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXIT ADMIN BUTTON -->
+<button class="exit-admin-btn" onclick="exitAdminMode()">
+  <i class="fas fa-sign-out-alt"></i>
+  Salir del Modo Admin
+</button>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal" style="position: relative;">
+    <button class="btn-close-modal" onclick="closeLoginModal()">&times;</button>
+    <div class="modal-header">
+      <i class="fas fa-user-shield"></i>
+      <h3>Acceso Administrativo</h3>
+      <p>Ingresa tus credenciales para editar el sitio</p>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
+        <input type="email" id="adminEmail" placeholder="admin@punto.com">
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-lock"></i> Contraseña</label>
+        <input type="password" id="adminPass" placeholder="••••••••">
+      </div>
+      <button class="btn-save" onclick="loginAdmin()" id="loginBtn">        <span id="loginText">INGRESAR AL PANEL</span>
+      </button>
+      <p id="loginError" style="color: #dc3545; font-size: 13px; margin-top: 15px; text-align: center; display: none;">
+        <i class="fas fa-exclamation-circle"></i> Credenciales incorrectas
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- HERO SECTION -->
+<section class="hero" id="inicio">
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 id="heroTitleDisplay">
+          <span class="gold">Los Mejores</span><br>
+          <span class="white">Productos de</span><br>
+          <span class="white">Tecnología y</span> <span class="gold">Telefonía</span>
+        </h1>
+        <p id="heroDescDisplay">Encuentra aquí lo último en smartphones, gadgets y accesorios de las mejores marcas.</p>
+        <a href="#productos" class="btn-gold" id="heroBtnDisplay">VER PRODUCTOS</a>
+      </div>
+
+      <div class="hero-carousel" id="heroCarousel">
+        <!-- Slides generated by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES BAR -->
+<div class="features-bar">
+  <div class="features-container" id="featuresContainer">
+    <!-- Features generated by JS -->
+  </div>
+</div>
+
+<!-- CATEGORIES SECTION -->
+<section class="section" id="productos">
+  <div class="section-header">
+    <h2 class="section-title">NUESTROS PRODUCTOS</h2>
+  </div>
+  
+  <div class="categories-grid" id="categoriesGrid">
+    <!-- Categories generated by JS -->
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section" id="destacados" style="background: rgba(26,26,26,0.3);">  <div class="section-header">
+    <h2 class="section-title">DESTACADOS</h2>
+  </div>
+  
+  <div class="products-grid" id="productsGrid">
+    <!-- Products generated by JS -->
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" id="contacto">
+  <div class="footer-container">
+    <div class="footer-content">
+      <div class="footer-social">
+        <span>ENCUÉNTRANOS EN</span>
+        <div class="social-links" id="socialLinks">
+          <!-- Social links generated by JS -->
+        </div>
+      </div>
+      <div class="footer-contact" id="footerContact">
+        <!-- Contact info generated by JS -->
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Punto Digital. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ===== DATA STORE =====
+  let siteData = {
+    colors: {
+      goldPrimary: '#d4a843',
+      goldLight: '#f0d68a',
+      goldDark: '#b89344'
+    },
+    hero: {
+      title: 'Los Mejores Productos de Tecnología y Telefonía',
+      description: 'Encuentra aquí lo último en smartphones, gadgets y accesorios de las mejores marcas.',
+      buttonText: 'VER PRODUCTOS',
+      images: [
+        { url: 'https://via.placeholder.com/150x300/1a1a2e/d4a843?text=iPhone+Pro', alt: 'iPhone Pro' },
+        { url: 'https://via.placeholder.com/150x300/2d1f0e/d4a843?text=Gold', alt: 'Gold Edition' },
+        { url: 'https://via.placeholder.com/150x300/0d1b2a/d4a843?text=Pro+Max', alt: 'Pro Max' },
+        { url: 'https://via.placeholder.com/150x300/1a1a1a/d4a843?text=Plus', alt: 'Plus' }
+      ]
+    },
+    features: [
+      { icon: 'fa-shield-halved', title: 'GARANTÍA DE CALIDAD', desc: 'Productos de primeras marcas' },      { icon: 'fa-truck-fast', title: 'ENVÍO RÁPIDO', desc: 'Rápido y seguro a todo Colombia' },
+      { icon: 'fa-headset', title: 'SOPORTE PROFESIONAL', desc: 'Atención al cliente 24/7' }
+    ],
+    categories: [
+      { name: 'Smartphones', image: 'https://via.placeholder.com/200x180/1a1a1a/d4a843?text=Smartphones' },
+      { name: 'Auriculares Bluetooth', image: 'https://via.placeholder.com/200x180/1a1a1a/d4a843?text=Auriculares' },
+      { name: 'Smartwatches', image: 'https://via.placeholder.com/200x180/1a1a1a/d4a843?text=Smartwatch' },
+      { name: 'Cargadores y Accesorios', image: 'https://via.placeholder.com/200x180/1a1a1a/d4a843?text=Cargadores' }
+    ],
+    products: [
+      { name: 'iPhone 15 Pro Max', price: '$ 497,900.00', image: 'https://via.placeholder.com/200x220/1a1a1a/d4a843?text=iPhone+15' },
+      { name: 'Samsung Galaxy S23 Ultra', price: '$ 253,900.00', image: 'https://via.placeholder.com/200x220/1a1a1a/d4a843?text=Galaxy+S23' },
+      { name: 'Sony WH-1000XM5', price: '$ 359,900.00', image: 'https://via.placeholder.com/200x220/1a1a1a/d4a843?text=Sony+WH' },
+      { name: 'iPhone 14 Pro', price: '$ 537,900.00', image: 'https://via.placeholder.com/200x220/1a1a1a/d4a843?text=iPhone+14' }
+    ],
+    footer: {
+      phone: '+57 301 234 5678',
+      email: 'info@puntodigital.co',
+      address: 'Colombia'
+    },
+    social: {
+      facebook: '#',
+      instagram: '#',
+      twitter: '#'
+    },
+    typography: {
+      fontFamily: 'Poppins',
+      heroTitleSize: 58,
+      sectionTitleSize: 28,
+      baseSize: 16
+    }
+  };
+
+  // Load from localStorage
+  if(localStorage.getItem('puntoDigitalData')) {
+    const saved = JSON.parse(localStorage.getItem('puntoDigitalData'));
+    siteData = { ...siteData, ...saved };
+  }
+
+  let isAdmin = false;
+  let currentTheme = 'dark';
+
+  // ===== PARTICLES =====
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.vx = (Math.random() - 0.5) * 0.5;
+      this.vy = (Math.random() - 0.5) * 0.5;
+      this.size = Math.random() * 2;
+      this.golden = Math.random() > 0.5;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+    }
+    draw() {
+      ctx.fillStyle = this.golden ? "rgba(212, 168, 67, 0.3)" : "rgba(255, 255, 255, 0.1)";
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  for(let i=0; i<100; i++) particles.push(new Particle());
+
+  function animate() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // ===== THEME TOGGLE =====
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    const icon = document.querySelector('#themeToggle i');
+    icon.className = currentTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    localStorage.setItem('theme', currentTheme);
+  }
+
+  // Load saved theme
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if(savedTheme === 'light') {    toggleTheme();
+  }
+
+  // ===== NAVBAR & MOBILE MENU =====
+  const navbar = document.getElementById('navbar');
+  const hamburger = document.getElementById('hamburger');
+  const navMenu = document.getElementById('navMenu');
+
+  window.addEventListener('scroll', () => {
+    if(window.scrollY > 50) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  });
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navMenu.classList.toggle('active');
+  });
+
+  // ===== HERO CAROUSEL =====
+  let currentSlide = 0;
+
+  function renderHeroCarousel() {
+    const carousel = document.getElementById('heroCarousel');
+    carousel.innerHTML = siteData.hero.images.map((img, idx) => `
+      <div class="carousel-slide ${idx === 0 ? 'active' : ''}">
+        <div class="phone-group">
+          ${siteData.hero.images.map((phone, pIdx) => `
+            <div class="phone-item phone-${pIdx + 1}" style="z-index: ${pIdx === 1 || pIdx === 2 ? 3 : 1}">
+              <img src="${phone.url}" alt="${phone.alt}">
+            </div>
+          `).join('')}
+          <div class="golden-orb orb-1"></div>
+          <div class="golden-orb orb-2"></div>
+          <div class="golden-orb orb-3"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function nextSlide() {
+    const slides = document.querySelectorAll('.carousel-slide');
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % slides.length;
+    slides[currentSlide].classList.add('active');
+  }
+
+  setInterval(nextSlide, 5000);
+  // ===== RENDER FUNCTIONS =====
+  function renderFeatures() {
+    const container = document.getElementById('featuresContainer');
+    container.innerHTML = siteData.features.map(f => `
+      <div class="feature-item">
+        <div class="feature-icon"><i class="fas ${f.icon}"></i></div>
+        <div class="feature-text">
+          <h4>${f.title}</h4>
+          <p>${f.desc}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderCategories() {
+    const grid = document.getElementById('categoriesGrid');
+    grid.innerHTML = siteData.categories.map(c => `
+      <div class="category-card">
+        <div class="category-image">
+          <img src="${c.image}" alt="${c.name}">
+        </div>
+        <h3>${c.name}</h3>
+        <a href="#" class="btn-outline">Ver más</a>
+      </div>
+    `).join('');
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = siteData.products.map(p => `
+      <div class="product-card">
+        <div class="product-image">
+          <img src="${p.image}" alt="${p.name}">
+        </div>
+        <h4>${p.name}</h4>
+        <div class="product-price">${p.price}</div>
+        <a href="#" class="btn-outline">VER MÁS</a>
+      </div>
+    `).join('');
+  }
+
+  function renderFooter() {
+    const contact = document.getElementById('footerContact');
+    contact.innerHTML = `
+      <a href="tel:${siteData.footer.phone}" class="contact-item">
+        <i class="fas fa-phone"></i>
+        <span>${siteData.footer.phone}</span>
+      </a>
+      <a href="mailto:${siteData.footer.email}" class="contact-item">        <i class="fas fa-envelope"></i>
+        <span>${siteData.footer.email}</span>
+      </a>
+    `;
+    
+    const social = document.getElementById('socialLinks');
+    social.innerHTML = `
+      <a href="${siteData.social.facebook}"><i class="fab fa-facebook-f"></i></a>
+      <a href="${siteData.social.instagram}"><i class="fab fa-instagram"></i></a>
+      <a href="${siteData.social.twitter}"><i class="fab fa-x-twitter"></i></a>
+    `;
+  }
+
+  function updateSite() {
+    // Update Hero
+    const titleParts = siteData.hero.title.split(' ');
+    const midIndex = Math.ceil(titleParts.length / 2);
+    const firstPart = titleParts.slice(0, midIndex).join(' ');
+    const secondPart = titleParts.slice(midIndex).join(' ');
+    
+    document.getElementById('heroTitleDisplay').innerHTML = `
+      <span class="gold">${firstPart}</span><br>
+      <span class="white">${secondPart}</span>
+    `;
+    document.getElementById('heroDescDisplay').textContent = siteData.hero.description;
+    document.getElementById('heroBtnDisplay').textContent = siteData.hero.buttonText;
+    
+    renderHeroCarousel();
+    renderFeatures();
+    renderCategories();
+    renderProducts();
+    renderFooter();
+  }
+
+  // ===== ADMIN FUNCTIONS =====
+  function openLoginModal() {
+    document.getElementById('loginModal').classList.add('active');
+  }
+
+  function closeLoginModal() {
+    document.getElementById('loginModal').classList.remove('active');
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  function loginAdmin() {
+    const email = document.getElementById('adminEmail').value;
+    const pass = document.getElementById('adminPass').value;
+    const btn = document.getElementById('loginBtn');
+    const text = document.getElementById('loginText');
+        text.innerHTML = '<span class="loading"></span>';
+    
+    setTimeout(() => {
+      if(email === 'admin@punto.com' && pass === 'admin123') {
+        closeLoginModal();
+        enterAdminMode();
+        text.innerHTML = 'INGRESAR AL PANEL';
+        document.getElementById('adminEmail').value = '';
+        document.getElementById('adminPass').value = '';
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+        text.innerHTML = 'INGRESAR AL PANEL';
+      }
+    }, 800);
+  }
+
+  function enterAdminMode() {
+    isAdmin = true;
+    document.body.classList.add('admin-mode');
+    document.getElementById('adminLoginBtn').innerHTML = '<i class="fas fa-user-check"></i>';
+    loadAdminData();
+    updateSite();
+  }
+
+  function exitAdminMode() {
+    isAdmin = false;
+    document.body.classList.remove('admin-mode');
+    document.getElementById('adminLoginBtn').innerHTML = '<i class="fas fa-lock"></i>';
+  }
+
+  function showAdminSection(section) {
+    // Update menu
+    document.querySelectorAll('.admin-menu-item').forEach(item => item.classList.remove('active'));
+    event.target.closest('.admin-menu-item').classList.add('active');
+    
+    // Update panels
+    document.querySelectorAll('.admin-section-panel').forEach(panel => panel.classList.remove('active'));
+    document.getElementById(`section-${section}`).classList.add('active');
+    
+    // Load specific data
+    if(section === 'hero') renderHeroImagesList();
+    if(section === 'features') renderFeaturesList();
+    if(section === 'categories') renderCategoriesList();
+    if(section === 'products') renderProductsList();
+  }
+
+  function saveData() {
+    localStorage.setItem('puntoDigitalData', JSON.stringify(siteData));
+    updateSite();
+  }
+  // Color Management
+  function updateColor(type, value) {
+    document.getElementById(`color${type.charAt(0).toUpperCase() + type.slice(1)}`).value = value;
+  }
+
+  function saveColors() {
+    siteData.colors.goldPrimary = document.getElementById('colorGoldPrimary').value;
+    siteData.colors.goldLight = document.getElementById('colorGoldLight').value;
+    siteData.colors.goldDark = document.getElementById('colorGoldDark').value;
+    
+    document.documentElement.style.setProperty('--gold-primary', siteData.colors.goldPrimary);
+    document.documentElement.style.setProperty('--gold-light', siteData.colors.goldLight);
+    document.documentElement.style.setProperty('--gold-dark', siteData.colors.goldDark);
+    
+    saveData();
+    alert('Colores actualizados correctamente');
+  }
+
+  function saveSiteInfo() {
+    alert('Información guardada');
+  }
+
+  // Hero Management
+  function saveHero() {
+    siteData.hero.title = document.getElementById('heroTitle').value;
+    siteData.hero.description = document.getElementById('heroDesc').value;
+    siteData.hero.buttonText = document.getElementById('heroBtnText').value;
+    saveData();
+    alert('Hero actualizado correctamente');
+  }
+
+  function renderHeroImagesList() {
+    const list = document.getElementById('heroImagesList');
+    list.innerHTML = siteData.hero.images.map((img, idx) => `
+      <div class="item-card">
+        <img src="${img.url}" class="item-preview">
+        <div class="item-info">
+          <h5>Imagen ${idx + 1}</h5>
+          <input type="text" value="${img.url}" onchange="updateHeroImage(${idx}, 'url', this.value)" style="width: 100%; margin-top: 5px; padding: 5px;">
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon btn-delete" onclick="deleteHeroImage(${idx})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateHeroImage(idx, field, value) {
+    siteData.hero.images[idx][field] = value;    saveData();
+  }
+
+  function deleteHeroImage(idx) {
+    if(siteData.hero.images.length > 1) {
+      siteData.hero.images.splice(idx, 1);
+      renderHeroImagesList();
+      saveData();
+    } else {
+      alert('Debe haber al menos una imagen');
+    }
+  }
+
+  function addHeroImage() {
+    siteData.hero.images.push({
+      url: 'https://via.placeholder.com/150x300/1a1a1a/d4a843?text=Nueva',
+      alt: 'Nueva imagen'
+    });
+    renderHeroImagesList();
+    saveData();
+  }
+
+  // Features Management
+  function renderFeaturesList() {
+    const list = document.getElementById('featuresList');
+    list.innerHTML = siteData.features.map((f, idx) => `
+      <div class="item-card">
+        <div class="feature-icon" style="width: 50px; height: 50px; font-size: 20px;">
+          <i class="fas ${f.icon}"></i>
+        </div>
+        <div class="item-info">
+          <h5>${f.title}</h5>
+          <p>${f.desc}</p>
+          <div style="margin-top: 10px;">
+            <input type="text" value="${f.title}" onchange="updateFeature(${idx}, 'title', this.value)" placeholder="Título" style="margin-bottom: 5px;">
+            <input type="text" value="${f.desc}" onchange="updateFeature(${idx}, 'desc', this.value)" placeholder="Descripción">
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon btn-delete" onclick="deleteFeature(${idx})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateFeature(idx, field, value) {
+    siteData.features[idx][field] = value;
+    saveData();
+  }
+  function deleteFeature(idx) {
+    siteData.features.splice(idx, 1);
+    renderFeaturesList();
+    saveData();
+  }
+
+  function addFeature() {
+    siteData.features.push({
+      icon: 'fa-star',
+      title: 'NUEVA CARACTERÍSTICA',
+      desc: 'Descripción de la característica'
+    });
+    renderFeaturesList();
+    saveData();
+  }
+
+  // Categories Management
+  function renderCategoriesList() {
+    const list = document.getElementById('categoriesList');
+    list.innerHTML = siteData.categories.map((c, idx) => `
+      <div class="item-card">
+        <img src="${c.image}" class="item-preview">
+        <div class="item-info">
+          <h5>${c.name}</h5>
+          <input type="text" value="${c.name}" onchange="updateCategory(${idx}, 'name', this.value)" style="margin-bottom: 5px;">
+          <input type="text" value="${c.image}" onchange="updateCategory(${idx}, 'image', this.value)">
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon btn-delete" onclick="deleteCategory(${idx})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateCategory(idx, field, value) {
+    siteData.categories[idx][field] = value;
+    saveData();
+  }
+
+  function deleteCategory(idx) {
+    siteData.categories.splice(idx, 1);
+    renderCategoriesList();
+    saveData();
+  }
+
+  function addCategory() {
+    siteData.categories.push({
+      name: 'Nueva Categoría',
+      image: 'https://via.placeholder.com/200x180/1a1a1a/d4a843?text=Nueva'
+    });    renderCategoriesList();
+    saveData();
+  }
+
+  // Products Management
+  function renderProductsList() {
+    const list = document.getElementById('productsList');
+    list.innerHTML = siteData.products.map((p, idx) => `
+      <div class="item-card">
+        <img src="${p.image}" class="item-preview">
+        <div class="item-info">
+          <h5>${p.name}</h5>
+          <p>${p.price}</p>
+          <div style="margin-top: 10px;">
+            <input type="text" value="${p.name}" onchange="updateProduct(${idx}, 'name', this.value)" placeholder="Nombre" style="margin-bottom: 5px;">
+            <input type="text" value="${p.price}" onchange="updateProduct(${idx}, 'price', this.value)" placeholder="Precio" style="margin-bottom: 5px;">
+            <input type="text" value="${p.image}" onchange="updateProduct(${idx}, 'image', this.value)" placeholder="URL Imagen">
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon btn-delete" onclick="deleteProduct(${idx})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateProduct(idx, field, value) {
+    siteData.products[idx][field] = value;
+    saveData();
+  }
+
+  function deleteProduct(idx) {
+    siteData.products.splice(idx, 1);
+    renderProductsList();
+    saveData();
+  }
+
+  function addProduct() {
+    siteData.products.push({
+      name: 'Nuevo Producto',
+      price: '$ 0.00',
+      image: 'https://via.placeholder.com/200x220/1a1a1a/d4a843?text=Nuevo'
+    });
+    renderProductsList();
+    saveData();
+  }
+
+  // Footer Management
+  function saveFooter() {
+    siteData.footer.phone = document.getElementById('footerPhone').value;    siteData.footer.email = document.getElementById('footerEmail').value;
+    siteData.footer.address = document.getElementById('footerAddress').value;
+    saveData();
+    alert('Footer actualizado');
+  }
+
+  function saveSocial() {
+    siteData.social.facebook = document.getElementById('socialFacebook').value;
+    siteData.social.instagram = document.getElementById('socialInstagram').value;
+    siteData.social.twitter = document.getElementById('socialTwitter').value;
+    saveData();
+    alert('Redes sociales actualizadas');
+  }
+
+  // Typography Management
+  function saveTypography() {
+    siteData.typography.heroTitleSize = document.getElementById('fontHeroTitle').value;
+    siteData.typography.sectionTitleSize = document.getElementById('fontSectionTitle').value;
+    siteData.typography.baseSize = document.getElementById('fontBase').value;
+    saveData();
+    alert('Tipografía actualizada');
+  }
+
+  function saveFontFamily() {
+    siteData.typography.fontFamily = document.getElementById('fontFamily').value;
+    document.body.style.fontFamily = siteData.typography.fontFamily;
+    saveData();
+    alert('Fuente actualizada');
+  }
+
+  function loadAdminData() {
+    // Load colors
+    document.getElementById('colorGoldPrimary').value = siteData.colors.goldPrimary;
+    document.getElementById('colorGoldLight').value = siteData.colors.goldLight;
+    document.getElementById('colorGoldDark').value = siteData.colors.goldDark;
+    
+    // Load hero
+    document.getElementById('heroTitle').value = siteData.hero.title;
+    document.getElementById('heroDesc').value = siteData.hero.description;
+    document.getElementById('heroBtnText').value = siteData.hero.buttonText;
+    
+    // Load footer
+    document.getElementById('footerPhone').value = siteData.footer.phone;
+    document.getElementById('footerEmail').value = siteData.footer.email;
+    document.getElementById('footerAddress').value = siteData.footer.address;
+    
+    // Load social
+    document.getElementById('socialFacebook').value = siteData.social.facebook;
+    document.getElementById('socialInstagram').value = siteData.social.instagram;
+    document.getElementById('socialTwitter').value = siteData.social.twitter;    
+    // Load typography
+    document.getElementById('fontHeroTitle').value = siteData.typography.heroTitleSize;
+    document.getElementById('fontSectionTitle').value = siteData.typography.sectionTitleSize;
+    document.getElementById('fontBase').value = siteData.typography.baseSize;
+    document.getElementById('fontFamily').value = siteData.typography.fontFamily;
+  }
+
+  // Close modal on outside click
+  document.getElementById('loginModal').addEventListener('click', (e) => {
+    if(e.target.id === 'loginModal') closeLoginModal();
+  });
+
+  // Initialize
+  updateSite();
+
+  // Phone hover effects
+  document.addEventListener('mouseover', (e) => {
+    if(e.target.closest('.phone-item')) {
+      const phone = e.target.closest('.phone-item');
+      phone.style.zIndex = '100';
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    if(e.target.closest('.phone-item')) {
+      const phone = e.target.closest('.phone-item');
+      const idx = Array.from(phone.parentElement.children).indexOf(phone);
+      phone.style.zIndex = idx === 1 || idx === 2 ? 3 : 1;
+    }
+  });
+</script>
+
+</body>
+</html>
