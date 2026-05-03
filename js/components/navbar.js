@@ -193,11 +193,7 @@ class Navbar {
     logos.forEach((logo) => {
       const hardReload = (e) => {
         e.preventDefault();
-        const targetPath = logo.getAttribute('href') || window.location.href;
-        const normalized = targetPath.startsWith('http')
-          ? targetPath
-          : new URL(targetPath, window.location.href).pathname;
-        window.location.assign(`${normalized}?_r=${Date.now()}`);
+        window.location.reload();
       };
       logo.addEventListener('click', hardReload);
       logo.addEventListener('touchend', hardReload, { passive: false });

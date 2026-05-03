@@ -415,9 +415,7 @@
       logos.forEach((logo) => {
         const hardReload = (e) => {
           e.preventDefault();
-          const href = logo.getAttribute('href') || window.location.href;
-          const path = new URL(href, window.location.href).pathname;
-          window.location.assign(path + '?_r=' + Date.now());
+          window.location.reload();
         };
         logo.addEventListener('click', hardReload);
         logo.addEventListener('touchend', hardReload, { passive: false });
