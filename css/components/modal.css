@@ -1,0 +1,105 @@
+/* ===== LOGIN MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: var(--spacing-md);
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: var(--black-card);
+  border: 2px solid var(--gold-primary);
+  border-radius: var(--border-radius-xl);
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 25px 80px rgba(212,168,67,0.3);
+  overflow: hidden;
+  animation: modalSlide 0.4s ease;
+  position: relative;
+}
+
+@keyframes modalSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, rgba(212,168,67,0.2), transparent);
+  padding: var(--spacing-xl);
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header i {
+  font-size: 48px;
+  color: var(--gold-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.modal-header h3 {
+  color: var(--gold-primary);
+  font-size: 26px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.modal-header p {
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.modal-body {
+  padding: var(--spacing-xl);
+}
+
+.btn-close-modal {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  font-size: 28px;
+  cursor: pointer;
+  transition: color var(--transition-normal);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.btn-close-modal:hover,
+.btn-close-modal:focus {
+  color: var(--gold-primary);
+  background: rgba(212,168,67,0.1);
+}
+
+/* Responsive modal */
+@media (max-width: 480px) {
+  .modal {
+    margin: var(--spacing-md);
+    max-width: calc(100% - 2rem);
+  }
+  
+  .modal-header,
+  .modal-body {
+    padding: var(--spacing-md);
+  }
+}

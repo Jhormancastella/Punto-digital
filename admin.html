@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Panel Admin — Punto Digital</title>
+
+  <link rel="icon" type="image/png" href="img/favicon-hd.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-hd.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-panel.css">
+</head>
+<body class="admin-body">
+
+  <!-- ── TOP BAR ─────────────────────────────────────────────── -->
+  <header class="ap-topbar">
+    <div class="ap-topbar-left">
+      <button class="ap-sidebar-toggle" id="sidebarToggle" aria-label="Menú">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="ap-brand">
+        <a href="admin.html" class="js-hard-reload-logo" aria-label="Recargar panel admin">
+          <img src="img/logo.png" alt="Punto Digital" class="ap-brand-logo" loading="eager" decoding="async">
+        </a>
+        <span><em>Admin</em></span>
+      </div>
+    </div>
+    <div class="ap-topbar-right">
+      <div class="ap-live-badge"><span></span> En vivo</div>
+      <button class="ap-icon-btn" id="themeToggle" title="Cambiar tema">
+        <i class="fas fa-moon"></i>
+      </button>
+      <button class="ap-icon-btn" id="previewBtn" title="Vista previa del sitio" onclick="window.open('index.html','_blank')">
+        <i class="fas fa-eye"></i>
+      </button>
+      <a href="index.html" class="ap-btn-back">
+        <i class="fas fa-arrow-left"></i> Volver al sitio
+      </a>
+    </div>
+  </header>
+
+  <!-- ── LAYOUT ──────────────────────────────────────────────── -->
+  <div class="ap-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="ap-sidebar" id="apSidebar">
+      <div class="ap-sidebar-user">
+        <div class="ap-avatar"><i class="fas fa-user-shield"></i></div>
+        <div>
+          <p class="ap-user-name">Administrador</p>
+          <p class="ap-user-role">Control total</p>
+        </div>
+      </div>
+
+      <nav class="ap-nav">
+        <p class="ap-nav-label">Principal</p>
+        <button class="ap-nav-item active" data-section="dashboard">
+          <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+        </button>
+
+        <p class="ap-nav-label">Contenido</p>
+        <button class="ap-nav-item" data-section="hero">
+          <i class="fas fa-image"></i><span>Hero / Banner</span>
+        </button>
+        <button class="ap-nav-item" data-section="features">
+          <i class="fas fa-star"></i><span>Características</span>
+        </button>
+        <button class="ap-nav-item" data-section="categories">
+          <i class="fas fa-th-large"></i><span>Categorías</span>
+        </button>
+
+        <p class="ap-nav-label">Tienda</p>
+        <button class="ap-nav-item" data-section="products">
+          <i class="fas fa-mobile-alt"></i><span>Productos</span>
+        </button>
+
+        <p class="ap-nav-label">Diseño</p>
+        <button class="ap-nav-item" data-section="colors">
+          <i class="fas fa-palette"></i><span>Colores</span>
+        </button>
+        <button class="ap-nav-item" data-section="typography">
+          <i class="fas fa-font"></i><span>Tipografía</span>
+        </button>
+
+        <p class="ap-nav-label">Sitio</p>
+        <button class="ap-nav-item" data-section="footer">
+          <i class="fas fa-address-card"></i><span>Footer & Contacto</span>
+        </button>
+        <button class="ap-nav-item" data-section="seo">
+          <i class="fas fa-search"></i><span>SEO</span>
+        </button>
+      </nav>
+
+      <div class="ap-sidebar-footer">
+        <button class="ap-logout-btn" onclick="adminLogout()">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="ap-main" id="apMain">
+
+      <!-- ── DASHBOARD ── -->
+      <section class="ap-section active" id="sec-dashboard">
+        <div class="ap-page-header">
+          <h1>Dashboard</h1>
+          <p>Resumen del estado del sitio</p>
+        </div>
+
+        <div class="ap-stats">
+          <div class="ap-stat-card">
+            <div class="ap-stat-icon" style="--c:#d4a843"><i class="fas fa-mobile-alt"></i></div>
+            <div><p class="ap-stat-num" id="stat-products">0</p><p class="ap-stat-lbl">Productos</p></div>
+          </div>
+          <div class="ap-stat-card">
+            <div class="ap-stat-icon" style="--c:#7c3aed"><i class="fas fa-award"></i></div>
+            <div><p class="ap-stat-num" id="stat-featured">0</p><p class="ap-stat-lbl">Destacados</p></div>
+          </div>
+          <div class="ap-stat-card">
+            <div class="ap-stat-icon" style="--c:#059669"><i class="fas fa-th-large"></i></div>
+            <div><p class="ap-stat-num" id="stat-categories">0</p><p class="ap-stat-lbl">Categorías</p></div>
+          </div>
+          <div class="ap-stat-card">
+            <div class="ap-stat-icon" style="--c:#dc2626"><i class="fas fa-images"></i></div>
+            <div><p class="ap-stat-num" id="stat-images">0</p><p class="ap-stat-lbl">Imágenes Hero</p></div>
+          </div>
+        </div>
+
+        <div class="ap-quick-actions">
+          <h3>Acciones rápidas</h3>
+          <div class="ap-qa-grid">
+            <button class="ap-qa-btn" onclick="goSection('hero')"><i class="fas fa-image"></i> Editar Hero</button>
+            <button class="ap-qa-btn" onclick="goSection('products')"><i class="fas fa-plus"></i> Nuevo Producto</button>
+            <button class="ap-qa-btn" onclick="goSection('colors')"><i class="fas fa-palette"></i> Cambiar Colores</button>
+            <button class="ap-qa-btn" onclick="window.open('index.html','_blank')"><i class="fas fa-eye"></i> Ver Sitio</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── HERO ── -->
+      <section class="ap-section" id="sec-hero">
+        <div class="ap-page-header">
+          <h1>Hero / Banner</h1>
+          <p>Texto principal, descripción y carrusel de imágenes</p>
+        </div>
+        <div class="ap-grid-2">
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-heading"></i> Texto del Hero</h3>
+            <div class="ap-field">
+              <label>Título principal</label>
+              <textarea id="heroTitle" rows="3"></textarea>
+            </div>
+            <div class="ap-field">
+              <label>Descripción</label>
+              <textarea id="heroDesc" rows="3"></textarea>
+            </div>
+            <div class="ap-field">
+              <label>Texto del botón</label>
+              <input type="text" id="heroBtnText">
+            </div>
+            <button class="ap-btn-save" onclick="adminPanel.saveHero()">
+              <i class="fas fa-save"></i> Guardar cambios
+            </button>
+          </div>
+
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-images"></i> Imágenes del Carrusel</h3>
+            <div id="heroImagesList" class="ap-item-list"></div>
+            <button class="ap-btn-add" onclick="adminPanel.openAddImageModal()">
+              <i class="fas fa-plus"></i> Agregar imagen
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── FEATURES ── -->
+      <section class="ap-section" id="sec-features">
+        <div class="ap-page-header">
+          <h1>Características</h1>
+          <p>Íconos y textos de la barra de características</p>
+        </div>
+        <div id="featuresList" class="ap-item-list ap-item-list--wide"></div>
+        <button class="ap-btn-add" onclick="adminPanel.openAddFeatureModal()">
+          <i class="fas fa-plus"></i> Agregar característica
+        </button>
+      </section>
+
+      <!-- ── CATEGORIES ── -->
+      <section class="ap-section" id="sec-categories">
+        <div class="ap-page-header">
+          <h1>Categorías</h1>
+          <p>Gestiona las categorías de productos</p>
+        </div>
+        <div id="categoriesList" class="ap-item-list ap-item-list--wide"></div>
+        <button class="ap-btn-add" onclick="adminPanel.openAddCategoryModal()">
+          <i class="fas fa-plus"></i> Agregar categoría
+        </button>
+      </section>
+
+      <!-- ── PRODUCTS ── -->
+      <section class="ap-section" id="sec-products">
+        <div class="ap-page-header">
+          <h1>Productos</h1>
+          <p>Gestiona el catálogo de productos principales</p>
+        </div>
+        <div id="productsList" class="ap-products-grid"></div>
+        <button class="ap-btn-add" onclick="adminPanel.openAddProductModal()">
+          <i class="fas fa-plus"></i> Agregar producto
+        </button>
+      </section>
+
+      <!-- ── COLORS ── -->
+      <section class="ap-section" id="sec-colors">
+        <div class="ap-page-header">
+          <h1>Colores</h1>
+          <p>Personaliza la paleta de colores del sitio</p>
+        </div>
+        <div class="ap-grid-2">
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-palette"></i> Paleta Dorada</h3>
+            <div class="ap-field">
+              <label>Color principal</label>
+              <div class="ap-color-row">
+                <input type="color" id="colorGoldPrimary" value="#d4a843">
+                <input type="text" id="colorGoldPrimaryHex" value="#d4a843" maxlength="7">
+                <div class="ap-color-preview" id="prevGoldPrimary" style="background:#d4a843"></div>
+              </div>
+            </div>
+            <div class="ap-field">
+              <label>Color claro</label>
+              <div class="ap-color-row">
+                <input type="color" id="colorGoldLight" value="#f0d68a">
+                <input type="text" id="colorGoldLightHex" value="#f0d68a" maxlength="7">
+                <div class="ap-color-preview" id="prevGoldLight" style="background:#f0d68a"></div>
+              </div>
+            </div>
+            <div class="ap-field">
+              <label>Color oscuro</label>
+              <div class="ap-color-row">
+                <input type="color" id="colorGoldDark" value="#b89344">
+                <input type="text" id="colorGoldDarkHex" value="#b89344" maxlength="7">
+                <div class="ap-color-preview" id="prevGoldDark" style="background:#b89344"></div>
+              </div>
+            </div>
+            <button class="ap-btn-save" onclick="adminPanel.saveColors()">
+              <i class="fas fa-check"></i> Aplicar colores
+            </button>
+          </div>
+
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-swatchbook"></i> Presets de Color</h3>
+            <p class="ap-hint">Haz clic en un preset para aplicarlo al instante</p>
+            <div class="ap-presets" id="colorPresets"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TYPOGRAPHY ── -->
+      <section class="ap-section" id="sec-typography">
+        <div class="ap-page-header">
+          <h1>Tipografía</h1>
+          <p>Fuentes y tamaños de texto</p>
+        </div>
+        <div class="ap-grid-2">
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-font"></i> Familia de fuente</h3>
+            <div class="ap-font-grid" id="fontGrid"></div>
+            <button class="ap-btn-save" onclick="adminPanel.saveFontFamily()">
+              <i class="fas fa-check"></i> Aplicar fuente
+            </button>
+          </div>
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-text-height"></i> Tamaños</h3>
+            <div class="ap-field">
+              <label>Título Hero (px) <span id="heroSizeVal">58</span></label>
+              <input type="range" id="fontHeroTitle" min="28" max="80" value="58"
+                     oninput="document.getElementById('heroSizeVal').textContent=this.value">
+            </div>
+            <div class="ap-field">
+              <label>Título Sección (px) <span id="sectionSizeVal">28</span></label>
+              <input type="range" id="fontSectionTitle" min="18" max="48" value="28"
+                     oninput="document.getElementById('sectionSizeVal').textContent=this.value">
+            </div>
+            <div class="ap-field">
+              <label>Tamaño base (px) <span id="baseSizeVal">16</span></label>
+              <input type="range" id="fontBase" min="12" max="22" value="16"
+                     oninput="document.getElementById('baseSizeVal').textContent=this.value">
+            </div>
+            <button class="ap-btn-save" onclick="adminPanel.saveTypography()">
+              <i class="fas fa-check"></i> Aplicar tamaños
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── FOOTER ── -->
+      <section class="ap-section" id="sec-footer">
+        <div class="ap-page-header">
+          <h1>Footer & Contacto</h1>
+          <p>Información de contacto y redes sociales</p>
+        </div>
+        <div class="ap-grid-2">
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-address-card"></i> Contacto</h3>
+            <div class="ap-field">
+              <label><i class="fas fa-phone"></i> Teléfono</label>
+              <input type="text" id="footerPhone">
+            </div>
+            <div class="ap-field">
+              <label><i class="fas fa-envelope"></i> Email</label>
+              <input type="email" id="footerEmail">
+            </div>
+            <div class="ap-field">
+              <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+              <input type="text" id="footerAddress">
+            </div>
+            <div class="ap-field">
+              <label><i class="fab fa-whatsapp"></i> WhatsApp</label>
+              <input type="text" id="footerWhatsapp">
+            </div>
+            <button class="ap-btn-save" onclick="adminPanel.saveFooter()">
+              <i class="fas fa-save"></i> Guardar contacto
+            </button>
+          </div>
+          <div class="ap-card">
+            <h3 class="ap-card-title"><i class="fas fa-share-alt"></i> Redes Sociales</h3>
+            <div class="ap-field">
+              <label><i class="fab fa-facebook"></i> Facebook URL</label>
+              <input type="url" id="socialFacebook">
+            </div>
+            <div class="ap-field">
+              <label><i class="fab fa-instagram"></i> Instagram URL</label>
+              <input type="url" id="socialInstagram">
+            </div>
+            <div class="ap-field">
+              <label><i class="fab fa-whatsapp"></i> WhatsApp URL</label>
+              <input type="url" id="socialWhatsapp" placeholder="https://wa.me/57...">
+            </div>
+            <div class="ap-field">
+              <label><i class="fab fa-x-twitter"></i> X / Twitter URL</label>
+              <input type="url" id="socialTwitter">
+            </div>
+            <div class="ap-field">
+              <label><i class="fab fa-youtube"></i> YouTube URL</label>
+              <input type="url" id="socialYoutube">
+            </div>
+            <button class="ap-btn-save" onclick="adminPanel.saveSocial()">
+              <i class="fas fa-save"></i> Guardar redes
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SEO ── -->
+      <section class="ap-section" id="sec-seo">
+        <div class="ap-page-header">
+          <h1>SEO</h1>
+          <p>Metadatos para motores de búsqueda</p>
+        </div>
+        <div class="ap-card" style="max-width:700px">
+          <h3 class="ap-card-title"><i class="fas fa-search"></i> Metadatos</h3>
+          <div class="ap-field">
+            <label>Título de la página</label>
+            <input type="text" id="seoTitle">
+          </div>
+          <div class="ap-field">
+            <label>Descripción meta</label>
+            <textarea id="seoDesc" rows="3"></textarea>
+          </div>
+          <div class="ap-field">
+            <label>Palabras clave (separadas por coma)</label>
+            <input type="text" id="seoKeywords">
+          </div>
+          <button class="ap-btn-save" onclick="adminPanel.saveSEO()">
+            <i class="fas fa-save"></i> Guardar SEO
+          </button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ── MODAL GENÉRICO ──────────────────────────────────────── -->
+  <div class="ap-modal-overlay" id="apModal" aria-hidden="true">
+    <div class="ap-modal" role="dialog">
+      <div class="ap-modal-header">
+        <h3 id="apModalTitle">Modal</h3>
+        <button class="ap-modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ap-modal-body" id="apModalBody"></div>
+      <div class="ap-modal-footer">
+        <button class="ap-btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="ap-btn-save" id="apModalSave">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/formatters.js"></script>
+  <script src="js/utils/imageProcessor.js"></script>
+  <script src="js/services/notificationService.js"></script>
+  <script src="js/data/siteData.js"></script>
+  <script src="js/utils/themeManager.js"></script>
+  <script src="js/services/authService.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    (function bindHardReloadLogo() {
+      const logos = document.querySelectorAll('.js-hard-reload-logo');
+      logos.forEach((logo) => {
+        const hardReload = (e) => {
+          e.preventDefault();
+          const href = logo.getAttribute('href') || 'admin.html';
+          const path = new URL(href, window.location.origin).pathname;
+          window.location.assign(path + '?_r=' + Date.now());
+        };
+        logo.addEventListener('click', hardReload);
+        logo.addEventListener('touchend', hardReload, { passive: false });
+      });
+    })();
+  </script>
+</body>
+</html>

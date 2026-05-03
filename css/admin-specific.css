@@ -1,0 +1,248 @@
+/* ===== ESTILOS ESPECÍFICOS PARA ADMIN ===== */
+
+/* Correcciones para el panel de administración */
+.admin-sidebar-header {
+  background: linear-gradient(135deg, rgba(212,168,67,0.1), transparent);
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-sidebar-header h2 {
+  color: var(--gold-primary);
+  font-size: 20px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.admin-sidebar-header p {
+  color: var(--text-dark);
+  font-size: 13px;
+  margin: 0;
+}
+
+.admin-menu {
+  padding: var(--spacing-md) 0;
+}
+
+.admin-menu-item {
+  padding: 18px var(--spacing-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  border-left: 3px solid transparent;
+  color: var(--text-gray);
+}
+
+.admin-menu-item:hover,
+.admin-menu-item.active {
+  background: rgba(212,168,67,0.05);
+  border-left-color: var(--gold-primary);
+  color: var(--gold-primary);
+}
+
+.admin-menu-item i {
+  width: 24px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.admin-menu-item span {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Secciones del panel */
+.admin-section-panel {
+  display: none;
+}
+
+.admin-section-panel.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.admin-panel-header {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.admin-panel-header h3 {
+  color: var(--gold-primary);
+  font-size: 28px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.admin-panel-header p {
+  color: var(--text-gray);
+  margin: 0;
+}
+
+/* Grid de editores */
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.editor-card {
+  background: var(--black-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.editor-card:hover {
+  border-color: rgba(212,168,67,0.3);
+  transform: translateY(-2px);
+}
+
+.editor-card h4 {
+  color: var(--gold-primary);
+  margin-bottom: var(--spacing-md);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Responsive para admin */
+@media (max-width: 1024px) {
+  .admin-container {
+    flex-direction: column;
+  }
+  
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 2px solid var(--border-color);
+  }
+  
+  .admin-content {
+    padding: var(--spacing-md);
+  }
+  
+  .editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 0 var(--spacing-md);
+    height: 60px;
+  }
+  
+  .admin-container {
+    margin-top: 60px;
+    min-height: calc(100vh - 60px);
+  }
+  
+  .admin-logo {
+    font-size: 18px;
+  }
+  
+  .admin-logo span {
+    display: none;
+  }
+  
+  .btn-back-to-site {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .btn-back-to-site span {
+    display: none;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .welcome-section {
+    padding: var(--spacing-md);
+  }
+  
+  .welcome-section h1 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-card {
+    padding: var(--spacing-md);
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+  }
+  
+  .editor-card {
+    padding: var(--spacing-md);
+  }
+  
+  .admin-panel-header h3 {
+    font-size: 22px;
+  }
+}
+
+/* Mejoras de accesibilidad */
+.admin-menu-item:focus {
+  outline: 2px solid var(--gold-primary);
+  outline-offset: 2px;
+}
+
+.stat-card:focus {
+  outline: 2px solid var(--gold-primary);
+  outline-offset: 2px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tema claro para admin */
+[data-theme="light"] .admin-header {
+  background: var(--black-card);
+  border-bottom-color: var(--gold-primary);
+}
+
+[data-theme="light"] .admin-sidebar {
+  background: var(--black-card);
+  border-right-color: var(--border-color);
+}
+
+[data-theme="light"] .admin-content {
+  background: var(--black-bg);
+}

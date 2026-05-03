@@ -1,0 +1,4 @@
+.edge-profile/
+.vscode/
+*.env
+node_modules/

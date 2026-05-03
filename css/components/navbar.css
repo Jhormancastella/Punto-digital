@@ -1,0 +1,235 @@
+/* ===== NAVBAR COMPONENT ===== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-md) 0;
+  transition: all var(--transition-normal);
+}
+
+[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.navbar.scrolled {
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-sm) 0;
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform var(--transition-fast);
+}
+
+.nav-logo:hover {
+  transform: scale(1.05);
+}
+
+.nav-logo-image {
+  height: 90px;
+  width: auto;
+  display: block;
+}
+
+/* Menu */
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: var(--spacing-xl);
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--text-gray);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: var(--font-size-small);
+  transition: color var(--transition-normal);
+  position: relative;
+  padding: var(--spacing-xs) 0;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--gold-primary);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gold-primary);
+  transition: width var(--transition-normal);
+}
+
+.nav-link:hover::after,
+.nav-link:focus::after {
+  width: 100%;
+}
+
+/* Actions */
+.nav-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.nav-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-gray);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-normal);
+  font-size: 16px;
+}
+
+.nav-icon-btn:hover,
+.nav-icon-btn:focus {
+  background: rgba(212,168,67,0.1);
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+  transform: translateY(-2px);
+}
+
+.nav-cta {
+  padding: 10px 25px;
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+  color: var(--black-bg) !important;
+  border-radius: var(--border-radius-full);
+  font-weight: 600;
+  transition: all var(--transition-normal);
+}
+
+.nav-cta:hover,
+.nav-cta:focus {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold);
+}
+
+.nav-cta::after {
+  display: none;
+}
+
+/* Hamburger menu */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 5px;
+  background: none;
+  border: none;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 2px;
+  background: var(--gold-primary);
+  transition: all var(--transition-normal);
+  border-radius: 1px;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+  }
+  
+  .nav-logo-image {
+    height: 75px;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    background: var(--black-card);
+    flex-direction: column;
+    padding: var(--spacing-lg) var(--spacing-md);
+    gap: var(--spacing-md);
+    border-bottom: 2px solid var(--gold-primary);
+    transform: translateY(-150%);
+    transition: transform var(--transition-normal);
+    z-index: 999;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .nav-menu.active {
+    transform: translateY(0);
+  }
+
+  /* "Ver Catálogo" mantiene su estilo dorado en el menú desplegable */
+  .nav-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 20px;
+    text-align: center;
+    border-radius: var(--border-radius-full);
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light)) !important;
+    color: var(--black-bg) !important;
+    font-weight: 700;
+  }
+  .nav-cta::after { display: none; }
+  
+  .nav-actions {
+    gap: var(--spacing-xs);
+  }
+  
+  .nav-icon-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .nav-logo-image {
+    height: 54px;
+  }
+}

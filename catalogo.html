@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Catálogo completo de productos - Punto Digital. Encuentra smartphones, auriculares, smartwatches y accesorios de las mejores marcas.">
+  <meta name="keywords" content="catálogo, productos, smartphones, auriculares, smartwatches, accesorios, tecnología">
+  <meta name="author" content="Punto Digital">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://puntodigital.co/catalogo">
+  <meta property="og:title" content="Catálogo de Productos - Punto Digital">
+  <meta property="og:description" content="Explora nuestro catálogo completo de productos tecnológicos con filtros avanzados.">
+  <meta property="og:image" content="https://puntodigital.co/img/logo.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://puntodigital.co/catalogo">
+  <meta property="twitter:title" content="Catálogo de Productos - Punto Digital">
+  <meta property="twitter:description" content="Explora nuestro catálogo completo de productos tecnológicos con filtros avanzados.">
+  <meta property="twitter:image" content="https://puntodigital.co/img/logo.png">
+
+  <title>Catálogo de Productos | Punto Digital</title>
+  <link rel="canonical" href="https://puntodigital.co/catalogo.html">
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="css/variables.css" as="style">
+  <link rel="preload" href="css/base.css" as="style">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  
+  <!-- CSS Modules -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components/navbar.css">
+  <link rel="stylesheet" href="css/components/cards.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/modal.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/catalog.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="img/favicon-hd.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-hd.png">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo js-hard-reload-logo" aria-label="Punto Digital - Volver al inicio">
+        <img src="img/logo.png" alt="Punto Digital" class="nav-logo-image" loading="eager" decoding="async">
+      </a>
+      
+      <ul class="nav-menu" id="navMenu" role="menubar">
+        <li role="none">
+          <a href="index.html" class="nav-link" role="menuitem">Inicio</a>
+        </li>
+        <li role="none">
+          <a href="catalogo.html" class="nav-link active" role="menuitem">Catálogo</a>
+        </li>
+        <li role="none">
+          <a href="#contacto" class="nav-link" role="menuitem">Contacto</a>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button class="nav-icon-btn" id="themeToggle" onclick="window.themeManager?.toggleTheme()" 
+                title="Cambiar tema" aria-label="Alternar tema oscuro/claro">
+          <i class="fas fa-moon" aria-hidden="true"></i>
+        </button>
+        
+        <!-- Cart -->
+        <button class="nav-icon-btn" id="cartBtn" title="Carrito de compras" 
+                aria-label="Ver carrito de compras" style="position:relative">
+          <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        
+        <!-- Mobile Menu -->
+        <button class="hamburger" id="hamburger" aria-label="Menú de navegación" 
+                aria-expanded="false" aria-controls="navMenu">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="main-content">
+    <!-- CATALOG HERO -->
+    <section class="catalog-hero">
+      <h1>Catálogo de Productos</h1>
+      <p>Explora nuestra amplia selección de productos tecnológicos con filtros avanzados para encontrar exactamente lo que necesitas.</p>
+    </section>
+
+    <!-- CATALOG CONTENT -->
+    <div class="catalog-container">
+
+      <!-- FILTER TOGGLE (mobile) -->
+      <button class="filter-toggle-btn" id="filterToggleBtn" aria-expanded="false" aria-controls="filtersSidebar">
+        <span><i class="fas fa-sliders-h" style="margin-right:8px;color:var(--gold-primary)"></i> Filtros</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+
+      <div class="catalog-layout">
+
+        <!-- FILTERS SIDEBAR -->
+        <aside class="filters-sidebar" id="filtersSidebar" role="complementary" aria-label="Filtros de productos">
+          <div class="filters-header">
+            <h3>Filtros</h3>
+            <button class="clear-filters" id="clearFilters">Limpiar todo</button>
+          </div>
+
+          <!-- Search Filter -->
+          <div class="filter-group">
+            <h4><i class="fas fa-search"></i> Búsqueda</h4>
+            <div class="search-bar">
+              <input type="text" class="search-input" id="searchInputFilters" data-catalog-search
+                     placeholder="Buscar productos..." aria-label="Buscar productos">
+              <button class="search-btn" id="searchBtnFilters" data-catalog-search-btn aria-label="Buscar">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <h4><i class="fas fa-th-large"></i> Categorías</h4>
+            <div class="filter-options" id="categoryFilters">
+              <!-- Categories will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Brand Filter -->
+          <div class="filter-group">
+            <h4><i class="fas fa-tags"></i> Marcas</h4>
+            <div class="filter-options" id="brandFilters">
+              <!-- Brands will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Price Filter -->
+          <div class="filter-group">
+            <h4><i class="fas fa-dollar-sign"></i> Precio</h4>
+            <div class="price-range">
+              <div class="price-inputs">
+                <input type="number" class="price-input" id="minPrice" placeholder="Mín" min="0">
+                <span class="price-separator">-</span>
+                <input type="number" class="price-input" id="maxPrice" placeholder="Máx" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Rating Filter -->
+          <div class="filter-group">
+            <h4><i class="fas fa-star"></i> Calificación</h4>
+            <div class="filter-options" id="ratingFilters">
+              <div class="filter-option">
+                <input type="checkbox" id="rating5" value="5">
+                <label for="rating5">
+                  <span>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    5 estrellas
+                  </span>
+                  <span class="filter-count" id="rating5Count">0</span>
+                </label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="rating4" value="4">
+                <label for="rating4">
+                  <span>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    4+ estrellas
+                  </span>
+                  <span class="filter-count" id="rating4Count">0</span>
+                </label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="rating3" value="3">
+                <label for="rating3">
+                  <span>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <i class="far fa-star"></i>
+                    3+ estrellas
+                  </span>
+                  <span class="filter-count" id="rating3Count">0</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Availability Filter -->
+          <div class="filter-group">
+            <h4><i class="fas fa-box"></i> Disponibilidad</h4>
+            <div class="filter-options">
+              <div class="filter-option">
+                <input type="checkbox" id="inStock" value="inStock">
+                <label for="inStock">
+                  <span>En stock</span>
+                  <span class="filter-count" id="inStockCount">0</span>
+                </label>
+              </div>
+              <div class="filter-option">
+                <input type="checkbox" id="onSale" value="onSale">
+                <label for="onSale">
+                  <span>En oferta</span>
+                  <span class="filter-count" id="onSaleCount">0</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- MAIN CATALOG -->
+        <main class="catalog-main">
+          <!-- Catalog Header -->
+          <div class="catalog-header">
+            <div class="results-info">
+              <span id="resultsCount">Cargando productos...</span>
+            </div>
+            
+            <div class="catalog-controls">
+              <!-- Search -->
+              <div class="search-bar">
+                <input type="text" class="search-input" id="searchInputCatalog" data-catalog-search
+                       placeholder="Buscar..." aria-label="Buscar productos">
+                <button class="search-btn" id="searchBtnCatalog" data-catalog-search-btn aria-label="Buscar">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+
+              <!-- Sort -->
+              <select class="sort-select" id="sortSelect" aria-label="Ordenar productos">
+                <option value="relevance">Relevancia</option>
+                <option value="price-low">Precio: menor a mayor</option>
+                <option value="price-high">Precio: mayor a menor</option>
+                <option value="rating">Mejor valorados</option>
+                <option value="name">A-Z</option>
+              </select>
+
+              <!-- View Toggle -->
+              <div class="view-toggle">
+                <button class="view-btn active" id="gridViewBtn" aria-label="Vista cuadrícula">
+                  <i class="fas fa-th"></i>
+                </button>
+                <button class="view-btn" id="listViewBtn" aria-label="Vista lista">
+                  <i class="fas fa-list"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products Grid -->
+          <div class="products-grid" id="productsGrid" role="grid" aria-label="Productos del catálogo">
+            <!-- Products will be populated by JavaScript -->
+          </div>
+
+          <!-- No Results -->
+          <div class="no-results" id="noResults" style="display: none;">
+            <i class="fas fa-search"></i>
+            <h3>No se encontraron productos</h3>
+            <p>Intenta ajustar los filtros o buscar con otros términos.</p>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" id="pagination" role="navigation" aria-label="Paginación de productos">
+            <!-- Pagination will be populated by JavaScript -->
+          </div>
+        </main>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="contacto" role="contentinfo" aria-labelledby="footer-title-cat">
+    <div class="footer-container">
+      <div class="footer-content">
+
+        <!-- Redes sociales -->
+        <div class="footer-social">
+          <span id="footer-title-cat">ENCUÉNTRANOS EN</span>
+          <div class="social-links" role="list" aria-label="Redes sociales">
+            <a href="https://facebook.com/puntodigital" target="_blank" rel="noopener"
+               aria-label="Facebook" title="Facebook">
+              <i class="fab fa-facebook-f" aria-hidden="true"></i>
+            </a>
+            <a href="https://instagram.com/puntodigital" target="_blank" rel="noopener"
+               aria-label="Instagram" title="Instagram">
+              <i class="fab fa-instagram" aria-hidden="true"></i>
+            </a>
+            <a href="https://wa.me/573012345678" target="_blank" rel="noopener"
+               aria-label="WhatsApp" title="WhatsApp">
+              <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            </a>
+            <a href="https://twitter.com/puntodigital" target="_blank" rel="noopener"
+               aria-label="X / Twitter" title="X / Twitter">
+              <i class="fab fa-x-twitter" aria-hidden="true"></i>
+            </a>
+            <a href="https://youtube.com/puntodigital" target="_blank" rel="noopener"
+               aria-label="YouTube" title="YouTube">
+              <i class="fab fa-youtube" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Contacto -->
+        <div class="footer-contact" role="list" aria-label="Información de contacto"
+             style="scroll-margin-top: 80px">
+          <a href="tel:+573012345678" class="contact-item">
+            <i class="fas fa-phone" aria-hidden="true"></i>
+            <span>+57 301 234 5678</span>
+          </a>
+          <a href="mailto:info@puntodigital.co" class="contact-item">
+            <i class="fas fa-envelope" aria-hidden="true"></i>
+            <span>info@puntodigital.co</span>
+          </a>
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+            <span>Colombia</span>
+          </div>
+          <a href="https://wa.me/573012345678" target="_blank" rel="noopener" class="contact-item">
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            <span>WhatsApp</span>
+          </a>
+        </div>
+
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Punto Digital. Todos los derechos reservados. Jhorman Castellanos.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript Modules -->
+  <script>
+    // Limpiar localStorage corrupto antes de cargar módulos
+    try {
+      const saved = localStorage.getItem('puntoDigitalData_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const arraySections = ['features', 'categories', 'products'];
+        const isCorrupt = arraySections.some(k => parsed[k] !== undefined && !Array.isArray(parsed[k]));
+        if (isCorrupt) localStorage.removeItem('puntoDigitalData_v2');
+      }
+      localStorage.removeItem('puntoDigitalData');
+    } catch(e) { localStorage.removeItem('puntoDigitalData_v2'); }
+  </script>
+  <!-- Environment and Configuration -->
+  <script src="js/config/environment.js"></script>
+  
+  <!-- Services -->
+  <script src="js/services/seoManager.js"></script>
+  <script src="js/utils/validator.js"></script>
+  
+  <!-- Utilities -->
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/formatters.js"></script>
+  <script src="js/utils/productBg.js"></script>
+  <script src="js/utils/imageProcessor.js"></script>
+  <script src="js/services/notificationService.js"></script>
+  <script src="js/services/cartService.js"></script>
+  <script src="js/services/productService.js"></script>
+  <script src="js/utils/productLoader.js"></script>
+  
+  <!-- Data and Utilities -->
+  <script src="js/data/siteData.js"></script>
+  <script src="js/utils/themeManager.js"></script>
+  
+  <!-- Components -->
+  <script src="js/components/navbar.js"></script>
+  <script src="js/components/productModal.js"></script>
+  
+  <!-- Catalog Script -->
+  <script src="js/catalog.js"></script>
+  <script>
+    // Toggle filtros en móvil
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('filterToggleBtn');
+      const sidebar = document.getElementById('filtersSidebar');
+      if (!btn || !sidebar) return;
+      btn.addEventListener('click', () => {
+        const isOpen = sidebar.classList.toggle('mobile-open');
+        btn.classList.toggle('open', isOpen);
+        btn.setAttribute('aria-expanded', isOpen);
+      });
+    });
+  </script>
+</body>
+</html>

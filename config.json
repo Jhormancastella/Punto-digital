@@ -1,0 +1,122 @@
+{
+  "project": {
+    "name": "Punto Digital",
+    "version": "2.0.0",
+    "description": "Tienda de tecnología y telefonía modularizada",
+    "author": "Kiro AI Assistant",
+    "license": "MIT"
+  },
+  "features": {
+    "imageProcessing": {
+      "enabled": true,
+      "backgroundRemoval": true,
+      "defaultBackgrounds": ["gradient", "gold", "dark"],
+      "maxImageSize": 5242880,
+      "supportedFormats": ["image/jpeg", "image/jpg", "image/png", "image/webp"]
+    },
+    "particles": {
+      "enabled": true,
+      "adaptive": true,
+      "respectMotionPreferences": true,
+      "maxParticles": {
+        "desktop": 80,
+        "tablet": 50,
+        "mobile": 30
+      }
+    },
+    "carousel": {
+      "autoPlay": true,
+      "interval": 5000,
+      "pauseOnHover": true,
+      "swipeEnabled": true,
+      "keyboardNavigation": true
+    },
+    "theme": {
+      "defaultTheme": "dark",
+      "systemDetection": true,
+      "smoothTransitions": true,
+      "persistPreference": true
+    },
+    "accessibility": {
+      "keyboardNavigation": true,
+      "screenReaderSupport": true,
+      "highContrastMode": true,
+      "skipLinks": true,
+      "ariaLabels": true
+    },
+    "performance": {
+      "lazyLoading": true,
+      "intersectionObserver": true,
+      "preloadCritical": true,
+      "debounceScroll": true
+    }
+  },
+  "breakpoints": {
+    "mobile": "768px",
+    "tablet": "1024px",
+    "desktop": "1400px"
+  },
+  "colors": {
+    "primary": {
+      "gold": "#d4a843",
+      "goldLight": "#f0d68a",
+      "goldDark": "#b89344"
+    },
+    "neutral": {
+      "blackBg": "#0a0a0a",
+      "blackCard": "#1a1a1a",
+      "blackLight": "#2a2a2a",
+      "textWhite": "#ffffff",
+      "textGray": "#aaaaaa",
+      "textDark": "#888888"
+    }
+  },
+  "typography": {
+    "fontFamily": "Poppins, Roboto, Arial, sans-serif",
+    "sizes": {
+      "hero": "clamp(28px, 5vw, 58px)",
+      "section": "clamp(20px, 4vw, 28px)",
+      "base": "clamp(14px, 2vw, 16px)",
+      "small": "clamp(12px, 1.5vw, 14px)"
+    }
+  },
+  "animations": {
+    "transitions": {
+      "fast": "0.2s ease",
+      "normal": "0.3s ease",
+      "slow": "0.5s ease"
+    },
+    "respectReducedMotion": true
+  },
+  "seo": {
+    "title": "Punto Digital | Tecnología y Telefonía",
+    "description": "Tienda especializada en tecnología y telefonía. Los mejores smartphones, gadgets y accesorios.",
+    "keywords": "smartphones, tecnología, telefonía, gadgets, accesorios",
+    "ogImage": "/img/logo.png",
+    "twitterImage": "/img/logo.png"
+  },
+  "admin": {
+    "sessionTimeout": 3600000,
+    "maxLoginAttempts": 3,
+    "lockoutDuration": 900000,
+    "features": {
+      "colorEditor": true,
+      "contentEditor": true,
+      "imageUpload": true,
+      "dataExport": true,
+      "dataImport": true
+    }
+  },
+  "development": {
+    "hotReload": false,
+    "debugMode": false,
+    "sourceMap": true,
+    "minification": false
+  },
+  "production": {
+    "minification": true,
+    "compression": true,
+    "caching": true,
+    "cdn": false
+  }
+}
