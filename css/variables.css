@@ -1,0 +1,82 @@
+/* ===== CSS VARIABLES ===== */
+:root {
+  /* Colores principales */
+  --gold-primary: #d4a843;
+  --gold-light: #f0d68a;
+  --gold-dark: #b89344;
+  --black-bg: #0a0a0a;
+  --black-card: #1a1a1a;
+  --black-light: #2a2a2a;
+  --text-white: #ffffff;
+  --text-gray: #aaaaaa;
+  --text-dark: #888888;
+  --border-color: rgba(212, 168, 67, 0.1);
+  --shadow-color: rgba(0,0,0,0.5);
+  
+  /* Tipografía */
+  --font-family: 'Poppins', 'Roboto', 'Arial', sans-serif;
+  --font-size-hero: clamp(28px, 5vw, 58px);
+  --font-size-section: clamp(20px, 4vw, 28px);
+  --font-size-base: clamp(14px, 2vw, 16px);
+  --font-size-small: clamp(12px, 1.5vw, 14px);
+  
+  /* Espaciado */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-xxl: 4rem;
+  
+  /* Transiciones */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Bordes */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 20px;
+  --border-radius-xl: 25px;
+  --border-radius-full: 50px;
+  
+  /* Sombras */
+  --shadow-sm: 0 2px 10px var(--shadow-color);
+  --shadow-md: 0 10px 30px var(--shadow-color);
+  --shadow-lg: 0 20px 60px var(--shadow-color);
+  --shadow-gold: 0 10px 30px rgba(212,168,67,0.3);
+}
+
+/* Tema claro */
+[data-theme="light"] {
+  --black-bg: #f8f9fa;
+  --black-card: #ffffff;
+  --black-light: #e9ecef;
+  --text-white: #212529;
+  --text-gray: #495057;
+  --text-dark: #6c757d;
+  --border-color: rgba(212, 168, 67, 0.2);
+  --shadow-color: rgba(0,0,0,0.1);
+}
+
+/* Modo de alto contraste */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: rgba(212, 168, 67, 0.3);
+    --text-gray: #cccccc;
+  }
+  
+  [data-theme="light"] {
+    --border-color: rgba(212, 168, 67, 0.4);
+    --text-gray: #333333;
+  }
+}
+
+/* Modo de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0s;
+    --transition-normal: 0s;
+    --transition-slow: 0s;
+  }
+}

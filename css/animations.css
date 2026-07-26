@@ -1,0 +1,337 @@
+/* ===== ANIMACIONES OPTIMIZADAS ===== */
+
+/* Variables de animación */
+:root {
+  --animation-fast: 0.2s;
+  --animation-normal: 0.3s;
+  --animation-slow: 0.4s;
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Animaciones base reutilizables */
+@keyframes cardHover {
+  to {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(212,168,67,0.25), 0 0 30px rgba(212,168,67,0.1);
+  }
+}
+
+@keyframes cardFocus {
+  to {
+    transform: translateY(-10px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(212,168,67,0.3), 0 0 0 3px var(--gold-primary);
+  }
+}
+
+@keyframes imageZoom {
+  to { transform: scale(1.15); }
+}
+
+@keyframes shimmerEffect {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(212,168,67,0.3); }
+  50% { box-shadow: 0 0 20px rgba(212,168,67,0.6), 0 0 30px rgba(212,168,67,0.4); }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Efectos de shimmer */
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212,168,67,0.1), transparent);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.shimmer-effect:hover::before {
+  left: 100%;
+}
+
+/* Aplicación a componentes */
+.category-card,
+.product-card {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transform-origin: center;
+  transition: all var(--animation-slow) var(--easing-smooth);
+}
+
+.category-card:hover,
+.product-card:hover {
+  animation: cardHover var(--animation-slow) ease forwards;
+  border-color: var(--gold-primary);
+}
+
+.category-card:focus,
+.product-card:focus {
+  animation: cardFocus var(--animation-normal) ease forwards;
+  outline: none;
+}
+
+.category-card:active,
+.product-card:active {
+  transform: translateY(-5px) scale(0.98);
+  transition: transform var(--animation-fast) ease;
+}
+
+/* Efectos shimmer en tarjetas */
+.category-card::before,
+.product-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212,168,67,0.1), transparent);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.category-card:hover::before,
+.product-card:hover::before {
+  left: 100%;
+}
+
+/* Imágenes con zoom */
+.category-image img,
+.product-image img {
+  transition: transform var(--animation-slow) var(--easing-smooth);
+}
+
+.category-card:hover .category-image img,
+.product-card:hover .product-image img {
+  animation: imageZoom var(--animation-slow) ease forwards;
+}
+
+/* Botones con efectos */
+.btn-outline,
+.btn-gold,
+.btn-save,
+.btn-add-cart,
+.btn-view-details {
+  position: relative;
+  overflow: hidden;
+  transition: all var(--animation-normal) var(--easing-smooth);
+}
+
+.btn-outline:hover,
+.btn-gold:hover,
+.btn-save:hover,
+.btn-add-cart:hover,
+.btn-view-details:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(212,168,67,0.3);
+}
+
+.btn-outline:active,
+.btn-gold:active,
+.btn-save:active,
+.btn-add-cart:active,
+.btn-view-details:active {
+  transform: translateY(0);
+  transition: transform var(--animation-fast) ease;
+}
+
+/* Animaciones de entrada */
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.6s var(--easing-smooth) forwards;
+}
+
+.scale-in {
+  animation: scaleIn 0.4s var(--easing-bounce) forwards;
+}
+
+/* Animaciones escalonadas para grids */
+.animate-in {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideInUp 0.6s var(--easing-smooth) forwards;
+}
+
+.animate-in:nth-child(1) { animation-delay: 0.1s; }
+.animate-in:nth-child(2) { animation-delay: 0.2s; }
+.animate-in:nth-child(3) { animation-delay: 0.3s; }
+.animate-in:nth-child(4) { animation-delay: 0.4s; }
+.animate-in:nth-child(5) { animation-delay: 0.5s; }
+.animate-in:nth-child(6) { animation-delay: 0.6s; }
+
+/* Navbar animations */
+.navbar {
+  transition: all var(--animation-normal) var(--easing-smooth);
+}
+
+.nav-link {
+  position: relative;
+  transition: color var(--animation-normal) ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--gold-primary);
+  transition: all var(--animation-normal) var(--easing-smooth);
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* Modal animations */
+.modal-overlay {
+  transition: all var(--animation-normal) var(--easing-smooth);
+}
+
+.modal-overlay.active .modal,
+.product-modal-overlay.active .product-modal {
+  animation: scaleIn var(--animation-normal) var(--easing-smooth) forwards;
+}
+
+/* Loading animations */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Pulse animation for badges */
+.product-badge,
+.featured-badge {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Optimización para dispositivos con movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .category-card:hover,
+  .product-card:hover,
+  .btn-outline:hover,
+  .btn-gold:hover {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* Responsive: reducir animaciones en móviles */
+@media (max-width: 768px) {
+  .category-card:hover,
+  .product-card:hover {
+    transform: translateY(-5px) scale(1.01);
+  }
+  
+  .category-card:hover .category-image img,
+  .product-card:hover .product-image img {
+    transform: scale(1.05);
+  }
+  
+  .btn-outline:hover,
+  .btn-gold:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* Animaciones específicas para hero phones */
+@keyframes phoneFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.phone-item {
+  animation: phoneFloat 3s ease-in-out infinite;
+}
+
+.phone-item:nth-child(1) { animation-delay: 0s; }
+.phone-item:nth-child(2) { animation-delay: 0.5s; }
+.phone-item:nth-child(3) { animation-delay: 1s; }
+.phone-item:nth-child(4) { animation-delay: 1.5s; }
+
+/* Partículas doradas */
+@keyframes goldenParticle {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--end-x)), calc(-50% + var(--end-y))) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes phoneRipple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}

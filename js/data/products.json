@@ -1,0 +1,74 @@
+{
+  "celulares": [
+    {
+      "id": 1,
+      "marca": "Apple",
+      "modelo": "iPhone 15 Pro",
+      "precio": 999.00,
+      "moneda": "USD",
+      "imagen_url": "https://placehold.co/300x400?text=iPhone+15+Pro",
+      "especificaciones": {
+        "almacenamiento": "128 GB",
+        "ram": "8 GB",
+        "pantalla": "6.1 pulgadas OLED",
+        "bateria": "3274 mAh"
+      }
+    },
+    {
+      "id": 2,
+      "marca": "Samsung",
+      "modelo": "Galaxy S24 Ultra",
+      "precio": 1299.00,
+      "moneda": "USD",
+      "imagen_url": "https://placehold.co/300x400?text=Galaxy+S24+Ultra",
+      "especificaciones": {
+        "almacenamiento": "256 GB",
+        "ram": "12 GB",
+        "pantalla": "6.8 pulgadas Dynamic AMOLED",
+        "bateria": "5000 mAh"
+      }
+    },
+    {
+      "id": 3,
+      "marca": "Google",
+      "modelo": "Pixel 8",
+      "precio": 699.00,
+      "moneda": "USD",
+      "imagen_url": "https://placehold.co/300x400?text=Google+Pixel+8",
+      "especificaciones": {
+        "almacenamiento": "128 GB",
+        "ram": "8 GB",
+        "pantalla": "6.2 pulgadas OLED",
+        "bateria": "4575 mAh"
+      }
+    },
+    {
+      "id": 4,
+      "marca": "Xiaomi",
+      "modelo": "Xiaomi 14",
+      "precio": 799.00,
+      "moneda": "USD",
+      "imagen_url": "https://placehold.co/300x400?text=Xiaomi+14",
+      "especificaciones": {
+        "almacenamiento": "256 GB",
+        "ram": "12 GB",
+        "pantalla": "6.36 pulgadas AMOLED",
+        "bateria": "4610 mAh"
+      }
+    },
+    {
+      "id": 5,
+      "marca": "OnePlus",
+      "modelo": "OnePlus 12",
+      "precio": 799.00,
+      "moneda": "USD",
+      "imagen_url": "https://placehold.co/300x400?text=OnePlus+12",
+      "especificaciones": {
+        "almacenamiento": "256 GB",
+        "ram": "16 GB",
+        "pantalla": "6.82 pulgadas LTPO AMOLED",
+        "bateria": "5400 mAh"
+      }
+    }
+  ]
+}

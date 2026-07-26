@@ -1,0 +1,7 @@
+.edge-profile/
+.vscode/
+*.env
+node_modules/
+*.msix
+*.exe
+*.msi

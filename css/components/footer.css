@@ -1,0 +1,125 @@
+/* ===== FOOTER ===== */
+.footer {
+  position: relative;
+  z-index: 1;
+  background: rgba(26,26,26,0.8);
+  border-top: 2px solid var(--border-color);
+  padding: var(--spacing-xxl) var(--spacing-lg) var(--spacing-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .footer {
+  background: rgba(240,240,240,0.8);
+}
+
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xxl);
+  padding-bottom: var(--spacing-xxl);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Social section */
+.footer-social {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.footer-social span {
+  font-size: 13px;
+  color: var(--text-dark);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.social-links {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.social-links a {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 2px solid rgba(212,168,67,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-primary);
+  font-size: 18px;
+  text-decoration: none;
+  transition: all var(--transition-normal);
+}
+
+.social-links a:hover,
+.social-links a:focus {
+  background: rgba(212,168,67,0.2);
+  border-color: var(--gold-primary);
+  transform: translateY(-5px) scale(1.1);
+}
+
+/* Contact section */
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-dark);
+  font-size: 14px;
+  text-decoration: none;
+  transition: color var(--transition-normal);
+}
+
+.contact-item:hover,
+.contact-item:focus {
+  color: var(--gold-primary);
+}
+
+.contact-item i {
+  color: var(--gold-primary);
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* Footer bottom */
+.footer-bottom {
+  text-align: center;
+  padding-top: var(--spacing-lg);
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .footer-contact {
+    align-items: center;
+  }
+  
+  .footer-social {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+}
