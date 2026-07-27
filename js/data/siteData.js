@@ -72,13 +72,19 @@ class SiteDataManager {
   }
 
   async _loadSiteConfig() {
-    const sections = ['hero', 'features', 'categories', 'footer', 'social', 'colors', 'typography', 'seo'];
+    const sections = ['hero', 'features', 'categories', 'footer', 'social', 'colors', 'typography', 'seo', 'slogan'];
     const results  = await Promise.all(
       sections.map(s => window.firebaseClient.getDoc(`siteConfig/${s}`))
     );
     const config = {};
     sections.forEach((s, i) => {
-      if (results[i]) config[s] = results[i];
+      if (results[i]) {
+        // Si el doc tiene solo { value: ... }, extraer el valor primitivo
+        const doc = results[i];
+        config[s] = (doc && Object.keys(doc).length === 1 && 'value' in doc)
+          ? doc.value
+          : doc;
+      }
     });
     return config;
   }
@@ -157,9 +163,10 @@ class SiteDataManager {
       if (section === 'products') {
         await this._syncProducts(this.data.products);
       } else {
-        const payload = Array.isArray(this.data[section])
-          ? { items: this.data[section] }
-          : this.data[section];
+        const raw = this.data[section];
+        const payload = Array.isArray(raw)
+          ? { items: raw }
+          : (raw !== null && typeof raw === 'object' ? raw : { value: raw });
         await window.firebaseClient.setDoc(`siteConfig/${section}`, payload);
       }
     } catch (err) {
