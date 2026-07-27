@@ -7,69 +7,70 @@ class ProductLoader {
   }
 
   /**
-   * Inicializa y carga productos desde JSON
+   * Inicializa productos.
+   * Firestore es la fuente de verdad. El JSON local solo se usa
+   * como fallback si Firestore no devuelve ningún producto.
    */
   async init() {
     if (this.loaded) return;
 
     try {
-      // Cargar productos desde el servicio
-      await window.productService.loadProducts();
-      
-      // Integrar con siteData si está disponible
-      if (window.siteData) {
-        this.integrateWithSiteData();
+      // Esperar a que siteData termine de cargar desde Firestore
+      await this._waitForSiteData();
+
+      const firestoreProducts = window.siteData.getSection('products') || [];
+
+      if (firestoreProducts.length > 0) {
+        // Hay productos en Firestore → usarlos directamente
+        console.log(`✅ ${firestoreProducts.length} productos cargados desde Firestore`);
+      } else {
+        // Sin productos en Firestore → cargar desde JSON como fallback
+        console.log('ℹ️ Sin productos en Firestore, cargando desde JSON (fallback)');
+        await window.productService.loadProducts();
+        const jsonProducts = window.productService.getAllProducts();
+        if (jsonProducts.length) {
+          // Guardar en Firestore para que queden persistidos
+          await window.siteData.updateSection('products', jsonProducts);
+          console.log(`📦 ${jsonProducts.length} productos del JSON migrados a Firestore`);
+        }
       }
-      
+
       this.loaded = true;
-      console.log('✅ Productos cargados correctamente desde JSON');
-      
-      // Notificar que los productos están listos
+
       window.dispatchEvent(new CustomEvent('productsLoaded', {
-        detail: { products: window.productService.getAllProducts() }
+        detail: { products: window.siteData.getSection('products') }
       }));
-      
+
+      if (window.app) {
+        window.app.renderProducts();
+        window.app.renderFeaturedProducts();
+      }
+
     } catch (error) {
       console.error('❌ Error cargando productos:', error);
     }
   }
 
   /**
-   * Integra productos del servicio con siteData
-   * Actualiza directamente el array sin usar updateSection para evitar re-renders prematuros
+   * Espera a que siteData haya terminado de cargar desde Firestore.
    */
-  integrateWithSiteData() {
-    const products = window.productService.getAllProducts();
-    if (!products.length) return;
-
-    // Solo integrar si siteData NO tiene productos propios con imágenes reales
-    // (evitar sobreescribir datos del admin o del siteData por defecto)
-    const existing = window.siteData.data.products || [];
-    const hasRealImages = existing.some(p =>
-      p.image && !p.image.includes('placehold.co')
-    );
-
-    if (hasRealImages) {
-      console.log('📱 siteData ya tiene productos con imágenes reales — productLoader omitido');
-      if (window.app) {
-        window.app.renderProducts();
-        window.app.renderFeaturedProducts();
+  _waitForSiteData() {
+    return new Promise(resolve => {
+      // Si ya cargó, resolver inmediatamente
+      if (window.siteData?.data?.products !== undefined &&
+          !window.siteData._loadingFromFirestore) {
+        // Dar un tick extra por si siteDataReady aún no disparó
+        setTimeout(resolve, 50);
+        return;
       }
-      return;
-    }
-
-    // Solo si no hay datos propios, usar los del JSON
-    window.siteData.data.products = products;
-    console.log(`📱 Integrados ${products.length} productos desde JSON`);
-
-    if (window.app) {
-      window.app.renderProducts();
-      window.app.renderFeaturedProducts();
-    }
+      window.addEventListener('siteDataReady', () => resolve(), { once: true });
+      // Timeout de seguridad: 5 segundos
+      setTimeout(resolve, 5000);
+    });
   }
 
   /**
-   * Recarga productos
+   * Recarga productos desde Firestore
    */
   async reload() {
     this.loaded = false;
@@ -77,21 +78,22 @@ class ProductLoader {
   }
 
   /**
-   * Obtiene estadísticas de productos
+   * Obtiene estadísticas de productos desde Firestore
    */
   getStats() {
-    const products = window.productService.getAllProducts();
-    const brands = [...new Set(products.map(p => p.brand))];
-    const avgPrice = products.reduce((sum, p) => sum + parseInt(p.price), 0) / products.length;
-    
+    const products = window.siteData.getSection('products') || [];
+    const brands = [...new Set(products.map(p => p.brand).filter(Boolean))];
+    const prices = products.map(p => parseInt(p.price)).filter(n => !isNaN(n));
+    const avgPrice = prices.length ? prices.reduce((s, n) => s + n, 0) / prices.length : 0;
+
     return {
       totalProducts: products.length,
       brands: brands.length,
       brandList: brands,
       averagePrice: Math.round(avgPrice),
       priceRange: {
-        min: Math.min(...products.map(p => parseInt(p.price))),
-        max: Math.max(...products.map(p => parseInt(p.price)))
+        min: prices.length ? Math.min(...prices) : 0,
+        max: prices.length ? Math.max(...prices) : 0
       }
     };
   }
