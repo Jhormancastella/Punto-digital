@@ -42,24 +42,32 @@ class SiteDataManager {
   }
 
   async _loadFromFirestore() {
-    try {
-      const [config, products] = await Promise.all([
-        this._loadSiteConfig(),
-        this._loadProducts()
-      ]);
+    // Reintentar hasta 3 veces con espera entre intentos
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const [config, products] = await Promise.all([
+          this._loadSiteConfig(),
+          this._loadProducts()
+        ]);
 
-      this.data = { ...this._getDefaultData(), ...config, products };
-      this._saveCache();
-      this.applyVisualSettings();
-      this.notifyObservers('dataLoaded', this.data);
+        this.data = { ...this._getDefaultData(), ...config, products };
+        this._saveCache();
+        this.applyVisualSettings();
+        this.notifyObservers('dataLoaded', this.data);
 
-      // Notificar a app.js para re-renderizar con datos frescos
-      window.dispatchEvent(new CustomEvent('siteDataReady', { detail: this.data }));
-      console.log('✅ siteData cargado desde Firestore');
+        window.dispatchEvent(new CustomEvent('siteDataReady', { detail: this.data }));
+        console.log('✅ siteData cargado desde Firestore');
+        return;
 
-    } catch (err) {
-      console.warn('⚠️ No se pudo cargar Firestore, usando caché local:', err.message);
-      window.dispatchEvent(new CustomEvent('siteDataReady', { detail: this.data }));
+      } catch (err) {
+        console.warn(`⚠️ Intento ${attempt}/3 fallido:`, err.message);
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, attempt * 1500));
+        } else {
+          console.warn('⚠️ Usando caché local (Firestore no disponible)');
+          window.dispatchEvent(new CustomEvent('siteDataReady', { detail: this.data }));
+        }
+      }
     }
   }
 
