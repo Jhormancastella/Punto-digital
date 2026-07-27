@@ -11,6 +11,9 @@ window.openLoginModal = () => {
 window.closeLoginModal = () => {
   const modal = document.getElementById('loginModal');
   if (!modal) return;
+  // Mover el foco fuera del modal antes de ocultarlo para evitar el warning de aria-hidden
+  const trigger = document.getElementById('adminLoginBtn');
+  if (trigger) trigger.focus();
   modal.classList.remove('active');
   modal.setAttribute('aria-hidden', 'true');
   const err = document.getElementById('loginError');
