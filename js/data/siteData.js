@@ -214,12 +214,20 @@ class SiteDataManager {
 
   async _syncProducts(products) {
     if (!Array.isArray(products)) return;
-    // Firestore no tiene batch ilimitado en el SDK web modular sin server SDK,
-    // así que guardamos producto por producto. Para catálogos grandes esto se
-    // puede mejorar con un Cloud Function, pero para <200 productos es suficiente.
-    await Promise.all(products.map(p =>
-      window.firebaseClient.setDoc(`products/${p.id}`, p)
-    ));
+
+    // IDs actuales en memoria
+    const currentIds = new Set(products.map(p => p.id));
+
+    // Obtener IDs que existen en Firestore para borrar los que ya no están
+    const existing = await window.firebaseClient.getCollection('products');
+    const toDelete = existing.filter(p => !currentIds.has(p.id));
+
+    await Promise.all([
+      // Guardar/actualizar los productos actuales
+      ...products.map(p => window.firebaseClient.setDoc(`products/${p.id}`, p)),
+      // Eliminar los que fueron borrados
+      ...toDelete.map(p => window.firebaseClient.deleteDoc(`products/${p.id}`))
+    ]);
   }
 
   // ── Datos por defecto ─────────────────────────────────────────
