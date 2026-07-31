@@ -259,10 +259,10 @@ class PuntoDigitalApp {
            aria-label="Producto: ${Helpers.escapeAttr(product.name)}"
            data-index="${index}" data-product-id="${product.id}" style="--index: ${index}">
         <div class="product-image">
-          <img src="${Helpers.sanitizeUrl(product.image)}" alt="${Helpers.escapeAttr(product.name)}" loading="lazy"
-               onload="this.classList.add('loaded')"
-               onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'">
-          ${product.badge ? `<span class="product-badge">${Helpers.escapeHtml(product.badge)}</span>` : ''}
+           <img src="${Helpers.sanitizeUrl(product.images?.[0] || product.image)}" alt="${Helpers.escapeAttr(product.name)}" loading="lazy"
+                onload="this.classList.add('loaded')"
+                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'">
+           ${product.badge ? `<span class="product-badge">${Helpers.escapeHtml(product.badge)}</span>` : ''}
         </div>
         <div class="product-content">
           <h4>${Helpers.escapeHtml(product.name)}</h4>
@@ -322,11 +322,11 @@ class PuntoDigitalApp {
            aria-label="Producto destacado: ${Helpers.escapeAttr(product.name)}"
            data-index="${index}" data-product-id="${product.id}" style="--index: ${index}">
         <div class="product-image">
-          <img src="${Helpers.sanitizeUrl(product.image)}" alt="${Helpers.escapeAttr(product.name)}" loading="lazy"
-               onload="this.classList.add('loaded')"
-               onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'">
-          ${product.badge ? `<span class="product-badge">${Helpers.escapeHtml(product.badge)}</span>` : ''}
-          <span class="featured-badge">Destacado</span>
+           <img src="${Helpers.sanitizeUrl(product.images?.[0] || product.image)}" alt="${Helpers.escapeAttr(product.name)}" loading="lazy"
+                onload="this.classList.add('loaded')"
+                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'">
+           ${product.badge ? `<span class="product-badge">${Helpers.escapeHtml(product.badge)}</span>` : ''}
+           <span class="featured-badge">Destacado</span>
         </div>
         <div class="product-content">
           <h4>${Helpers.escapeHtml(product.name)}</h4>

@@ -33,7 +33,14 @@ class ProductModal {
           <div class="product-modal-image">
             <img id="product-modal-img" src="" alt="" loading="lazy">
             <div class="product-modal-badge" id="product-modal-badge"></div>
+            <button class="product-modal-nav product-modal-nav--prev" id="product-modal-prev" aria-label="Imagen anterior">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="product-modal-nav product-modal-nav--next" id="product-modal-next" aria-label="Imagen siguiente">
+              <i class="fas fa-chevron-right"></i>
+            </button>
           </div>
+          <div class="product-modal-thumbs" id="product-modal-thumbs"></div>
           
           <div class="product-modal-info">
             <div class="product-modal-header">
@@ -126,6 +133,17 @@ class ProductModal {
     this.modal.querySelector('#product-modal-add-cart-m').addEventListener('click', () => this.addToCart());
     this.modal.querySelector('#product-modal-buy-now-m').addEventListener('click', () => this.buyNow());
     this.modal.querySelector('#product-modal-whatsapp-m').addEventListener('click', () => this.contactWhatsApp());
+
+    // Navegación de imágenes
+    this.modal.querySelector('#product-modal-prev').addEventListener('click', () => this._prevImage());
+    this.modal.querySelector('#product-modal-next').addEventListener('click', () => this._nextImage());
+
+    // Flechas del teclado
+    document.addEventListener('keydown', (e) => {
+      if (!this.isOpen) return;
+      if (e.key === 'ArrowLeft') this._prevImage();
+      if (e.key === 'ArrowRight') this._nextImage();
+    });
   }
 
   open(product) {
@@ -184,34 +202,20 @@ class ProductModal {
   }
 
   populateModal(product) {
-    // Imagen
+    const images = Array.isArray(product.images) && product.images.length
+      ? product.images
+      : (product.image ? [product.image] : []);
+
+    this._currentImageIndex = 0;
+    this._modalImages = images;
+
     const img = this.modal.querySelector('#product-modal-img');
     img.src = '';
     img.alt = product.name;
 
-    // Cargar imagen con fallback + procesamiento automático de fondo claro
-    const fallbackSrc = `https://placehold.co/400x400/1a1a1a/d4a843?text=${encodeURIComponent(product.name)}`;
-    const originalSrc = Helpers.sanitizeUrl(product.image, fallbackSrc);
-    const canProcess = window.imageProcessor?.processImageForCatalog;
+    this._renderThumbs();
+    this._loadModalImage(this._currentImageIndex, product);
 
-    if (canProcess) {
-      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 700 })
-        .then((processedSrc) => {
-          const stillSameProduct = this.currentProduct && this.currentProduct.id === product.id;
-          if (stillSameProduct) img.src = processedSrc || originalSrc;
-        })
-        .catch(() => {
-          const stillSameProduct = this.currentProduct && this.currentProduct.id === product.id;
-          if (stillSameProduct) img.src = fallbackSrc;
-        });
-    } else {
-      const tempImg = new Image();
-      tempImg.onload = () => { img.src = originalSrc; };
-      tempImg.onerror = () => { img.src = fallbackSrc; };
-      tempImg.src = originalSrc;
-    }
-
-    // Badge
     const badge = this.modal.querySelector('#product-modal-badge');
     if (product.badge) {
       badge.textContent = product.badge;
@@ -308,6 +312,70 @@ class ProductModal {
     } else {
       stockText.innerHTML = '<span class="stock-available">Disponible</span>';
     }
+  }
+
+  _renderThumbs() {
+    const thumbsContainer = this.modal.querySelector('#product-modal-thumbs');
+    if (!thumbsContainer) return;
+    thumbsContainer.innerHTML = this._modalImages.map((src, i) => `
+      <img src="${Helpers.sanitizeUrl(src, 'https://placehold.co/80x80?text=?')}"
+           alt="Miniatura ${i + 1}"
+           class="product-modal-thumb ${i === 0 ? 'active' : ''}"
+           loading="lazy"
+           onerror="this.src='https://placehold.co/80x80?text=?'"
+           data-idx="${i}">
+    `).join('');
+    thumbsContainer.querySelectorAll('.product-modal-thumb').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        this._currentImageIndex = parseInt(thumb.dataset.idx);
+        this._renderThumbs();
+        this._loadModalImage(this._currentImageIndex, this.currentProduct);
+      });
+    });
+  }
+
+  _loadModalImage(index, product) {
+    const img = this.modal.querySelector('#product-modal-img');
+    const src = this._modalImages[index] || '';
+    const fallbackSrc = `https://placehold.co/400x400/1a1a1a/d4a843?text=${encodeURIComponent(product.name)}`;
+    const originalSrc = Helpers.sanitizeUrl(src, fallbackSrc);
+    const canProcess = window.imageProcessor?.processImageForCatalog;
+
+    img.src = '';
+    img.alt = product.name;
+
+    if (canProcess) {
+      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 700 })
+        .then((processedSrc) => {
+          const stillSameProduct = this.currentProduct && this.currentProduct.id === product.id
+            && this._currentImageIndex === index;
+          if (stillSameProduct) img.src = processedSrc || originalSrc;
+        })
+        .catch(() => {
+          const stillSameProduct = this.currentProduct && this.currentProduct.id === product.id
+            && this._currentImageIndex === index;
+          if (stillSameProduct) img.src = fallbackSrc;
+        });
+    } else {
+      const tempImg = new Image();
+      tempImg.onload = () => { img.src = originalSrc; };
+      tempImg.onerror = () => { img.src = fallbackSrc; };
+      tempImg.src = originalSrc;
+    }
+  }
+
+  _prevImage() {
+    if (!this._modalImages || this._modalImages.length <= 1) return;
+    this._currentImageIndex = (this._currentImageIndex - 1 + this._modalImages.length) % this._modalImages.length;
+    this._renderThumbs();
+    this._loadModalImage(this._currentImageIndex, this.currentProduct);
+  }
+
+  _nextImage() {
+    if (!this._modalImages || this._modalImages.length <= 1) return;
+    this._currentImageIndex = (this._currentImageIndex + 1) % this._modalImages.length;
+    this._renderThumbs();
+    this._loadModalImage(this._currentImageIndex, this.currentProduct);
   }
 
   // Acciones de botones
@@ -510,6 +578,62 @@ const modalCSS = `
   background-position: center;
 }
 
+.product-modal-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: var(--text-white);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  z-index: 5;
+  transition: all 0.2s ease;
+}
+
+.product-modal-nav:hover {
+  background: var(--gold-primary);
+  color: var(--black-bg);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.product-modal-nav--prev { left: 10px; }
+.product-modal-nav--next { right: 10px; }
+
+.product-modal-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.product-modal-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+  background: var(--black-light);
+}
+
+.product-modal-thumb:hover {
+  opacity: 0.8;
+}
+
+.product-modal-thumb.active {
+  border-color: var(--gold-primary);
+  opacity: 1;
+}
+
 .product-modal-badge {
   position: absolute;
   top: 15px;
@@ -703,6 +827,11 @@ const modalCSS = `
     height: 240px;
   }
 
+  .product-modal-thumbs {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
   .product-modal-header h2 {
     font-size: 20px;
   }
@@ -742,6 +871,23 @@ const modalCSS = `
   }
 
   .product-modal-image img { height: 180px; }
+
+  .product-modal-thumbs {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .product-modal-thumb {
+    width: 70px;
+    height: 70px;
+  }
+
+  .product-modal-nav {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
   .product-modal-header h2 { font-size: 17px; }
   .current-price { font-size: 20px; }
   .product-modal-description p { font-size: 13px; }

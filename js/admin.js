@@ -396,8 +396,8 @@ class AdminPanel {
     if (!products.length) { grid.innerHTML = '<p style="color:var(--text-dark);font-size:13px;padding:8px">Sin productos</p>'; return; }
     grid.innerHTML = products.map((p, i) => `
       <div class="ap-product-card">
-        <img src="${Helpers.sanitizeUrl(p.image, 'https://placehold.co/240x160?text=?')}" alt="${Helpers.escapeAttr(p.name)}"
-             onerror="this.src='https://placehold.co/240x160?text=?'">
+         <img src="${Helpers.sanitizeUrl(p.images?.[0] || p.image, 'https://placehold.co/240x160?text=?')}" alt="${Helpers.escapeAttr(p.name)}"
+              onerror="this.src='https://placehold.co/240x160?text=?'">
         <div class="ap-product-card-body">
           ${p.badge ? `<span class="ap-badge">${Helpers.escapeHtml(p.badge)}</span>` : ''}
           <strong>${Helpers.escapeHtml(p.name)}</strong>
@@ -440,17 +440,27 @@ class AdminPanel {
       <div class="ap-field"><label>Precio (COP, sin puntos)</label><input type="number" id="m-pPrice" value="${Helpers.escapeAttr(data.price || '')}"></div>
       <div class="ap-field"><label>Precio original (opcional)</label><input type="number" id="m-pOriginal" value="${Helpers.escapeAttr(data.originalPrice || '')}"></div>
       <div class="ap-field">
-        <label>Imagen — URL</label>
-        <input type="text" id="m-pImg" value="${Helpers.escapeAttr(data.image || '')}" placeholder="https://...">
-      </div>
-      <div class="ap-field">
-        <label>Imagen — o sube un archivo</label>
-        <input type="file" id="m-pImgFile" accept="image/*" style="color:var(--text-white)">
+        <label>Imágenes del producto <span style="color:#dc3545">*</span> (mínimo 3)</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <input type="text" id="m-pImgUrl" placeholder="https://ejemplo.com/imagen.jpg"
+                 style="flex:1;min-width:200px">
+          <button type="button" id="m-pImgAddUrl" class="ap-item-btn ap-item-btn-edit"
+                  style="white-space:nowrap">
+            <i class="fas fa-link"></i> Agregar
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <input type="file" id="m-pImgFile" accept="image/*" multiple
+                 style="color:var(--text-white);flex:1">
+          <button type="button" id="m-pImgAddFile" class="ap-item-btn ap-item-btn-edit"
+                  style="white-space:nowrap">
+            <i class="fas fa-upload"></i> Subir
+          </button>
+        </div>
         <p class="ap-hint" style="margin-top:4px">El fondo blanco/claro se eliminará automáticamente</p>
-      </div>
-      <div id="m-pImgPreview" style="margin-top:8px;display:${data.image ? 'block' : 'none'}">
-        <img id="m-pImgPreviewImg" src="${Helpers.sanitizeUrl(data.image, '')}"
-             style="width:100%;max-height:180px;object-fit:contain;border-radius:10px;background:var(--black-light)">
+        <div id="m-pImagesContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:10px">
+          <!-- Miniaturas dinámicas -->
+        </div>
       </div>
       <div class="ap-field"><label>Categoría</label>
         <select id="m-pCat">
@@ -476,15 +486,10 @@ class AdminPanel {
       const name = this.getVal('m-pName');
       if (!name) { notificationService.error('El nombre es requerido'); return false; }
 
-      let imageUrl = this.getVal('m-pImg');
-      const fileInput = document.getElementById('m-pImgFile');
-      if (fileInput?.files?.[0]) {
-        try {
-          imageUrl = await window.imageProcessor.processImage(fileInput.files[0]);
-        } catch (e) {
-          notificationService.error('Error procesando imagen');
-          return false;
-        }
+      const images = window.adminPanel._productImages || [];
+      if (images.length < 3) {
+        notificationService.error('Debes agregar al menos 3 imágenes');
+        return false;
       }
 
       const item = {
@@ -492,7 +497,8 @@ class AdminPanel {
         name, brand: this.getVal('m-pBrand'),
         price: this.getVal('m-pPrice'),
         originalPrice: this.getVal('m-pOriginal') || null,
-        image: imageUrl,
+        image: images[0],
+        images: images,
         category: this.getVal('m-pCat'),
         badge: this.getVal('m-pBadge') || null,
         description: this.getVal('m-pDesc'),
@@ -509,25 +515,79 @@ class AdminPanel {
       notificationService.success('Producto guardado');
     });
 
-    // Preview en tiempo real
+    // Inicializar gestor de imágenes múltiples
     setTimeout(() => {
-      const fileInput = document.getElementById('m-pImgFile');
-      const urlInput  = document.getElementById('m-pImg');
-      if (!fileInput) return;
-      const showPreview = async (src) => {
-        const wrap = document.getElementById('m-pImgPreview');
-        const img  = document.getElementById('m-pImgPreviewImg');
-        if (!wrap || !img) return;
-        wrap.style.display = 'block';
-        img.style.opacity = '0.4';
-        try {
-          const processed = await window.imageProcessor.processImage(src);
-          img.src = processed; img.style.opacity = '1';
-        } catch { img.src = typeof src === 'string' ? src : ''; img.style.opacity = '1'; }
-      };
-      fileInput.addEventListener('change', () => { if (fileInput.files[0]) showPreview(fileInput.files[0]); });
-      urlInput.addEventListener('blur', () => { if (urlInput.value.trim()) showPreview(urlInput.value.trim()); });
+      window.adminPanel._initProductImages(data);
     }, 100);
+  }
+
+  _initProductImages(data) {
+    const existing = Array.isArray(data.images) && data.images.length
+      ? data.images
+      : (data.image ? [data.image] : []);
+    this._productImages = existing;
+
+    const container = document.getElementById('m-pImagesContainer');
+    const addUrlBtn = document.getElementById('m-pImgAddUrl');
+    const addFileBtn = document.getElementById('m-pImgAddFile');
+    const urlInput = document.getElementById('m-pImgUrl');
+    const fileInput = document.getElementById('m-pImgFile');
+
+    this._renderProductImages();
+
+    addUrlBtn?.addEventListener('click', () => {
+      const url = urlInput.value.trim();
+      if (url) { this._addProductImage(url); urlInput.value = ''; }
+    });
+
+    addFileBtn?.addEventListener('click', async () => {
+      const files = fileInput.files;
+      if (!files || !files.length) { notificationService.error('Selecciona al menos un archivo'); return; }
+      for (const file of files) {
+        if (!window.imageProcessor.validateImageFormat(file)) {
+          notificationService.error(`Formato no válido: ${file.name}`);
+          continue;
+        }
+        try {
+          const processed = await window.imageProcessor.processImage(file);
+          this._addProductImage(processed);
+        } catch {
+          notificationService.error(`Error procesando: ${file.name}`);
+        }
+      }
+      fileInput.value = '';
+    });
+  }
+
+  _renderProductImages() {
+    const container = document.getElementById('m-pImagesContainer');
+    if (!container) return;
+    container.innerHTML = this._productImages.map((src, i) => `
+      <div style="position:relative;width:100%;height:100px;border-radius:8px;overflow:hidden;background:var(--black-light)">
+        <img src="${Helpers.sanitizeUrl(src, 'https://placehold.co/100x100?text=?')}"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.src='https://placehold.co/100x100?text=?'">
+        <button type="button" onclick="adminPanel._removeProductImage(${i})"
+                style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);border:none;color:#ff6b6b;width:20px;height:20px;border-radius:50%;cursor:pointer">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    `).join('');
+    const count = this._productImages.length;
+    const hint = document.querySelector('.ap-hint');
+    if (hint) hint.textContent = `El fondo blanco/claro se eliminará automáticamente · ${count}/3 imágenes mínimas`;
+  }
+
+  _addProductImage(src) {
+    if (!src) return;
+    if (this._productImages.includes(src)) return;
+    this._productImages.push(src);
+    this._renderProductImages();
+  }
+
+  _removeProductImage(index) {
+    this._productImages.splice(index, 1);
+    this._renderProductImages();
   }
 
   editProduct(index) {

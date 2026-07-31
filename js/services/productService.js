@@ -33,6 +33,13 @@ class ProductService {
       price: Math.round(product.precio * this.exchangeRate).toString(),
       originalPrice: product.precio > 800 ? Math.round(product.precio * this.exchangeRate * 1.15).toString() : null,
       image: product.imagen_url,
+      images: Array.isArray(product.imagenes) && product.imagenes.length
+        ? product.imagenes
+        : [
+            product.imagen_url,
+            product.imagen_url.replace('?', '+2?'),
+            product.imagen_url.replace('?', '+3?')
+          ],
       category: 'smartphones',
       brand: product.marca,
       featured: false,
@@ -118,6 +125,11 @@ class ProductService {
         name: 'Producto de Ejemplo',
         price: '2999000',
         image: 'https://placehold.co/300x400?text=Producto',
+        images: [
+          'https://placehold.co/300x400?text=Producto',
+          'https://placehold.co/300x400?text=Producto+2',
+          'https://placehold.co/300x400?text=Producto+3'
+        ],
         category: 'smartphones',
         brand: 'Ejemplo',
         description: 'Producto de ejemplo para mostrar.',

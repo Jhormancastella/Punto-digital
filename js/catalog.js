@@ -409,7 +409,7 @@ class ProductCatalog {
       : null;
     const safeName = Helpers.escapeHtml(product.name);
     const safeNameAttr = Helpers.escapeAttr(product.name);
-    const safeImage = Helpers.sanitizeUrl(product.image, 'https://placehold.co/300x220?text=?');
+    const safeImage = Helpers.sanitizeUrl(product.images?.[0] || product.image, 'https://placehold.co/300x220?text=?');
     const safeBadge = Helpers.escapeHtml(product.badge || '');
 
     card.innerHTML = `
