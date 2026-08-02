@@ -526,6 +526,7 @@ class AdminPanel {
       ? data.images
       : (data.image ? [data.image] : []);
     this._productImages = existing;
+    this._productImageSettings = {};
 
     const container = document.getElementById('m-pImagesContainer');
     const addUrlBtn = document.getElementById('m-pImgAddUrl');
@@ -535,9 +536,23 @@ class AdminPanel {
 
     this._renderProductImages();
 
-    addUrlBtn?.addEventListener('click', () => {
+    addUrlBtn?.addEventListener('click', async () => {
       const url = urlInput.value.trim();
-      if (url) { this._addProductImage(url); urlInput.value = ''; }
+      if (!url) { notificationService.error('Ingresa una URL válida'); return; }
+      try {
+        urlInput.disabled = true;
+        addUrlBtn.disabled = true;
+        notificationService.info('Procesando imagen...');
+        const processed = await window.imageProcessor.processImage(url, { tolerance: 35, outputSize: 700, smooth: 3 });
+        this._openImageEditor(url, processed, { tolerance: 35, smooth: 3, isUrl: true });
+      } catch (e) {
+        console.error(e);
+        notificationService.error('Error al procesar la URL. Verifica que sea pública y permita CORS.');
+      } finally {
+        urlInput.disabled = false;
+        addUrlBtn.disabled = false;
+        urlInput.value = '';
+      }
     });
 
     addFileBtn?.addEventListener('click', async () => {
@@ -549,8 +564,14 @@ class AdminPanel {
           continue;
         }
         try {
-          const processed = await window.imageProcessor.processImage(file);
-          this._addProductImage(processed);
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          const previewProcessed = await window.imageProcessor.previewRemoveBackground(dataUrl, { tolerance: 35, smooth: 3 });
+          this._openImageEditor(dataUrl, previewProcessed, { tolerance: 35, smooth: 3, fileName: file.name, isFile: true });
         } catch {
           notificationService.error(`Error procesando: ${file.name}`);
         }
@@ -563,19 +584,205 @@ class AdminPanel {
     const container = document.getElementById('m-pImagesContainer');
     if (!container) return;
     container.innerHTML = this._productImages.map((src, i) => `
-      <div style="position:relative;width:100%;height:100px;border-radius:8px;overflow:hidden;background:var(--black-light)">
-        <img src="${Helpers.sanitizeUrl(src, 'https://placehold.co/100x100?text=?')}"
-             style="width:100%;height:100%;object-fit:cover"
-             onerror="this.src='https://placehold.co/100x100?text=?'">
-        <button type="button" onclick="adminPanel._removeProductImage(${i})"
-                style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);border:none;color:#ff6b6b;width:20px;height:20px;border-radius:50%;cursor:pointer">
-          <i class="fas fa-times"></i>
-        </button>
+      <div class="ap-product-img-card" data-idx="${i}">
+        <div class="ap-product-img-wrap">
+          <img src="${Helpers.sanitizeUrl(src, 'https://placehold.co/100x100?text=?')}"
+               alt="Producto imagen ${i + 1}"
+               onerror="this.src='https://placehold.co/100x100?text=?'">
+          ${i === 0 ? '<div class="ap-product-img-primary">Principal</div>' : ''}
+        </div>
+        <div class="ap-product-img-actions">
+          <button type="button" class="ap-product-img-btn" onclick="adminPanel._editProductImage(${i})" title="Ajustar transparencia">
+            <i class="fas fa-magic"></i>
+          </button>
+          ${i > 0 ? `<button type="button" class="ap-product-img-btn" onclick="adminPanel._reorderProductImage(${i}, ${i - 1})" title="Mover izquierda"><i class="fas fa-chevron-left"></i></button>` : ''}
+          ${i < this._productImages.length - 1 ? `<button type="button" class="ap-product-img-btn" onclick="adminPanel._reorderProductImage(${i}, ${i + 1})" title="Mover derecha"><i class="fas fa-chevron-right"></i></button>` : ''}
+          <button type="button" class="ap-product-img-btn ap-product-img-btn--del" onclick="adminPanel._removeProductImage(${i})" title="Eliminar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
       </div>
     `).join('');
     const count = this._productImages.length;
     const hint = document.querySelector('.ap-hint');
-    if (hint) hint.textContent = `El fondo blanco/claro se eliminará automáticamente · ${count}/3 imágenes mínimas`;
+    if (hint) hint.innerHTML = `Puedes ajustar la transparencia individualmente con <i class="fas fa-magic"></i> · <strong>${count}/3</strong> mínimas`;
+  }
+
+  _reorderProductImage(from, to) {
+    const arr = this._productImages;
+    [arr[from], arr[to]] = [arr[to], arr[from]];
+    this._renderProductImages();
+  }
+
+  _editProductImage(idx) {
+    const currentUrl = this._productImages[idx];
+    const settings = this._productImageSettings[idx] || { tolerance: 35, smooth: 3 };
+    this._openImageEditor(currentUrl, null, { ...settings, editIndex: idx, existing: true });
+  }
+
+  async _openImageEditor(originalSrc, initialProcessed, opts = {}) {
+    const toleranceDefault = opts.tolerance ?? 35;
+    const smoothDefault    = opts.smooth    ?? 3;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'ap-image-editor-overlay';
+    overlay.innerHTML = `
+      <div class="ap-image-editor">
+        <div class="ap-image-editor__header">
+          <h3><i class="fas fa-magic" style="color:var(--gold-primary);margin-right:8px"></i>Ajustar Quitar Fondo</h3>
+          <button type="button" class="ap-image-editor__close" title="Cancelar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="ap-image-editor__compare">
+          <div class="ap-image-editor__col">
+            <div class="ap-image-editor__label">Original</div>
+            <div class="ap-image-editor__canvas">
+              <img class="ap-img-original" src="" alt="Original" crossorigin="anonymous">
+            </div>
+          </div>
+          <div class="ap-image-editor__col">
+            <div class="ap-image-editor__label ap-image-editor__label--ok">
+              Sin Fondo <span class="ap-img-check">●</span>
+            </div>
+            <div class="ap-image-editor__canvas ap-image-editor__canvas--checker">
+              <img class="ap-img-processed" src="" alt="Procesada">
+            </div>
+          </div>
+        </div>
+
+        <div class="ap-image-editor__controls">
+          <div class="ap-image-editor__slider">
+            <div class="ap-image-editor__slider-head">
+              <label>Sensibilidad de corte (tolerancia)</label>
+              <span class="ap-chip" id="chipTol">${toleranceDefault}</span>
+            </div>
+            <input type="range" id="sliderTol" min="10" max="80" value="${toleranceDefault}" step="1">
+            <small>↑ Mayor = más fondo eliminado ·  ↓ Menor = más preciso</small>
+          </div>
+          <div class="ap-image-editor__slider">
+            <div class="ap-image-editor__slider-head">
+              <label>Suavizado de bordes</label>
+              <span class="ap-chip" id="chipSmooth">${smoothDefault}</span>
+            </div>
+            <input type="range" id="sliderSmooth" min="0" max="6" value="${smoothDefault}" step="1">
+            <small>0 = duro ·  3 = recomendado  ·  6 = muy suave</small>
+          </div>
+          <div class="ap-image-editor__slider">
+            <div class="ap-image-editor__slider-head">
+              <label>Tamaño de salida</label>
+              <span class="ap-chip" id="chipSize">700px</span>
+            </div>
+            <input type="range" id="sliderSize" min="500" max="900" value="700" step="50">
+            <small>Resolución al subir a Cloudinary</small>
+          </div>
+        </div>
+
+        <div class="ap-image-editor__footer">
+          <button type="button" class="ap-btn ap-btn--ghost ap-image-editor__cancel">Cancelar</button>
+          <button type="button" class="ap-btn ap-btn--primary ap-image-editor__confirm" disabled>
+            <i class="fas fa-cloud-upload-alt"></i>
+            Confirmar y Subir
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const el = sel => overlay.querySelector(sel);
+    const imgOrig     = el('.ap-img-original');
+    const imgProc     = el('.ap-img-processed');
+    const sliderTol   = el('#sliderTol');
+    const sliderSmooth= el('#sliderSmooth');
+    const sliderSize  = el('#sliderSize');
+    const chipTol     = el('#chipTol');
+    const chipSmooth  = el('#chipSmooth');
+    const chipSize    = el('#chipSize');
+    const btnCancel   = el('.ap-image-editor__cancel, .ap-image-editor__close');
+    const btnConfirm  = el('.ap-image-editor__confirm');
+
+    let lastT = +sliderTol.value, lastS = +sliderSmooth.value;
+    let debounceTimer = null;
+
+    const rerenderProcessed = async () => {
+      const tol    = +sliderTol.value;
+      const smooth = +sliderSmooth.value;
+      chipTol.textContent    = tol;
+      chipSmooth.textContent = smooth;
+      chipSize.textContent   = sliderSize.value + 'px';
+      lastT = tol; lastS = smooth;
+      try {
+        imgProc.style.opacity = '0.55';
+        const dataUrl = await window.imageProcessor.previewRemoveBackground(imgOrig.src, { tolerance: tol, smooth, outputSize: +sliderSize.value });
+        imgProc.src = dataUrl;
+        imgProc.style.opacity = '1';
+        btnConfirm.disabled = false;
+      } catch (e) {
+        console.warn(e);
+      }
+    };
+
+    const onSliderInput = () => {
+      chipTol.textContent    = sliderTol.value;
+      chipSmooth.textContent = sliderSmooth.value;
+      chipSize.textContent   = sliderSize.value + 'px';
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(rerenderProcessed, 120);
+    };
+
+    imgOrig.onload = async () => {
+      if (initialProcessed) {
+        imgProc.src = initialProcessed;
+        btnConfirm.disabled = false;
+      } else {
+        await rerenderProcessed();
+      }
+    };
+    imgOrig.src = originalSrc;
+
+    sliderTol.addEventListener('input', onSliderInput);
+    sliderSmooth.addEventListener('input', onSliderInput);
+    sliderSize.addEventListener('change', rerenderProcessed);
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeEditor();
+    });
+    document.addEventListener('keydown', escClose);
+    function escClose(e) { if (e.key === 'Escape') closeEditor(); }
+
+    function closeEditor() {
+      document.removeEventListener('keydown', escClose);
+      overlay.remove();
+    }
+    btnCancel.addEventListener('click', closeEditor);
+
+    btnConfirm.addEventListener('click', async () => {
+      try {
+        btnConfirm.disabled = true;
+        const origLabel = btnConfirm.innerHTML;
+        btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo a Cloudinary...';
+        const tol    = +sliderTol.value;
+        const smooth = +sliderSmooth.value;
+        const size   = +sliderSize.value;
+        const finalUrl = await window.imageProcessor.processImage(originalSrc, { tolerance: tol, smooth, outputSize: size });
+        if (typeof opts.editIndex === 'number') {
+          this._productImages[opts.editIndex] = finalUrl;
+          this._productImageSettings[opts.editIndex] = { tolerance: tol, smooth };
+        } else {
+          if (this._productImages.includes(finalUrl)) { closeEditor(); return; }
+          this._productImages.push(finalUrl);
+          this._productImageSettings[this._productImages.length - 1] = { tolerance: tol, smooth };
+        }
+        this._renderProductImages();
+        notificationService.success(opts.editIndex !== undefined ? 'Imagen ajustada' : 'Imagen agregada');
+        closeEditor();
+      } catch (e) {
+        console.error(e);
+        notificationService.error('Error al subir la imagen');
+        btnConfirm.disabled = false;
+      }
+    });
   }
 
   _addProductImage(src) {
@@ -587,6 +794,12 @@ class AdminPanel {
 
   _removeProductImage(index) {
     this._productImages.splice(index, 1);
+    const settings = [];
+    Object.keys(this._productImageSettings || {}).forEach(k => {
+      const ki = +k;
+      if (ki !== index) settings[ki < index ? ki : ki - 1] = this._productImageSettings[k];
+    });
+    this._productImageSettings = settings;
     this._renderProductImages();
   }
 

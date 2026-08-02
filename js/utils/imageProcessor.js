@@ -17,13 +17,14 @@ class ImageProcessor {
 
     this.defaultBgImg    = this._createDefaultBg();
     this._processedCache = new Map();
+    this._processVersion = 2;
   }
 
   async processImage(input, opts = {}) {
-    const { folder = 'puntodigital/products', tolerance = 35, outputSize = 600 } = opts;
+    const { folder = 'puntodigital/products', tolerance = 35, outputSize = 600, smooth = 3 } = opts;
     try {
       const img     = await this.loadImage(input);
-      const dataUrl = this._compose(img, tolerance, outputSize);
+      const dataUrl = this._compose(img, tolerance, outputSize, smooth);
       if (this.cloudinaryCloud && this.cloudinaryPreset) {
         return await this._uploadToCloudinary(dataUrl, folder);
       }
@@ -44,21 +45,43 @@ class ImageProcessor {
     return this.canvas.toDataURL('image/png');
   }
 
+  async previewRemoveBackground(input, opts = {}) {
+    const { tolerance = 35, outputSize = 520, smooth = 3, applyBg = false } = opts;
+    const img = await this.loadImage(input);
+    return applyBg
+      ? this._compose(img, tolerance, outputSize, smooth)
+      : this._cutoutOnly(img, tolerance, smooth);
+  }
+
+  _cutoutOnly(img, tolerance, smooth = 3) {
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    this._setupCanvas(w, h);
+    this.ctx.drawImage(img, 0, 0);
+    const id = this.ctx.getImageData(0, 0, w, h);
+    this._floodFillRemove(id, tolerance);
+    this._smoothAlpha(id, 2);
+    this._softenEdges(id, Math.max(1, smooth));
+    this.ctx.putImageData(id, 0, 0);
+    return this.canvas.toDataURL('image/png');
+  }
+
   async processImageForCatalog(url, opts = {}) {
     if (!url || typeof url !== 'string') return url;
     if (url.startsWith('data:'))         return url;
-    if (this._processedCache.has(url))   return this._processedCache.get(url);
+    const cacheKey = `${url}#v${this._processVersion}`;
+    if (this._processedCache.has(cacheKey)) return this._processedCache.get(cacheKey);
     try {
       const img = await this.loadImage(url);
       if (!this._hasLightCornerBackground(img)) {
-        this._processedCache.set(url, url);
+        this._processedCache.set(cacheKey, url);
         return url;
       }
       const processed = this._compose(img, opts.tolerance || 35, opts.outputSize || 600);
-      this._processedCache.set(url, processed);
+      this._processedCache.set(cacheKey, processed);
       return processed;
     } catch {
-      this._processedCache.set(url, url);
+      this._processedCache.set(cacheKey, url);
       return url;
     }
   }
@@ -111,12 +134,14 @@ class ImageProcessor {
     return img;
   }
 
-  _compose(img, tolerance, outputSize) {
+  _compose(img, tolerance, outputSize, smooth = 3) {
     const w = outputSize, h = outputSize;
     this._setupCanvas(img.naturalWidth || img.width, img.naturalHeight || img.height);
     this.ctx.drawImage(img, 0, 0);
     const id = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
     this._floodFillRemove(id, tolerance);
+    this._smoothAlpha(id, 2);
+    this._softenEdges(id, Math.max(1, smooth));
     this.ctx.putImageData(id, 0, 0);
     this.bgCanvas.width = w; this.bgCanvas.height = h;
     if (this.defaultBgImg && this.defaultBgImg.src) {
@@ -127,8 +152,14 @@ class ImageProcessor {
       this.bgCtx.fillStyle = grad;
       this.bgCtx.fillRect(0,0,w,h);
     }
-    var c2 = this._contain(this.canvas.width, this.canvas.height, w, h, 0.85);
+    var c2 = this._contain(this.canvas.width, this.canvas.height, w, h, 0.82);
+    this.bgCtx.save();
+    this.bgCtx.shadowColor = 'rgba(0,0,0,0.35)';
+    this.bgCtx.shadowBlur = 14;
+    this.bgCtx.shadowOffsetX = 0;
+    this.bgCtx.shadowOffsetY = 4;
     this.bgCtx.drawImage(this.canvas, c2.dx, c2.dy, c2.dw, c2.dh);
+    this.bgCtx.restore();
     return this.bgCanvas.toDataURL('image/png');
   }
 
@@ -148,6 +179,7 @@ class ImageProcessor {
     };
     if ((ref.r+ref.g+ref.b)/3 < 160) return;
     var queue = [[0,0],[width-1,0],[0,height-1],[width-1,height-1]];
+    const tol2 = tolerance * 1.15;
     while (queue.length) {
       var pt = queue.pop(), x = pt[0], y = pt[1];
       if (x<0||x>=width||y<0||y>=height) continue;
@@ -155,11 +187,61 @@ class ImageProcessor {
       if (visited[idx]) continue;
       visited[idx] = 1;
       var px = this._getPixel(data,x,y,width);
-      if (!this._colorMatch(px,ref,tolerance)) continue;
-      var dist  = this._colorDist(px,ref);
-      var alpha = Math.min(255, Math.round((dist/tolerance)*255));
-      data[idx*4+3] = alpha < 30 ? 0 : alpha;
-      queue.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+      var dist = this._colorDist(px,ref);
+      if (dist > tol2) continue;
+      var t = Math.min(1, dist / tolerance);
+      var edge = 0.5 - 0.5 * Math.cos(t * Math.PI);
+      data[idx*4+3] = Math.max(0, Math.min(255, Math.round(edge * 255)));
+      if (dist <= tolerance) {
+        queue.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+      }
+    }
+  }
+
+  _smoothAlpha(imageData, radius) {
+    const w = imageData.width, h = imageData.height, src = imageData.data;
+    const tmp = new Uint8ClampedArray(src);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = (y*w+x)*4;
+        if (tmp[i+3] === 0 || tmp[i+3] === 255) continue;
+        let sum = 0, count = 0;
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
+          const nx = x+dx, ny = y+dy;
+          if (nx<0||nx>=w||ny<0||ny>=h) continue;
+          sum += tmp[(ny*w+nx)*4+3];
+          count++;
+          }
+        }
+        src[i+3] = Math.round(sum/count);
+      }
+    }
+  }
+
+  _softenEdges(imageData, radius) {
+    const w = imageData.width, h = imageData.height, src = imageData.data;
+    const tmp = new Uint8ClampedArray(src);
+    const r2 = radius * radius;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = (y*w+x)*4;
+        const a = tmp[i+3];
+        if (a === 0 || a === 255) continue;
+        let sumA = 0, weight = 0;
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
+            const d2 = dx*dx + dy*dy;
+            if (d2 > r2) continue;
+            const nx = x+dx, ny = y+dy;
+            if (nx<0||nx>=w||ny<0||ny>=h) continue;
+            const wgt = 1 - Math.sqrt(d2)/radius;
+            sumA += tmp[(ny*w+nx)*4+3] * wgt;
+            weight += wgt;
+          }
+        }
+        src[i+3] = weight > 0 ? Math.round(sumA / weight) : a;
+      }
     }
   }
 
