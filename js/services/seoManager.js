@@ -9,7 +9,7 @@ class SEOManager {
       keywords: 'smartphones, tecnología, telefonía, gadgets, accesorios, iPhone, Samsung, Colombia',
       author: 'Punto Digital',
       robots: 'index, follow',
-      canonical: window.location.origin,
+      canonical: window.location.href.split('#')[0],
       ogType: 'website',
       ogImage: '/img/logo.png',
       twitterCard: 'summary_large_image'
@@ -62,7 +62,7 @@ class SEOManager {
         if (url && url !== '#' && typeof url === 'string') socialUrls.push(url);
       });
     }
-    const phoneRaw   = footerData?.phone ? footerData.phone.replace(/\D/g, '');
+    const phoneRaw   = footerData?.phone ? footerData.phone.replace(/\D/g, '') : '';
     const phoneFormatted = phoneRaw ? `+57-${phoneRaw.slice(0,3)}-${phoneRaw.slice(3,6)}-${phoneRaw.slice(6)}` : '+57-300-123-4567';
 
     const organizationSchema = {
@@ -245,7 +245,7 @@ class SEOManager {
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": `${window.env.get('site.url')}/search?q={search_term_string}`
+          "urlTemplate": `${window.env.get('site.url')}/catalogo.html?search={search_term_string}`
         },
         "query-input": "required name=search_term_string"
       }

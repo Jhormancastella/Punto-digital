@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 
-Sitemap: https://puntodigital.co/sitemap.xml
+Sitemap: http://puntodigitalcolombia.com/sitemap.xml

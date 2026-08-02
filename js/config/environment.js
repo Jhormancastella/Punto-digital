@@ -18,7 +18,7 @@ class Environment {
       site: {
         url: window.ENV?.SITE_URL || window.location.origin,
         name: window.ENV?.SITE_NAME || 'Punto Digital',
-        adminEmail: window.ENV?.ADMIN_EMAIL || 'admin@puntodigital.co'
+        adminEmail: window.ENV?.ADMIN_EMAIL || 'admin@puntodigitalcolombia.com'
       },
       analytics: {
         googleAnalyticsId: window.ENV?.GOOGLE_ANALYTICS_ID || '',
