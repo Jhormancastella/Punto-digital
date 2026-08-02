@@ -458,9 +458,10 @@ class PuntoDigitalApp {
     };
 
     container.innerHTML = Object.entries(socialData)
+      .map(([platform, url]) => [platform, Helpers.sanitizeUrl(url)])
       .filter(([, url]) => url && url !== '#')
       .map(([platform, url]) => `
-        <a href="${Helpers.sanitizeUrl(url)}" target="_blank" rel="noopener"
+        <a href="${Helpers.escapeAttr(url)}" target="_blank" rel="noopener"
            aria-label="${Helpers.escapeAttr(platform.charAt(0).toUpperCase() + platform.slice(1))}"
            title="${Helpers.escapeAttr(platform.charAt(0).toUpperCase() + platform.slice(1))}">
           <i class="${socialIcons[platform] || 'fas fa-link'}" aria-hidden="true"></i>

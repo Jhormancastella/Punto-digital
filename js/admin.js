@@ -954,25 +954,38 @@ class AdminPanel {
     this.setVal('socialWhatsapp', s.whatsapp || '');
   }
 
-  saveFooter() {
-    window.siteData.updateSection('footer', {
+  async saveFooter() {
+    await window.siteData.updateSection('footer', {
       phone: this.getVal('footerPhone'),
       email: this.getVal('footerEmail'),
       address: this.getVal('footerAddress'),
       whatsapp: this.getVal('footerWhatsapp'),
     });
+    window.dispatchEvent(new CustomEvent('siteFooterUpdated'));
     notificationService.success('Contacto guardado');
   }
 
-  saveSocial() {
-    window.siteData.updateSection('social', {
-      facebook:  this.getVal('socialFacebook'),
-      instagram: this.getVal('socialInstagram'),
-      whatsapp:  this.getVal('socialWhatsapp'),
-      twitter:   this.getVal('socialTwitter'),
-      youtube:   this.getVal('socialYoutube'),
+  async saveSocial() {
+    await window.siteData.updateSection('social', {
+      facebook:  this.normalizeSocialUrl(this.getVal('socialFacebook')),
+      instagram: this.normalizeSocialUrl(this.getVal('socialInstagram')),
+      whatsapp:  this.normalizeSocialUrl(this.getVal('socialWhatsapp'), 'whatsapp'),
+      twitter:   this.normalizeSocialUrl(this.getVal('socialTwitter')),
+      youtube:   this.normalizeSocialUrl(this.getVal('socialYoutube')),
     });
+    this.loadFooter();
+    window.dispatchEvent(new CustomEvent('siteFooterUpdated'));
     notificationService.success('Redes sociales guardadas');
+  }
+
+  normalizeSocialUrl(value, platform = '') {
+    const raw = String(value || '').trim();
+    if (!raw || raw === '#') return '';
+    if (platform === 'whatsapp' && /^\+?\d[\d\s().-]+$/.test(raw)) {
+      return `https://wa.me/${raw.replace(/\D/g, '')}`;
+    }
+    if (/^(https?:|mailto:|tel:)/i.test(raw)) return raw;
+    return `https://${raw.replace(/^\/+/, '')}`;
   }
 
   /* ── SEO ────────────────────────────────────────────────────── */

@@ -29,6 +29,15 @@ class ProductCatalog {
     this.applyURLParams();   // ← lee ?search= y ?brand= de la URL
     this.renderProducts();
     this.updateResultsCount();
+    this.renderFooter();
+    this.setupSiteDataObserver();
+
+    window.addEventListener('siteDataReady', () => {
+      this.loadProducts();
+      this.populateFilters();
+      this.applyFilters();
+      this.renderFooter();
+    });
     
     console.log('✅ Catálogo inicializado correctamente');
   }
@@ -68,6 +77,85 @@ class ProductCatalog {
         stock: 5
       }
     ];
+  }
+
+  setupSiteDataObserver() {
+    if (!window.siteData) return;
+    window.siteData.addObserver((event, data) => {
+      if (event === 'sectionUpdated') {
+        if (data.section === 'social' || data.section === 'footer') {
+          this.renderFooter();
+        }
+        if (data.section === 'products') {
+          this.loadProducts();
+          this.populateFilters();
+          this.applyFilters();
+        }
+      }
+    });
+  }
+
+  renderFooter() {
+    const footerData = window.siteData?.getSection('footer');
+    const socialData = window.siteData?.getSection('social');
+    this.renderFooterContact(footerData);
+    this.renderSocialLinks(socialData);
+    const slogan = window.siteData?.getSection('slogan') || 'Siempre Conectados';
+    document.querySelectorAll('#navSloganText').forEach(el => { el.textContent = slogan; });
+  }
+
+  renderFooterContact(footerData) {
+    const container = document.getElementById('footerContact');
+    if (!container || !footerData) return;
+
+    container.innerHTML = `
+      <a href="tel:${footerData.phone}" class="contact-item">
+        <i class="fas fa-phone" aria-hidden="true"></i>
+        <span>${Helpers.escapeHtml(footerData.phone)}</span>
+      </a>
+      <a href="mailto:${Helpers.escapeAttr(footerData.email)}" class="contact-item">
+        <i class="fas fa-envelope" aria-hidden="true"></i>
+        <span>${Helpers.escapeHtml(footerData.email)}</span>
+      </a>
+      ${footerData.address ? `
+        <div class="contact-item">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          <span>${Helpers.escapeHtml(footerData.address)}</span>
+        </div>
+      ` : ''}
+      ${footerData.whatsapp ? `
+        <a href="https://wa.me/${footerData.whatsapp.replace(/\D/g, '')}" 
+           class="contact-item" target="_blank" rel="noopener">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          <span>WhatsApp</span>
+        </a>
+      ` : ''}
+    `;
+  }
+
+  renderSocialLinks(socialData) {
+    const container = document.getElementById('socialLinks');
+    if (!container || !socialData) return;
+
+    const socialIcons = {
+      facebook:  'fab fa-facebook-f',
+      instagram: 'fab fa-instagram',
+      whatsapp:  'fab fa-whatsapp',
+      twitter:   'fab fa-x-twitter',
+      youtube:   'fab fa-youtube',
+      tiktok:    'fab fa-tiktok'
+    };
+
+    container.innerHTML = Object.entries(socialData)
+      .map(([platform, url]) => [platform, Helpers.sanitizeUrl(url)])
+      .filter(([, url]) => url && url !== '#')
+      .map(([platform, url]) => `
+        <a href="${Helpers.escapeAttr(url)}" target="_blank" rel="noopener"
+           aria-label="${Helpers.escapeAttr(platform.charAt(0).toUpperCase() + platform.slice(1))}"
+           title="${Helpers.escapeAttr(platform.charAt(0).toUpperCase() + platform.slice(1))}">
+          <i class="${socialIcons[platform] || 'fas fa-link'}" aria-hidden="true"></i>
+        </a>
+      `).join('');
   }
 
   setupEventListeners() {

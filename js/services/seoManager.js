@@ -23,6 +23,93 @@ class SEOManager {
     this.setupStructuredData();
     this.setupAnalytics();
     this.setupSitemap();
+    this.setupDynamicDataSync();
+  }
+
+  setupDynamicDataSync() {
+    const syncFromSiteData = () => {
+      const social = window.siteData?.getSection('social');
+      const footer = window.siteData?.getSection('footer');
+      const seo    = window.siteData?.getSection('seo');
+      if (social || footer) this.refreshStructuredData(social, footer);
+      if (seo) this.applySEOData(seo);
+    };
+    if (window.siteData?.data && Object.keys(window.siteData.data).length) {
+      syncFromSiteData();
+    }
+    if (window.siteData) {
+      window.siteData.addObserver((event, data) => {
+        if (event === 'dataLoaded' || event === 'siteDataReady' ||
+            (event === 'sectionUpdated' &&
+             ['social','footer','seo'].includes(data.section))) {
+          syncFromSiteData();
+        }
+      });
+    }
+    window.addEventListener('siteDataReady', syncFromSiteData, { once: true });
+  }
+
+  applySEOData(seo) {
+    if (seo.title) this.setTitle(seo.title);
+    if (seo.description) this.setDescription(seo.description);
+    if (seo.keywords) this.setKeywords(seo.keywords);
+  }
+
+  refreshStructuredData(socialData, footerData) {
+    const socialUrls = [];
+    if (socialData) {
+      Object.values(socialData).forEach(url => {
+        if (url && url !== '#' && typeof url === 'string') socialUrls.push(url);
+      });
+    }
+    const phoneRaw   = footerData?.phone ? footerData.phone.replace(/\D/g, '');
+    const phoneFormatted = phoneRaw ? `+57-${phoneRaw.slice(0,3)}-${phoneRaw.slice(3,6)}-${phoneRaw.slice(6)}` : '+57-300-123-4567';
+
+    const organizationSchema = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": window.env.get('site.name'),
+      "url": window.env.get('site.url'),
+      "logo": this.getFullUrl('/img/logo.png'),
+      "description": this.defaultMeta.description,
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": phoneFormatted,
+        "contactType": "customer service",
+        "availableLanguage": "Spanish"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CO",
+        "addressLocality": footerData?.address || "Bogotá"
+      },
+      "sameAs": socialUrls.length ? socialUrls : [
+        "https://facebook.com/puntodigital",
+        "https://instagram.com/puntodigital",
+        "https://twitter.com/puntodigital"
+      ]
+    };
+
+    const storeSchema = {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": window.env.get('site.name'),
+      "description": this.defaultMeta.description,
+      "url": window.env.get('site.url'),
+      "telephone": phoneFormatted,
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CO",
+        "addressLocality": footerData?.address || "Bogotá"
+      },
+      "openingHours": "Mo-Fr 09:00-18:00, Sa 09:00-16:00",
+      "paymentAccepted": "Cash, Credit Card, Debit Card, Bank Transfer",
+      "currenciesAccepted": "COP",
+      "sameAs": socialUrls.length ? socialUrls : undefined
+    };
+
+    this.addStructuredData('organization', organizationSchema);
+    this.addStructuredData('store', storeSchema);
   }
 
   /**

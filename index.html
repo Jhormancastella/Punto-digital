@@ -50,22 +50,7 @@
   <link rel="icon" type="image/png" href="img/favicon-hd.png">
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-hd.png">
 
-  <!-- Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Store",
-    "name": "Punto Digital",
-    "description": "Tienda especializada en tecnología y telefonía",
-    "url": "https://puntodigital.co",
-    "telephone": "+57 301 234 5678",
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "CO",
-      "addressLocality": "Bogotá"
-    }
-  }
-  </script>
+  <!-- Structured Data (generado dinámicamente por seoManager.js usando datos de siteData/admin -->
 </head>
 <body>
   <!-- PARTICLES BACKGROUND -->
@@ -687,6 +672,7 @@
       localStorage.removeItem('puntoDigitalData');
     } catch(e) { localStorage.removeItem('puntoDigitalData_v2'); }
   </script>
+  <script src="js/config/environment.js"></script>
   <script src="js/utils/helpers.js"></script>
   <script src="js/utils/formatters.js"></script>
   <script src="js/utils/productBg.js"></script>
@@ -695,6 +681,7 @@
   <script src="js/services/authService.js"></script>
   <script src="js/services/cartService.js"></script>
   <script src="js/data/siteData.js"></script>
+  <script src="js/services/seoManager.js"></script>
   <script src="js/utils/themeManager.js"></script>
   <script src="js/utils/imageProcessor.js"></script>
   <script src="js/components/particles.js"></script>
