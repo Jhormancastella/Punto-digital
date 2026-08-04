@@ -1,5 +1,6 @@
 /**
  * Panel de Administración — Punto Digital
+ * Protegido con Firebase Auth real (no solo sessionStorage).
  */
 class AdminPanel {
   constructor() {
@@ -18,6 +19,217 @@ class AdminPanel {
       { name: 'Lima', primary: '#84cc16', light: '#bef264', dark: '#4d7c0f', bg: '#84cc16' },
       { name: 'Cobre', primary: '#c2410c', light: '#fdba74', dark: '#7c2d12', bg: '#c2410c' },
     ];
+    this._boot();
+  }
+
+  async _boot() {
+    try {
+      if (window.firebaseClient?.waitReady) {
+        await window.firebaseClient.waitReady();
+      } else {
+        await new Promise(res => window.addEventListener('firebaseReady', res, { once: true }));
+      }
+    } catch (e) {
+      console.warn('[AdminPanel] Firebase no inicializó a tiempo, continuando con Auth state:', e);
+    }
+
+    const authUser = window.firebaseClient?.getCurrentUser?.();
+    if (authUser && this._isAdminEmail(authUser.email)) {
+      this._enterPanel();
+      return;
+    }
+
+    window.addEventListener('firebaseAuthChanged', (e) => {
+      const user = e.detail?.user;
+      if (user && this._isAdminEmail(user.email)) this._enterPanel();
+      else this._showLogin();
+    }, { once: true });
+
+    if (!authUser) this._showLogin();
+    else this._showLogin();
+  }
+
+  _isAdminEmail(email) {
+    return String(email || '').toLowerCase() === 'puntodigitalti@gmail.com';
+  }
+
+  _showLogin() {
+    const app = document.getElementById('apMain')?.parentElement?.parentElement;
+    if (document.getElementById('adminLoginScreen')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'adminLoginScreen';
+    overlay.className = 'admin-login-overlay';
+    overlay.innerHTML = `
+      <div class="admin-login-card">
+        <div class="admin-login-icon"><i class="fas fa-user-shield"></i></div>
+        <h1>Acceso Admin</h1>
+        <p class="admin-login-sub">Inicia sesión con tu cuenta autorizada</p>
+        <form id="adminLoginForm" novalidate>
+          <div class="admin-login-field">
+            <label for="lg_email">Correo electrónico</label>
+            <div class="admin-login-input-wrap">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="lg_email" name="email" autocomplete="username" placeholder="admin@puntodigital.com" required>
+            </div>
+          </div>
+          <div class="admin-login-field">
+            <label for="lg_password">Contraseña</label>
+            <div class="admin-login-input-wrap">
+              <i class="fas fa-lock"></i>
+              <input type="password" id="lg_password" name="password" autocomplete="current-password" placeholder="••••••••" required>
+            </div>
+          </div>
+          <button type="submit" class="admin-login-submit" id="adminLoginSubmitBtn">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Iniciar Sesión</span>
+          </button>
+          <p class="admin-login-error" id="adminLoginError" role="alert"></p>
+        </form>
+        <p class="admin-login-footer">
+          <i class="fas fa-shield-alt"></i>
+          Acceso restringido solo a personal autorizado de Punto Digital
+        </p>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .admin-login-overlay{
+        position:fixed;inset:0;z-index:99999;
+        background:radial-gradient(ellipse at top, rgba(212,168,67,0.12), transparent 60%), #0a0a0a;
+        display:flex;align-items:center;justify-content:center;
+        padding:20px;
+      }
+      .admin-login-card{
+        width:100%;max-width:420px;
+        background:linear-gradient(180deg, #161616, #0e0e0e);
+        border:1px solid rgba(212,168,67,0.25);
+        border-radius:20px;
+        padding:38px 32px 28px;
+        box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.02) inset;
+        text-align:center;
+        animation:adminLoginPop 0.35s cubic-bezier(.16,1,.3,1);
+      }
+      @keyframes adminLoginPop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+      .admin-login-icon{
+        width:68px;height:68px;border-radius:18px;
+        background:linear-gradient(135deg, var(--gold-primary,#d4a843), #b89344);
+        color:#0a0a0a;font-size:28px;
+        display:flex;align-items:center;justify-content:center;
+        margin:0 auto 18px;
+        box-shadow:0 8px 24px rgba(212,168,67,0.28);
+      }
+      .admin-login-card h1{
+        margin:0 0 6px;font-size:24px;font-weight:800;color:var(--text-white,#fff);
+        letter-spacing:-0.2px;
+      }
+      .admin-login-sub{
+        margin:0 0 26px;font-size:13px;color:var(--text-gray,#aaa);
+      }
+      .admin-login-field{
+        margin-bottom:16px;text-align:left;
+      }
+      .admin-login-field label{
+        display:block;margin-bottom:6px;font-size:12px;font-weight:700;
+        color:var(--text-gray,#bbb);text-transform:uppercase;letter-spacing:.5px;
+      }
+      .admin-login-input-wrap{
+        position:relative;
+      }
+      .admin-login-input-wrap i{
+        position:absolute;left:14px;top:50%;transform:translateY(-50%);
+        color:rgba(212,168,67,0.7);font-size:13px;
+      }
+      .admin-login-input-wrap input{
+        width:100%;padding:13px 14px 13px 40px;
+        background:#111;border:1.5px solid rgba(255,255,255,0.07);
+        border-radius:11px;color:var(--text-white,#fff);
+        font-family:inherit;font-size:14px;
+        transition:all .2s ease;box-sizing:border-box;
+      }
+      .admin-login-input-wrap input:focus{
+        outline:none;border-color:var(--gold-primary,#d4a843);
+        box-shadow:0 0 0 3px rgba(212,168,67,0.1);
+        background:#161616;
+      }
+      .admin-login-input-wrap input::placeholder{color:rgba(255,255,255,0.28)}
+      .admin-login-submit{
+        width:100%;margin-top:6px;padding:14px;
+        background:linear-gradient(135deg, var(--gold-primary,#d4a843), #b89344);
+        color:#0a0a0a;border:none;border-radius:12px;
+        font-family:inherit;font-size:15px;font-weight:800;
+        display:flex;align-items:center;justify-content:center;gap:9px;
+        cursor:pointer;transition:all .2s ease;
+        box-shadow:0 8px 20px rgba(212,168,67,0.25);
+      }
+      .admin-login-submit:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px rgba(212,168,67,0.35)}
+      .admin-login-submit:disabled{opacity:.7;cursor:not-allowed}
+      .admin-login-submit .fa-spinner{font-size:15px}
+      .admin-login-error{
+        min-height:20px;margin:12px 0 0;font-size:12.5px;color:#ff6b7a;font-weight:600;
+      }
+      .admin-login-footer{
+        margin:24px 0 0;padding-top:18px;
+        border-top:1px solid rgba(255,255,255,0.06);
+        font-size:11.5px;color:var(--text-gray,#888);
+        display:flex;align-items:center;justify-content:center;gap:7px;
+      }
+      .admin-login-footer i{color:rgba(212,168,67,0.7)}
+    `;
+    document.head.appendChild(style);
+
+    const form = overlay.querySelector('#adminLoginForm');
+    const errEl = overlay.querySelector('#adminLoginError');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = form.email.value.trim();
+      const password = form.password.value;
+      const btn = overlay.querySelector('#adminLoginSubmitBtn');
+      const originalHTML = btn.innerHTML;
+
+      errEl.textContent = '';
+      if (!email || !password) {
+        errEl.textContent = 'Ingresa correo y contraseña';
+        return;
+      }
+      if (!this._isAdminEmail(email)) {
+        errEl.textContent = 'Esta cuenta no tiene permisos de administrador';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Verificando...</span>';
+      try {
+        await window.authService.signIn(email, password);
+        if (!this._isAdminEmail(window.firebaseClient?.getCurrentUser?.()?.email)) {
+          await window.authService.signOut();
+          throw new Error('Usuario no autorizado como administrador');
+        }
+        overlay.remove();
+        this._enterPanel();
+      } catch (err) {
+        errEl.textContent = err.message || 'Error al iniciar sesión';
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      }
+    });
+  }
+
+  _enterPanel() {
+    sessionStorage.setItem('adminAuthenticated', 'true');
+    try {
+      if (window.orderService) {
+        window.orderService.orders = [];
+        localStorage.removeItem('puntoDigitalOrders');
+        window.orderService.notify('ordersUpdated', []);
+      }
+    } catch (_) {}
+    document.getElementById('adminLoginScreen')?.remove();
+    if (window.orderService?._ensureAdminFirestoreListener) {
+      window.orderService._ensureAdminFirestoreListener();
+    }
     this.init();
   }
 
@@ -32,12 +244,15 @@ class AdminPanel {
   }
 
   isAuthenticated() {
-    return sessionStorage.getItem('adminAuthenticated') === 'true';
+    const fbUser = window.firebaseClient?.getCurrentUser?.();
+    const sessionFlag = sessionStorage.getItem('adminAuthenticated') === 'true';
+    if (fbUser && this._isAdminEmail(fbUser.email)) return true;
+    if (sessionFlag && fbUser && this._isAdminEmail(fbUser.email)) return true;
+    return false;
   }
 
   redirectToLogin() {
-    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:#d4a843;font-family:Poppins,sans-serif;flex-direction:column;gap:16px"><i class="fas fa-lock" style="font-size:48px"></i><p style="font-size:18px">Acceso no autorizado</p></div>`;
-    setTimeout(() => window.location.href = 'index.html', 2000);
+    this._showLogin();
   }
 
   /* ── Navigation ─────────────────────────────────────────────── */
@@ -1032,9 +1247,15 @@ function goSection(name) {
   document.querySelector(`.ap-nav-item[data-section="${name}"]`)?.click();
 }
 
-function adminLogout() {
+async function adminLogout() {
   sessionStorage.removeItem('adminAuthenticated');
-  window.location.href = 'index.html';
+  try {
+    if (window.authService) await window.authService.signOut();
+    else if (window.firebaseClient?.signOut) await window.firebaseClient.signOut();
+  } catch (e) {
+    console.warn('Error al cerrar sesión Firebase:', e);
+  }
+  window.location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

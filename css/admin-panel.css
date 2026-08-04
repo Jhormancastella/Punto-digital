@@ -518,7 +518,8 @@
   border: 1px solid rgba(212,168,67,0.2);
   border-radius: 20px;
   width: 100%; max-width: 560px;
-  max-height: 90vh; overflow-y: auto;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
   transform: scale(0.95);
   transition: transform 0.25s ease;
   box-shadow: 0 24px 60px rgba(0,0,0,0.5);
@@ -526,7 +527,7 @@
 .ap-modal-overlay.open .ap-modal { transform: scale(1); }
 .ap-modal-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 24px;
+  padding: 20px 24px; flex-shrink: 0;
   border-bottom: 1px solid rgba(212,168,67,0.1);
   background: linear-gradient(135deg, rgba(212,168,67,0.06), transparent);
 }
@@ -539,9 +540,9 @@
   transition: all 0.2s ease;
 }
 .ap-modal-close:hover { background: rgba(220,53,69,0.15); color: #ef4444; }
-.ap-modal-body { padding: 24px; }
+.ap-modal-body { padding: 24px; overflow-y: auto; flex: 1 1 auto; }
 .ap-modal-footer {
-  display: flex; justify-content: flex-end; gap: 10px;
+  display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
   padding: 16px 24px;
   border-top: 1px solid rgba(212,168,67,0.1);
 }

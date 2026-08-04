@@ -403,21 +403,32 @@ class ProductModal {
   buyNow() {
     if (!this.currentProduct) return;
 
-    const footer = window.siteData?.getSection?.('footer') || {};
-    const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
-    const message = [
-      'Hola, quiero comprar este producto en Punto Digital:',
-      '',
-      `${this.currentProduct.name}`,
-      `Precio: ${this.formatPrice(this.currentProduct.price)}`,
-      '',
-      'Quedo atento para confirmar disponibilidad y entrega.'
-    ].join('\n');
+    if (window.cartService && window.checkoutModal) {
+      const existing = window.cartService.items.find(i => i.id === this.currentProduct.id);
+      if (!existing) {
+        window.cartService.items.push({ ...this.currentProduct, qty: 1 });
+      } else {
+        existing.qty += 1;
+      }
+      window.cartService.save();
+      window.cartService.updateBadge();
+      window.checkoutModal.open(window.cartService.items, window.cartService.getTotal());
+    } else {
+      const footer = window.siteData?.getSection?.('footer') || {};
+      const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+      const message = [
+        'Hola, quiero comprar este producto en Punto Digital:',
+        '',
+        `${this.currentProduct.name}`,
+        `Precio: ${this.formatPrice(this.currentProduct.price)}`,
+        '',
+        'Quedo atento para confirmar disponibilidad y entrega.'
+      ].join('\n');
 
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
-    this.showNotification('Compra abierta en WhatsApp', 'success');
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
+      this.showNotification('Compra abierta en WhatsApp', 'success');
+    }
 
-    // Tracking
     this.trackEvent('buy_now_clicked', {
       product_id: this.currentProduct.id,
       product_name: this.currentProduct.name,

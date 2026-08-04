@@ -321,16 +321,21 @@
   <!-- JavaScript Modules -->
   <script>
     // Limpiar localStorage corrupto antes de cargar módulos
-    try {
-      const saved = localStorage.getItem('puntoDigitalData_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const arraySections = ['features', 'categories', 'products'];
-        const isCorrupt = arraySections.some(k => parsed[k] !== undefined && !Array.isArray(parsed[k]));
-        if (isCorrupt) localStorage.removeItem('puntoDigitalData_v2');
-      }
-      localStorage.removeItem('puntoDigitalData');
-    } catch(e) { localStorage.removeItem('puntoDigitalData_v2'); }
+    (function cleanCorruptStorage() {
+      const keys = ['puntoDigitalData', 'puntoDigitalData_v2', 'puntoDigitalData_v3'];
+      keys.forEach(key => {
+        try {
+          const saved = localStorage.getItem(key);
+          if (!saved) return;
+          const parsed = JSON.parse(saved);
+          const arraySections = ['features', 'categories', 'products'];
+          const isCorrupt = arraySections.some(k => parsed[k] !== undefined && !Array.isArray(parsed[k]));
+          if (isCorrupt) localStorage.removeItem(key);
+        } catch {
+          localStorage.removeItem(key);
+        }
+      });
+    })();
   </script>
   <!-- Utilities -->
   <script src="js/config/environment.js"></script>
@@ -341,6 +346,7 @@
   <script src="js/services/notificationService.js"></script>
   <script src="js/services/firebaseClient.js"></script>
   <script src="js/services/cartService.js"></script>
+  <script src="js/services/orderService.js"></script>
   <script src="js/services/seoManager.js"></script>
   
   <!-- Data -->
@@ -349,6 +355,7 @@
   <!-- Components -->
   <script src="js/components/navbar.js"></script>
   <script src="js/components/productModal.js"></script>
+  <script src="js/components/checkoutModal.js"></script>
   
   <!-- Catalog Script -->
   <script src="js/catalog.js"></script>

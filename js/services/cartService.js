@@ -12,6 +12,7 @@ class CartService {
   init() {
     this.renderCartDrawer();
     this.setupCartButton();
+    this.setupCrossTabSync();
     // Esperar DOM para actualizar badge
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => this.updateBadge());
@@ -20,17 +21,36 @@ class CartService {
     }
   }
 
+  setupCrossTabSync() {
+    window.addEventListener('storage', (e) => {
+      if (e.key === this.storageKey) {
+        this.items = this.load();
+        this.updateBadge();
+        this.renderItems();
+      }
+    });
+  }
+
   // ── Persistencia ──────────────────────────────────────────────
   load() {
     try {
-      return JSON.parse(localStorage.getItem(this.storageKey)) || [];
+      const raw = localStorage.getItem(this.storageKey);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
   }
 
   save() {
-    localStorage.setItem(this.storageKey, JSON.stringify(this.items));
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.items));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        console.warn('[CartService] localStorage lleno. No se pudo guardar el carrito.');
+      }
+    }
   }
 
   // ── CRUD ──────────────────────────────────────────────────────
@@ -245,24 +265,28 @@ class CartService {
       return;
     }
 
-    const footer = window.siteData?.getSection?.('footer') || {};
-    const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
-    const lines = this.items.map((item, index) => {
-      const subtotal = parseInt(item.price) * item.qty;
-      return `${index + 1}. ${item.name} x${item.qty} - ${Formatters.formatPrice(subtotal)}`;
-    });
-    const message = [
-      'Hola, quiero hacer este pedido en Punto Digital:',
-      '',
-      ...lines,
-      '',
-      `Total: ${Formatters.formatPrice(this.getTotal())}`,
-      '',
-      'Quedo atento para confirmar disponibilidad y entrega.'
-    ].join('\n');
+    if (window.checkoutModal) {
+      window.checkoutModal.open(this.items, this.getTotal());
+    } else {
+      const footer = window.siteData?.getSection?.('footer') || {};
+      const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+      const lines = this.items.map((item, index) => {
+        const subtotal = parseInt(item.price) * item.qty;
+        return `${index + 1}. ${item.name} x${item.qty} - ${Formatters.formatPrice(subtotal)}`;
+      });
+      const message = [
+        'Hola, quiero hacer este pedido en Punto Digital:',
+        '',
+        ...lines,
+        '',
+        `Total: ${Formatters.formatPrice(this.getTotal())}`,
+        '',
+        'Quedo atento para confirmar disponibilidad y entrega.'
+      ].join('\n');
 
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
-    notificationService.success('Pedido abierto en WhatsApp');
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
+      notificationService.success('Pedido abierto en WhatsApp');
+    }
   }
 
   // ── Observers ─────────────────────────────────────────────────
