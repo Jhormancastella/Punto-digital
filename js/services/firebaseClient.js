@@ -14,10 +14,9 @@ class FirebaseClient {
 
   async _init() {
     try {
-      // Cargar Firebase desde CDN (compatible con sitios estáticos sin bundler)
       const { initializeApp }     = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
       const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-      const { getFirestore, enableIndexedDbPersistence, connectFirestoreEmulator } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      const { initializeFirestore, persistentLocalCache } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
 
       const firebaseConfig = {
         apiKey:            'AIzaSyBMAdcPFlfnVpgEdacqMKnCxo8miofhpuY',
@@ -30,19 +29,18 @@ class FirebaseClient {
 
       this.app  = initializeApp(firebaseConfig);
       this.auth = getAuth(this.app);
-      this.db   = getFirestore(this.app);
 
-      // Habilitar persistencia offline (caché local de Firestore)
       try {
-        await enableIndexedDbPersistence(this.db);
-        console.log('✅ Persistencia offline habilitada');
-      } catch (persistErr) {
-        // 'failed-precondition': múltiples tabs abiertas — no es crítico
-        // 'unimplemented': navegador no soporta IndexedDB
-        console.warn('⚠️ Persistencia offline no disponible:', persistErr.code);
+        this.db = initializeFirestore(this.app, {
+          cache: persistentLocalCache({})
+        });
+        console.log('✅ Persistencia offline multi-tab habilitada (nueva API cache)');
+      } catch (initErr) {
+        console.warn('[Firebase] initializeFirestore con cache persistente falló (usando caché en memoria):', initErr?.code || initErr?.message);
+        const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        this.db = getFirestore(this.app);
       }
 
-      // Escuchar cambios de sesión
       onAuthStateChanged(this.auth, (user) => {
         this.user = user;
         window.dispatchEvent(new CustomEvent('firebaseAuthChanged', { detail: { user } }));

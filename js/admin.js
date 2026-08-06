@@ -86,6 +86,10 @@ class AdminPanel {
           </button>
           <p class="admin-login-error" id="adminLoginError" role="alert"></p>
         </form>
+        <a href="index.html" class="admin-login-back">
+          <i class="fas fa-arrow-left"></i>
+          Volver al sitio web
+        </a>
         <p class="admin-login-footer">
           <i class="fas fa-shield-alt"></i>
           Acceso restringido solo a personal autorizado de Punto Digital
@@ -177,6 +181,24 @@ class AdminPanel {
         display:flex;align-items:center;justify-content:center;gap:7px;
       }
       .admin-login-footer i{color:rgba(212,168,67,0.7)}
+      .admin-login-back{
+        display:flex;align-items:center;justify-content:center;gap:8px;
+        margin:14px 0 0;padding:11px 14px;
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.08);
+        border-radius:11px;
+        color:var(--text-gray,#aaa);
+        font-size:13.5px;font-weight:600;
+        text-decoration:none;
+        transition:all .2s ease;
+      }
+      .admin-login-back:hover{
+        background:rgba(255,255,255,0.08);
+        border-color:rgba(255,255,255,0.15);
+        color:var(--text-white,#fff);
+        transform:translateY(-1px);
+      }
+      .admin-login-back i{font-size:12px;}
     `;
     document.head.appendChild(style);
 
@@ -266,26 +288,29 @@ class AdminPanel {
         const target = document.getElementById(`sec-${sec}`);
         if (target) target.classList.add('active');
         this.currentSection = sec;
-        if (window.innerWidth <= 900) this.closeMobileSidebar();
+        this.closeMobileSidebar();
       });
     });
   }
 
   setupSidebar() {
-    const toggle = document.getElementById('sidebarToggle');
+    // La gestión del toggle/backdrop/cierre del sidebar móvil
+    // ya la hace la IIFE bindSidebarToggle() de admin.html.
+    // Aquí solo gestionamos el estado colapsado del sidebar desktop
     const sidebar = document.getElementById('apSidebar');
-    if (!toggle || !sidebar) return;
-    toggle.addEventListener('click', () => {
-      if (window.innerWidth <= 900) {
-        sidebar.classList.toggle('mobile-open');
-      } else {
-        sidebar.classList.toggle('collapsed');
-      }
-    });
+    if (!sidebar) return;
+    // No registrar listener del toggle aquí para evitar duplicados
   }
 
   closeMobileSidebar() {
-    document.getElementById('apSidebar')?.classList.remove('mobile-open');
+    const sidebar = document.getElementById('apSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (backdrop) {
+      backdrop.classList.remove('show');
+      backdrop.setAttribute('aria-hidden', 'true');
+    }
+    try { document.body.style.overflow = ''; } catch (_) {}
   }
 
   /* ── Stats ──────────────────────────────────────────────────── */

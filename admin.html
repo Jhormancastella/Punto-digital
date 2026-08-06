@@ -424,6 +424,11 @@
 
     <!-- SIDEBAR -->
     <aside class="ap-sidebar" id="apSidebar">
+      <div class="ap-sidebar-brand">
+        <a href="admin.html" class="js-hard-reload-logo" aria-label="Recargar panel admin">
+          <img src="img/logo.png" alt="Punto Digital" class="ap-sidebar-logo" loading="eager" decoding="async">
+        </a>
+      </div>
       <div class="ap-sidebar-user">
         <div class="ap-avatar"><i class="fas fa-user-shield"></i></div>
         <div>
@@ -455,6 +460,9 @@
         </button>
         <button class="ap-nav-item" data-section="orders">
           <i class="fas fa-boxes-stacked"></i><span>Pedidos</span>
+        </button>
+        <button class="ap-nav-item" data-section="reviews">
+          <i class="fas fa-star-half-alt"></i><span>Reseñas</span>
         </button>
 
         <p class="ap-nav-label">Diseño</p>
@@ -686,6 +694,106 @@
           </div>
         </div>
       </section>
+      <!-- ── REVIEWS ── -->
+      <section class="ap-section" id="sec-reviews">
+        <div class="ap-page-header">
+          <div>
+            <h1>Reseñas de Clientes</h1>
+            <p>Modera, aprueba y gestiona las reseñas y videos enviados por tus clientes</p>
+          </div>
+          <div class="ap-page-actions">
+            <button class="ap-btn-refresh" onclick="window.adminReviews && adminReviews.refresh()">
+              <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+            <button class="ap-btn-refresh" style="color:#198754;border-color:rgba(25,135,84,0.25);background:rgba(25,135,84,0.08);" onclick="window.open('reseñas.html','_blank')">
+              <i class="fas fa-eye"></i> Ver pública
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="orders-stats" id="reviewsStats">
+          <div class="order-stat-card">
+            <div class="order-stat-icon" style="--c:#ffc107"><i class="fas fa-hourglass-half"></i></div>
+            <div><p class="order-stat-num" id="rv-stat-pending">0</p><p class="order-stat-lbl">Pendientes</p></div>
+          </div>
+          <div class="order-stat-card">
+            <div class="order-stat-icon" style="--c:#198754"><i class="fas fa-circle-check"></i></div>
+            <div><p class="order-stat-num" id="rv-stat-approved">0</p><p class="order-stat-lbl">Aprobadas</p></div>
+          </div>
+          <div class="order-stat-card">
+            <div class="order-stat-icon" style="--c:#dc3545"><i class="fas fa-circle-xmark"></i></div>
+            <div><p class="order-stat-num" id="rv-stat-rejected">0</p><p class="order-stat-lbl">Rechazadas</p></div>
+          </div>
+          <div class="order-stat-card">
+            <div class="order-stat-icon" style="--c:#d4a843"><i class="fas fa-star"></i></div>
+            <div><p class="order-stat-num" id="rv-stat-avg">0.0</p><p class="order-stat-lbl">Promedio</p></div>
+          </div>
+          <div class="order-stat-card">
+            <div class="order-stat-icon" style="--c:#7c3aed"><i class="fas fa-gem"></i></div>
+            <div><p class="order-stat-num" id="rv-stat-featured">0</p><p class="order-stat-lbl">Destacadas</p></div>
+          </div>
+          <div class="order-stat-card">
+            <div class="order-stat-icon" style="--c:#0dcaf0"><i class="fas fa-video"></i></div>
+            <div><p class="order-stat-num" id="rv-stat-videos">0</p><p class="order-stat-lbl">Con video</p></div>
+          </div>
+          <div class="order-stat-card">
+            <div class="order-stat-icon" style="--c:#f97316"><i class="fas fa-camera"></i></div>
+            <div><p class="order-stat-num" id="rv-stat-photos">0</p><p class="order-stat-lbl">Con foto</p></div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="orders-toolbar">
+          <div class="orders-filters" id="reviewsStatusFilters">
+            <button class="order-filter-btn active" data-rv-filter="all" onclick="window.adminReviews && adminReviews.filter(this,'all')">Todas</button>
+            <button class="order-filter-btn" data-rv-filter="pending" onclick="window.adminReviews && adminReviews.filter(this,'pending')"><span class="order-dot" style="--c:#ffc107"></span>Pendientes</button>
+            <button class="order-filter-btn" data-rv-filter="approved" onclick="window.adminReviews && adminReviews.filter(this,'approved')"><span class="order-dot" style="--c:#198754"></span>Aprobadas</button>
+            <button class="order-filter-btn" data-rv-filter="rejected" onclick="window.adminReviews && adminReviews.filter(this,'rejected')"><span class="order-dot" style="--c:#dc3545"></span>Rechazadas</button>
+            <button class="order-filter-btn" data-rv-filter="featured" onclick="window.adminReviews && adminReviews.filter(this,'featured')"><span class="order-dot" style="--c:#d4a843"></span>Destacadas</button>
+            <button class="order-filter-btn" data-rv-filter="video" onclick="window.adminReviews && adminReviews.filter(this,'video')"><i class="fas fa-video"></i> Con video</button>
+            <button class="order-filter-btn" data-rv-filter="photo" onclick="window.adminReviews && adminReviews.filter(this,'photo')"><i class="fas fa-camera"></i> Con foto</button>
+          </div>
+          <div class="orders-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="reviewsSearchInput" placeholder="Buscar por nombre, email, producto..." oninput="window.adminReviews && adminReviews.search(this.value)">
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="orders-container">
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Puntuación</th>
+                  <th>Resumen</th>
+                  <th>Producto</th>
+                  <th>Video</th>
+                  <th>Foto</th>
+                  <th>Estado</th>
+                  <th>Destacada</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="reviewsTableBody">
+                <tr class="orders-empty-row">
+                  <td colspan="10">
+                    <div class="orders-empty">
+                      <i class="fas fa-comments"></i>
+                      <p>No hay reseñas aún</p>
+                      <span>Las reseñas enviadas por los clientes aparecerán aquí</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ── COLORS ── -->
       <section class="ap-section" id="sec-colors">
         <div class="ap-page-header">
@@ -872,6 +980,21 @@
     </div>
   </div>
 
+  <!-- ── MODAL DETALLE RESEÑA ──────────────────────────────────── -->
+  <div class="ap-modal-overlay reviews-modal video-player-modal" id="reviewDetailModal" aria-hidden="true">
+    <div class="ap-modal ap-modal--large" role="dialog">
+      <div class="ap-modal-header">
+        <h3><i class="fas fa-star" style="color:var(--gold-primary)"></i> Detalle de Reseña <span id="rvDetailId"></span></h3>
+        <button class="ap-modal-close" onclick="closeReviewDetailModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ap-modal-body" id="reviewDetailBody"></div>
+      <div class="ap-modal-footer">
+        <button class="ap-btn-cancel" onclick="closeReviewDetailModal()">Cerrar</button>
+        <div class="ap-modal-footer-right" id="rvDetailActions"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── MODAL GENÉRICO ──────────────────────────────────────── -->
   <div class="ap-modal-overlay" id="apModal" aria-hidden="true">
     <div class="ap-modal" role="dialog">
@@ -897,8 +1020,11 @@
   <script src="js/utils/themeManager.js"></script>
   <script src="js/services/authService.js"></script>
   <script src="js/services/orderService.js"></script>
+  <script src="js/services/reviewService.js"></script>
   <script src="js/admin.js"></script>
   <script src="js/admin-orders.js"></script>
+  <script src="js/admin-reviews.js"></script>
+  <div class="ap-sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
   <script>
     (function bindHardReloadLogo() {
       const logos = document.querySelectorAll('.js-hard-reload-logo');
@@ -909,6 +1035,41 @@
         };
         logo.addEventListener('click', hardReload);
         logo.addEventListener('touchend', hardReload, { passive: false });
+      });
+    })();
+    (function bindSidebarToggle() {
+      const toggle = document.getElementById('sidebarToggle');
+      const sidebar = document.querySelector('.ap-sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (!toggle || !sidebar) return;
+      const isToggleVisible = () => {
+        const cs = window.getComputedStyle(toggle);
+        return cs && cs.display !== 'none' && cs.visibility !== 'hidden';
+      };
+      const openSidebar = () => {
+        if (!isToggleVisible()) return;
+        sidebar.classList.add('mobile-open');
+        if (backdrop) { backdrop.classList.add('show'); backdrop.setAttribute('aria-hidden', 'false'); }
+        try { document.body.style.overflow = 'hidden'; } catch (_) {}
+      };
+      const closeSidebar = () => {
+        sidebar.classList.remove('mobile-open');
+        if (backdrop) { backdrop.classList.remove('show'); backdrop.setAttribute('aria-hidden', 'true'); }
+        try { document.body.style.overflow = ''; } catch (_) {}
+      };
+      const onToggleTap = (e) => {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        if (sidebar.classList.contains('mobile-open')) closeSidebar();
+        else openSidebar();
+      };
+      toggle.addEventListener('click', onToggleTap);
+      toggle.addEventListener('touchend', (e) => { e.preventDefault(); onToggleTap(null); }, { passive: false });
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) closeSidebar();
+      });
+      window.addEventListener('resize', () => {
+        if (!isToggleVisible() && sidebar.classList.contains('mobile-open')) closeSidebar();
       });
     })();
   </script>

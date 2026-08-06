@@ -10,13 +10,18 @@
   background: var(--black-bg);
   color: var(--text-white);
   min-height: 100vh;
-  overflow-x: hidden;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Top bar ──────────────────────────────────────────────────── */
 .ap-topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
+  flex-shrink: 0;
+  position: relative;
   height: 64px;
   background: var(--black-card);
   border-bottom: 1px solid rgba(212,168,67,0.2);
@@ -44,6 +49,10 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 16px;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 3000;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .ap-sidebar-toggle:hover { background: rgba(212,168,67,0.18); color: var(--gold-primary); }
 
@@ -103,30 +112,116 @@
 /* ── Layout ───────────────────────────────────────────────────── */
 .ap-layout {
   display: flex;
-  margin-top: 64px;
-  min-height: calc(100vh - 64px);
-}
-
-/* ── Sidebar ──────────────────────────────────────────────────── */
-.ap-sidebar {
-  width: 260px;
-  min-width: 260px;
-  background: var(--black-card);
-  border-right: 1px solid rgba(212,168,67,0.12);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 64px;
+  flex: 1 1 auto;
+  min-height: 0;
   height: calc(100vh - 64px);
-  overflow-y: auto;
-  transition: width 0.3s ease, min-width 0.3s ease, transform 0.3s ease;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(212,168,67,0.2) transparent;
+  height: calc(100dvh - 64px);
 }
-.ap-sidebar::-webkit-scrollbar { width: 4px; }
-.ap-sidebar::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.2); border-radius: 2px; }
 
+/* ═══════════════════════════════════════════════
+   DESKTOP (≥ 901px) — Sidebar fija full-height desde top=0
+   ═══════════════════════════════════════════════ */
+@media (min-width: 901px) {
+  .ap-sidebar-toggle { display: none !important; }
+  .ap-topbar .ap-brand { display: flex !important; }
+
+  .ap-sidebar-brand { display: none !important; }
+
+  .ap-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    min-width: 260px;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--black-card);
+    border-right: 1px solid rgba(212,168,67,0.12);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-height: 0;
+    overflow-y: auto;
+    transition: width 0.3s ease, min-width 0.3s ease, transform 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212,168,67,0.2) transparent;
+    z-index: 500;
+    padding-top: calc(64px + env(safe-area-inset-top, 0px));
+    box-sizing: border-box;
+  }
+  .ap-sidebar::-webkit-scrollbar { width: 4px; }
+  .ap-sidebar::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.2); border-radius: 2px; }
+
+  .ap-sidebar-user {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 18px;
+    border-bottom: 1px solid rgba(212,168,67,0.1);
+    background: linear-gradient(135deg, rgba(212,168,67,0.06), transparent);
+  }
+  .ap-user-name { display: block !important; font-size: 14px; font-weight: 600; color: var(--text-white); }
+  .ap-user-role { display: block !important; font-size: 11px; color: var(--gold-primary); margin-top: 2px; }
+  .ap-avatar { display: flex !important; }
+
+  .ap-topbar {
+    padding-left: calc(260px + 24px);
+    padding-right: 24px;
+    box-sizing: border-box;
+  }
+
+  .ap-layout {
+    padding-left: 260px;
+    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
+    min-height: 0;
+  }
+
+  .ap-sidebar.collapsed { width: 68px; min-width: 68px; }
+  body.admin-sidebar-collapsed .ap-topbar { padding-left: calc(68px + 24px); }
+  body.admin-sidebar-collapsed .ap-layout { padding-left: 68px; }
+
+  .ap-sidebar.collapsed .ap-sidebar-user,
+  .ap-sidebar.collapsed .ap-nav-label,
+  .ap-sidebar.collapsed .ap-nav-item span,
+  .ap-sidebar.collapsed .ap-logout-btn span,
+  .ap-sidebar.collapsed .ap-user-name,
+  .ap-sidebar.collapsed .ap-user-role { display: none !important; }
+  .ap-sidebar.collapsed .ap-nav-item { justify-content: center; padding: 14px; }
+  .ap-sidebar.collapsed .ap-nav-item i { margin: 0; }
+  .ap-sidebar.collapsed .ap-logout-btn { justify-content: center; padding: 12px; }
+}
+
+/* ═══════════════════════════════════════════════
+   DEFAULT / MOBILE PRE-901 (sobrescrito en media)
+   ═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .ap-sidebar-toggle { display: flex !important; }
+  .ap-topbar .ap-brand { display: flex; }
+
+  .ap-sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--black-card);
+    border-right: 1px solid rgba(212,168,67,0.12);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-height: 0;
+    overflow-y: auto;
+    transition: transform 0.3s ease, width 0.3s ease, min-width 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212,168,67,0.2) transparent;
+  }
+  .ap-sidebar::-webkit-scrollbar { width: 4px; }
+  .ap-sidebar::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.2); border-radius: 2px; }
+}
+
+/* ── Sidebar collapsed (fallback para móvil no usado normalmente) ── */
 .ap-sidebar.collapsed { width: 68px; min-width: 68px; }
+.ap-sidebar.collapsed .ap-sidebar-brand { padding: 12px 8px; }
+.ap-sidebar.collapsed .ap-sidebar-logo { height: 40px; }
 .ap-sidebar.collapsed .ap-sidebar-user,
 .ap-sidebar.collapsed .ap-nav-label,
 .ap-sidebar.collapsed .ap-nav-item span,
@@ -136,6 +231,21 @@
 .ap-sidebar.collapsed .ap-nav-item { justify-content: center; padding: 14px; }
 .ap-sidebar.collapsed .ap-nav-item i { margin: 0; }
 .ap-sidebar.collapsed .ap-logout-btn { justify-content: center; padding: 12px; }
+
+.ap-sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px 14px;
+  border-bottom: 1px solid rgba(212,168,67,0.1);
+  background: linear-gradient(180deg, rgba(212,168,67,0.06), transparent);
+}
+.ap-sidebar-logo {
+  height: 64px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
 
 .ap-sidebar-user {
   display: flex; align-items: center; gap: 12px;
@@ -219,11 +329,21 @@
 
 /* ── Main content ─────────────────────────────────────────────── */
 .ap-main {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 32px;
   overflow-y: auto;
+  overflow-x: hidden;
   min-width: 0;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212,168,67,0.25) transparent;
 }
+.ap-main::-webkit-scrollbar { width: 8px; }
+.ap-main::-webkit-scrollbar-thumb {
+  background: rgba(212,168,67,0.2);
+  border-radius: 4px;
+}
+.ap-main::-webkit-scrollbar-thumb:hover { background: rgba(212,168,67,0.4); }
 
 /* ── Sections ─────────────────────────────────────────────────── */
 .ap-section { display: none; animation: apFadeIn 0.3s ease; }
@@ -549,15 +669,22 @@
 .ap-modal-footer .ap-btn-save { width: auto; padding: 11px 28px; margin-top: 0; }
 
 /* ── Light theme ──────────────────────────────────────────────── */
-[data-theme="light"] .ap-topbar,
-[data-theme="light"] .ap-sidebar,
+/* Sidebar y Topbar SON SIEMPRE oscuros (estilo de marca Punto Digital) */
+.ap-topbar,
+.ap-sidebar { background: #0b0b0d; }
+.ap-sidebar { border-right-color: rgba(212,168,67,0.12); }
+.ap-sidebar-user { border-bottom-color: rgba(212,168,67,0.1); }
+[data-theme="light"] .ap-sidebar-user,
+[data-theme="light"] .ap-sidebar-brand { border-bottom-color: rgba(212,168,67,0.1); }
+[data-theme="light"] .ap-sidebar { border-right-color: rgba(212,168,67,0.12); }
+[data-theme="light"] .ap-user-name { color: #f1f3f5 !important; }
+
 [data-theme="light"] .ap-card,
 [data-theme="light"] .ap-stat-card,
 [data-theme="light"] .ap-item,
 [data-theme="light"] .ap-product-card,
 [data-theme="light"] .ap-modal,
 [data-theme="light"] .ap-qa-btn { background: #ffffff; }
-
 [data-theme="light"] .admin-body { background: #f1f3f5; }
 [data-theme="light"] .ap-field input,
 [data-theme="light"] .ap-field textarea,
@@ -566,16 +693,51 @@
 
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 900px) {
+  .ap-sidebar-brand { display: none; }
   .ap-sidebar {
-    position: fixed;
-    top: 64px; left: 0; bottom: 0;
-    z-index: 900;
-    transform: translateX(-100%);
+    position: fixed !important;
+    top: 0; left: 0; bottom: 0;
+    width: 260px !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-width: 260px !important;
+    z-index: 2000;
+    transform: translateX(-100%) translateZ(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 4px 0 30px rgba(0,0,0,0.4);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+    box-sizing: border-box;
+    will-change: transform;
   }
-  .ap-sidebar.mobile-open { transform: translateX(0); }
+  .ap-sidebar.mobile-open {
+    transform: translateX(0) translateZ(0) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ap-topbar { padding-left: 16px; padding-right: 16px; }
+  .ap-layout { padding-left: 0; }
+
   .ap-main { padding: 20px 16px; }
   .ap-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Backdrop móvil al abrir sidebar */
+.ap-sidebar-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 1999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, display 0s linear 0.25s, backdrop-filter 0.25s ease;
+}
+.ap-sidebar-backdrop.show {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.25s ease, display 0s linear 0s, backdrop-filter 0.25s ease;
 }
 
 @media (max-width: 600px) {
@@ -599,8 +761,21 @@
     padding-top: env(safe-area-inset-top);
     height: calc(64px + env(safe-area-inset-top));
   }
-  .ap-layout { margin-top: calc(64px + env(safe-area-inset-top)); }
-  .ap-sidebar { top: calc(64px + env(safe-area-inset-top)); }
+  .ap-layout { margin-top: 0; }
+  .ap-sidebar {
+    top: 0;
+    padding-top: 0;
+  }
+  /* Desktop safe area: sidebar tiene top=0 y padding-top propio calc(64px + safe-area). Evitar sobrescritura a 0. */
+  @media (min-width: 901px) {
+    .ap-sidebar {
+      padding-top: calc(64px + env(safe-area-inset-top, 0px));
+      box-sizing: border-box;
+    }
+  }
+  @media (max-width: 900px) {
+    .ap-sidebar { padding-top: calc(env(safe-area-inset-top) + 12px); box-sizing: border-box; }
+  }
 }
 
 @media (max-width: 430px) {

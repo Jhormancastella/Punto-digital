@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reseñas y opiniones de clientes de Punto Digital. Videos, puntuaciones y comentarios reales de nuestros compradores.">
+  <meta name="keywords" content="reseñas, opiniones, testimonios, clientes, Punto Digital, videos, reviews">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Reseñas de Clientes | Punto Digital">
+  <meta property="og:description" content="Opiniones y videos reales de nuestros compradores.">
+  <meta property="og:image" content="img/logo.png">
+
+  <title>Reseñas de Clientes | Punto Digital</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components/navbar.css">
+  <link rel="stylesheet" href="css/components/particles.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/login-modal.css">
+  <link rel="stylesheet" href="css/components/modal.css">
+  <link rel="stylesheet" href="css/components/reviews.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+
+  <link rel="icon" type="image/png" href="img/favicon-hd.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-hd.png">
+</head>
+<body>
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo js-hard-reload-logo">
+        <img src="img/logo.png" alt="Punto Digital" class="nav-logo-image" loading="eager" decoding="async">
+        <div class="nav-slogan">
+          <span class="nav-slogan-brand">Punto Digital</span>
+          <span class="nav-slogan-text" id="navSloganText">Siempre Conectados</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu" id="navMenu" role="menubar">
+        <li role="none"><a href="index.html#inicio" class="nav-link" role="menuitem">Inicio</a></li>
+        <li role="none"><a href="index.html#productos-lista" class="nav-link" role="menuitem">Productos</a></li>
+        <li role="none"><a href="index.html#destacados" class="nav-link" role="menuitem">Destacados</a></li>
+        <li role="none"><a href="reseñas.html" class="nav-link nav-cta-active" role="menuitem">Reseñas</a></li>
+        <li role="none"><a href="catalogo.html" class="nav-link nav-cta" role="menuitem">Ver Catálogo</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="nav-icon-btn" id="themeToggle" onclick="window.themeManager.toggleTheme()" title="Cambiar tema" aria-label="Alternar tema oscuro/claro">
+          <i class="fas fa-moon" aria-hidden="true"></i>
+        </button>
+        <button class="nav-icon-btn" id="adminLoginBtn" onclick="openLoginModal()" title="Panel de administración" aria-label="Acceso administrativo">
+          <i class="fas fa-lock" aria-hidden="true"></i>
+        </button>
+        <button class="nav-icon-btn" id="cartBtn" title="Carrito de compras" aria-label="Ver carrito de compras" style="position:relative">
+          <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+          <span class="cart-count" id="cartCount" aria-label="Productos en carrito">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menú de navegación" aria-expanded="false" aria-controls="navMenu">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="reviews-page" id="main-content">
+
+    <!-- HERO / SUMMARY -->
+    <section class="reviews-hero">
+      <div class="reviews-hero-wrap">
+        <div class="reviews-hero-title">
+          <h1>Lo que dicen <span>nuestros clientes</span></h1>
+          <p>Reseñas auténticas y videos de personas que ya compraron en Punto Digital. ¡Tú también puedes compartir tu experiencia.</p>
+        </div>
+
+        <div class="reviews-summary" id="reviewsSummary">
+          <div class="reviews-summary-left">
+            <div class="reviews-avg-big" id="reviewsAvgBig">0.0</div>
+            <div class="reviews-avg-stars" id="reviewsAvgStars"></div>
+            <div class="reviews-avg-total" id="reviewsAvgTotal">0 reseñas verificadas</div>
+          </div>
+          <div class="reviews-summary-right" id="reviewsRatingDist"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REVIEWS LIST -->
+    <section class="reviews-section-wrap">
+      <div class="reviews-section-head">
+        <h2>Todas las reseñas</h2>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <div class="reviews-filters" id="reviewsRatingFilters">
+            <button class="reviews-filter-btn active" data-rating-filter="all">Todas</button>
+            <button class="reviews-filter-btn" data-rating-filter="5"><i class="fas fa-star"></i> 5</button>
+            <button class="reviews-filter-btn" data-rating-filter="4"><i class="fas fa-star"></i> 4</button>
+            <button class="reviews-filter-btn" data-rating-filter="3"><i class="fas fa-star"></i> 3</button>
+            <button class="reviews-filter-btn" data-rating-filter="video"><i class="fas fa-video"></i> Con video</button>
+            <button class="reviews-filter-btn" data-rating-filter="photo"><i class="fas fa-camera"></i> Con foto</button>
+          </div>
+          <button class="btn-gold-outline" id="openReviewBtn"><i class="fas fa-pen-fancy"></i> Escribir reseña</button>
+        </div>
+      </div>
+
+      <div id="reviewsPendingBanner"></div>
+
+      <div class="reviews-grid" id="reviewsGrid">
+        <div class="reviews-empty">
+          <i class="fas fa-comment-slash"></i>
+          <p>Aún no hay reseñas aprobadas</p>
+          <span>¡Sé el primero en compartir tu experiencia!</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="contacto" role="contentinfo">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-social">
+          <span>ENCUÉNTRANOS EN</span>
+          <div class="social-links" id="socialLinks"></div>
+        </div>
+        <div class="footer-contact" id="footerContact"></div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Punto Digital. Todos los derechos reservados. Jhorman Castellanos.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- LOGIN MODAL -->
+  <div class="modal-overlay" id="loginModal" role="dialog" aria-hidden="true">
+    <div class="login-modal">
+      <button class="login-modal-close" onclick="closeLoginModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="login-modal-brand">
+        <div class="login-brand-logo">
+          <img src="img/logo.png" alt="Punto Digital">
+        </div>
+        <h2><span>ADMIN</span></h2>
+        <p>Panel de administración</p>
+        <div class="login-brand-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="login-modal-form">
+        <div class="login-form-header">
+          <div class="login-form-icon"><i class="fas fa-user-shield"></i></div>
+          <h3>Acceso Administrativo</h3>
+          <p>Ingresa tus credenciales para continuar</p>
+        </div>
+        <form id="loginForm" onsubmit="loginAdmin(event)" novalidate>
+          <div class="login-field">
+            <label for="adminEmail">Correo electrónico</label>
+            <div class="login-input-wrap">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="adminEmail" placeholder="admin@punto.com" required autocomplete="email">
+            </div>
+          </div>
+          <div class="login-field">
+            <label for="adminPass">Contraseña</label>
+            <div class="login-input-wrap">
+              <i class="fas fa-lock"></i>
+              <input type="password" id="adminPass" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="login-toggle-pass" id="togglePass" aria-label="Mostrar contraseña">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <p id="loginError" role="alert" aria-live="polite">
+            <i class="fas fa-exclamation-circle"></i>
+            Credenciales incorrectas. Intenta de nuevo.
+          </p>
+          <button type="submit" class="login-submit" id="loginBtn">
+            <span id="loginText">
+              <i class="fas fa-arrow-right-to-bracket"></i>
+              Ingresar al panel
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ESCRIBIR RESEÑA -->
+  <div class="ap-modal-overlay reviews-modal" id="reviewFormModal" aria-hidden="true">
+    <div class="ap-modal" role="dialog">
+      <div class="ap-modal-header">
+        <h3 id="reviewModalTitle"><i class="fas fa-star" style="color:var(--gold-primary)"></i> Comparte tu experiencia</h3>
+        <button class="ap-modal-close" onclick="closeReviewFormModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ap-modal-body">
+        <form id="reviewForm" onsubmit="submitReviewForm(event)" novalidate>
+          <div class="reviews-form-grid">
+            <div class="reviews-field">
+              <label>Tu nombre *</label>
+              <input type="text" id="rvName" required placeholder="Nombre completo">
+            </div>
+            <div class="reviews-field">
+              <label>Correo electrónico *</label>
+              <input type="email" id="rvEmail" required placeholder="tu@email.com">
+            </div>
+            <div class="reviews-field">
+              <label>Teléfono (opcional)</label>
+              <input type="tel" id="rvPhone" placeholder="+57 300 123 4567">
+            </div>
+            <div class="reviews-field">
+              <label>Producto comprado (opcional)</label>
+              <input type="text" id="rvProduct" placeholder="Ej: iPhone 15 Pro Max">
+            </div>
+            <div class="reviews-field full">
+              <label>Puntuación *</label>
+              <div class="reviews-rating-picker" id="rvRatingPicker" role="radiogroup" aria-label="Puntuación de 1 a 5 estrellas"></div>
+            </div>
+            <div class="reviews-field full">
+              <label>Título (opcional)</label>
+              <input type="text" id="rvTitle" placeholder="Resume tu experiencia en una frase">
+            </div>
+            <div class="reviews-field full">
+              <label>Tu comentario *</label>
+              <textarea id="rvComment" required placeholder="Cuéntanos cómo fue tu experiencia, el trato recibido, el producto, envío..."></textarea>
+            </div>
+            <div class="reviews-field">
+              <label>Tipo de video</label>
+              <select id="rvVideoType">
+                <option value="link">Enlace / URL directa</option>
+                <option value="youtube">YouTube</option>
+                <option value="drive">Google Drive</option>
+              </select>
+            </div>
+            <div class="reviews-field">
+              <label>URL del video (opcional)</label>
+              <input type="url" id="rvVideoUrl" placeholder="https://...">
+            </div>
+            <div class="reviews-field full">
+              <label>Foto del producto (opcional)</label>
+              <div class="reviews-image-upload" id="rvImageDropZone">
+                <input type="file" id="rvImageFile" accept="image/*" hidden>
+                <div class="rv-image-placeholder" id="rvImagePlaceholder">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <span>Arrastra tu foto aquí o <button type="button" class="rv-browse-btn" id="rvBrowseBtn">haz clic para seleccionar</button></span>
+                  <small>JPG, PNG, WebP — hasta 8MB</small>
+                </div>
+                <div class="rv-image-preview" id="rvImagePreview" hidden>
+                  <img id="rvImagePreviewImg" alt="Preview foto producto">
+                  <button type="button" class="rv-image-remove" id="rvImageRemoveBtn" title="Quitar foto">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div class="rv-image-progress" id="rvImageProgress" hidden>
+                  <div class="rv-progress-bar"><span id="rvProgressFill"></span></div>
+                  <small id="rvProgressLabel">Subiendo imagen...</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="reviews-video-info">
+            <i class="fas fa-info-circle"></i> Sube tu video a YouTube o Google Drive y pega aquí el enlace. También puedes usar cualquier URL de video directa (MP4, WebM). El video y la foto serán visibles una vez aprobada tu reseña.
+          </div>
+        </form>
+      </div>
+      <div class="ap-modal-footer">
+        <button class="ap-btn-cancel" onclick="closeReviewFormModal()">Cancelar</button>
+        <button class="ap-btn-save" id="rvSubmitBtn" onclick="submitReviewForm(event)"><i class="fas fa-paper-plane"></i> Enviar reseña</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL REPRODUCTOR VIDEO -->
+  <div class="ap-modal-overlay reviews-modal video-player-modal" id="videoPlayerModal" aria-hidden="true">
+    <div class="ap-modal" role="dialog">
+      <div class="ap-modal-header">
+        <h3 id="videoPlayerTitle"><i class="fas fa-play-circle" style="color:var(--gold-primary)"></i> Video reseña</h3>
+        <button class="ap-modal-close" onclick="closeVideoPlayerModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="video-player-body" id="videoPlayerBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL VISOR IMAGEN -->
+  <div class="ap-modal-overlay reviews-modal image-viewer-modal" id="imageViewerModal" aria-hidden="true">
+    <div class="ap-modal" role="dialog">
+      <div class="ap-modal-header">
+        <h3 id="imageViewerTitle"><i class="fas fa-image" style="color:var(--gold-primary)"></i> Foto reseña</h3>
+        <button class="ap-modal-close" onclick="closeImageViewerModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="image-viewer-body" id="imageViewerBody"></div>
+    </div>
+  </div>
+
+  <div class="reviews-toast" id="reviewsToast" role="status" aria-live="polite"></div>
+
+  <!-- SCRIPTS -->
+  <script>
+    (function cleanCorruptStorage() {
+      const keys = ['puntoDigitalData', 'puntoDigitalData_v2', 'puntoDigitalData_v3'];
+      keys.forEach(key => {
+        try {
+          const saved = localStorage.getItem(key);
+          if (!saved) return;
+          const parsed = JSON.parse(saved);
+          const arraySections = ['features', 'categories', 'products'];
+          const isCorrupt = arraySections.some(k => parsed[k] !== undefined && !Array.isArray(parsed[k]));
+          if (isCorrupt) localStorage.removeItem(key);
+        } catch {
+          localStorage.removeItem(key);
+        }
+      });
+    })();
+  </script>
+  <script src="js/config/environment.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/formatters.js"></script>
+  <script src="js/services/notificationService.js"></script>
+  <script src="js/services/firebaseClient.js"></script>
+  <script src="js/utils/imageProcessor.js"></script>
+  <script src="js/services/authService.js"></script>
+  <script src="js/services/cartService.js"></script>
+  <script src="js/services/reviewService.js"></script>
+  <script src="js/data/siteData.js"></script>
+  <script src="js/utils/themeManager.js"></script>
+  <script src="js/components/particles.js"></script>
+  <script src="js/components/navbar.js"></script>
+  <script src="js/components/loginModal.js"></script>
+  <script src="js/reviews.js"></script>
+  <script>
+    (function bindHardReloadLogo() {
+      const logos = document.querySelectorAll('.js-hard-reload-logo');
+      logos.forEach((logo) => {
+        const hardReload = (e) => {
+          e.preventDefault();
+          window.location.reload();
+        };
+        logo.addEventListener('click', hardReload);
+        logo.addEventListener('touchend', hardReload, { passive: false });
+      });
+    })();
+  </script>
+</body>
+</html>

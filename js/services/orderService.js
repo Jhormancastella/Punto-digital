@@ -9,6 +9,7 @@ class OrderService {
     this.orders = this.load();
     this.observers = [];
     this._firestoreUnsubscribe = null;
+    this._isStartingListener = false;
     this.setupCrossTabSync();
     this.STATUS = {
       PENDING: 'pending',
@@ -55,11 +56,20 @@ class OrderService {
     } else {
       boot();
     }
-    window.addEventListener('userSignedIn', () => this._ensureAdminFirestoreListener());
+    window.addEventListener('userSignedIn', () => {
+      if (this._isStartingListener) return;
+      if (this._firestoreUnsubscribe) return;
+      this._ensureAdminFirestoreListener();
+    });
+    window.addEventListener('firebaseAuthChanged', () => {
+      if (this._isStartingListener) return;
+      if (this._firestoreUnsubscribe) return;
+      this._ensureAdminFirestoreListener();
+    });
   }
 
   async _ensureAdminFirestoreListener() {
-    if (this._firestoreUnsubscribe) return;
+    if (this._firestoreUnsubscribe || this._isStartingListener) return;
     const fbUser = window.firebaseClient?.getCurrentUser?.();
     const adminEmail = 'puntodigitalti@gmail.com';
     if (!fbUser || String(fbUser.email || '').toLowerCase() !== adminEmail) {
@@ -69,11 +79,19 @@ class OrderService {
   }
 
   async _startFirestoreListener() {
-    if (this._firestoreUnsubscribe) return;
-    if (window.firebaseClient?.waitReady) await window.firebaseClient.waitReady();
-    if (!window.firebaseClient?.db) return;
+    if (this._firestoreUnsubscribe || this._isStartingListener) return;
+    this._isStartingListener = true;
+    try {
+      if (window.firebaseClient?.waitReady) await window.firebaseClient.waitReady();
+    } catch (e) {
+      this._isStartingListener = false;
+      return;
+    }
+    if (this._firestoreUnsubscribe) { this._isStartingListener = false; return; }
+    if (!window.firebaseClient?.db) { this._isStartingListener = false; return; }
     try {
       const { collection, onSnapshot, query, orderBy } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      if (this._firestoreUnsubscribe) { this._isStartingListener = false; return; }
       const q = query(collection(window.firebaseClient.db, 'orders'), orderBy('createdAt', 'desc'));
       this._firestoreUnsubscribe = onSnapshot(q, (snapshot) => {
         const remoteOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -81,8 +99,10 @@ class OrderService {
       }, (err) => {
         console.warn('[OrderService] Error en listener de Firestore:', err);
       });
+      this._isStartingListener = false;
       console.log('[OrderService] Suscrito a cambios de pedidos en Firestore');
     } catch (e) {
+      this._isStartingListener = false;
       console.warn('[OrderService] No se pudo suscribir a Firestore:', e);
     }
   }

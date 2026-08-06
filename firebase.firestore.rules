@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /siteConfig/{document} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == 'puntodigitalti@gmail.com';
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == 'puntodigitalti@gmail.com';
+    }
+
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read: if request.auth != null && request.auth.token.email == 'puntodigitalti@gmail.com';
+      allow update, delete: if request.auth != null && request.auth.token.email == 'puntodigitalti@gmail.com';
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'id', 'reviewerName', 'reviewerEmail', 'reviewerPhone',
+          'productName', 'rating', 'title', 'comment',
+          'videoUrl', 'videoType', 'videoThumbnail',
+          'imageUrl',
+          'status', 'isFeatured', 'moderationNote',
+          'helpfulCount', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.reviewerName is string
+        && request.resource.data.reviewerEmail is string
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.comment is string
+        && request.resource.data.status == 'pending'
+        && request.resource.data.isFeatured == false
+        && request.resource.data.helpfulCount == 0;
+
+      allow update: if
+        (request.auth != null && request.auth.token.email == 'puntodigitalti@gmail.com')
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['helpfulCount', 'updatedAt'])
+          && request.resource.data.helpfulCount is int
+          && request.resource.data.helpfulCount >= (resource.data.helpfulCount || 0)
+        );
+
+      allow delete: if request.auth != null && request.auth.token.email == 'puntodigitalti@gmail.com';
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+  }
+}

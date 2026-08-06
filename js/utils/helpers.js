@@ -126,6 +126,77 @@ class Helpers {
       return success;
     }
   }
+
+  /* ── Footer / Contacto / Social (compartido: index, reseñas, catálogo) ── */
+  static renderFooterContact(footerData) {
+    const container = document.getElementById('footerContact');
+    if (!container || !footerData) return;
+
+    container.innerHTML = `
+      <a href="tel:${footerData.phone}" class="contact-item" role="listitem">
+        <i class="fas fa-phone" aria-hidden="true"></i>
+        <span>${Helpers.escapeHtml(footerData.phone)}</span>
+      </a>
+      <a href="mailto:${Helpers.escapeAttr(footerData.email)}" class="contact-item" role="listitem">
+        <i class="fas fa-envelope" aria-hidden="true"></i>
+        <span>${Helpers.escapeHtml(footerData.email)}</span>
+      </a>
+      ${footerData.address ? `
+        <div class="contact-item" role="listitem">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          <span>${Helpers.escapeHtml(footerData.address)}</span>
+        </div>
+      ` : ''}
+      ${footerData.whatsapp ? `
+        <a href="https://wa.me/${footerData.whatsapp.replace(/\D/g, '')}"
+           class="contact-item" target="_blank" rel="noopener" role="listitem">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          <span>WhatsApp</span>
+        </a>
+      ` : ''}
+      ${footerData.website ? `
+        <a href="${Helpers.sanitizeUrl(footerData.website)}"
+           class="contact-item" target="_blank" rel="noopener" role="listitem">
+          <i class="fas fa-globe" aria-hidden="true"></i>
+          <span>${Helpers.escapeHtml(footerData.website)}</span>
+        </a>
+      ` : ''}
+    `;
+  }
+
+  static renderSocialLinks(socialData) {
+    const container = document.getElementById('socialLinks');
+    if (!container || !socialData) return;
+
+    const socialIcons = {
+      facebook:  'fab fa-facebook-f',
+      instagram: 'fab fa-instagram',
+      whatsapp:  'fab fa-whatsapp',
+      twitter:   'fab fa-x-twitter',
+      youtube:   'fab fa-youtube',
+      tiktok:    'fab fa-tiktok',
+      linkedin:  'fab fa-linkedin-in'
+    };
+
+    container.innerHTML = Object.entries(socialData)
+      .map(([platform, url]) => [platform, Helpers.sanitizeUrl(url)])
+      .filter(([, url]) => url && url !== '#')
+      .map(([platform, url]) => `
+        <a href="${Helpers.escapeAttr(url)}" target="_blank" rel="noopener" role="listitem"
+           aria-label="${Helpers.escapeAttr(platform.charAt(0).toUpperCase() + platform.slice(1))}"
+           title="${Helpers.escapeAttr(platform.charAt(0).toUpperCase() + platform.slice(1))}">
+          <i class="${socialIcons[platform] || 'fas fa-link'}" aria-hidden="true"></i>
+        </a>
+      `).join('');
+  }
+
+  static renderFooter() {
+    if (!window.siteData || typeof window.siteData.getSection !== 'function') return;
+    const footerData = window.siteData.getSection('footer');
+    const socialData = window.siteData.getSection('social');
+    Helpers.renderFooterContact(footerData);
+    Helpers.renderSocialLinks(socialData);
+  }
 }
 
 // Exportar para uso global
