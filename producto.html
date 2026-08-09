@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Detalle de producto - Punto Digital. Especificaciones completas, imágenes y mejores precios en tecnología.">
+  <meta name="keywords" content="producto, detalle, especificaciones, smartphone, tecnología, Punto Digital">
+  <meta name="author" content="Punto Digital">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="product">
+  <meta property="og:url" content="http://puntodigitalcolombia.com/producto.html">
+  <meta property="og:title" content="Producto - Punto Digital">
+  <meta property="og:description" content="Especificaciones completas y mejores precios">
+  <meta property="og:image" content="http://puntodigitalcolombia.com/img/logo.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="http://puntodigitalcolombia.com/producto.html">
+  <meta property="twitter:title" content="Producto - Punto Digital">
+  <meta property="twitter:description" content="Especificaciones completas y mejores precios">
+  <meta property="twitter:image" content="http://puntodigitalcolombia.com/img/logo.png">
+
+  <title>Producto | Punto Digital</title>
+  <link rel="canonical" href="http://puntodigitalcolombia.com/producto.html">
+
+  <link rel="preload" href="css/variables.css" as="style">
+  <link rel="preload" href="css/base.css" as="style">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components/navbar.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/modal.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/product-page.css">
+
+  <link rel="icon" type="image/png" href="img/favicon-hd.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-hd.png">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo js-hard-reload-logo" aria-label="Punto Digital - Volver al inicio">
+        <img src="img/logo.png" alt="Punto Digital" class="nav-logo-image" loading="eager" decoding="async">
+        <div class="nav-slogan">
+          <span class="nav-slogan-brand">Punto Digital</span>
+          <span class="nav-slogan-text" id="navSloganText">Siempre Conectados</span>
+        </div>
+      </a>
+      <ul class="nav-menu" id="navMenu" role="menubar">
+        <li role="none"><a href="index.html" class="nav-link" role="menuitem">Inicio</a></li>
+        <li role="none"><a href="catalogo.html" class="nav-link active" role="menuitem">Catálogo</a></li>
+        <li role="none"><a href="reseñas.html" class="nav-link" role="menuitem">Reseñas</a></li>
+        <li role="none"><a href="#contacto" class="nav-link" role="menuitem">Contacto</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-icon-btn" id="themeToggle" onclick="window.themeManager?.toggleTheme()"
+                title="Cambiar tema" aria-label="Alternar tema oscuro/claro">
+          <i class="fas fa-moon" aria-hidden="true"></i>
+        </button>
+        <button class="nav-icon-btn" id="cartBtn" title="Carrito de compras"
+                aria-label="Ver carrito de compras" style="position:relative">
+          <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menú de navegación"
+                aria-expanded="false" aria-controls="navMenu">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content">
+    <!-- BREADCRUMB -->
+    <nav class="pp-breadcrumb" aria-label="Ruta de navegación">
+      <div class="pp-breadcrumb__container">
+        <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+        <span class="pp-breadcrumb__sep"><i class="fas fa-chevron-right"></i></span>
+        <a href="catalogo.html">Catálogo</a>
+        <span class="pp-breadcrumb__sep"><i class="fas fa-chevron-right"></i></span>
+        <span id="ppBreadcrumbProduct" aria-current="page">Cargando...</span>
+      </div>
+    </nav>
+
+    <!-- LOADING STATE -->
+    <div class="pp-loading" id="ppLoading">
+      <div class="pp-loading__spinner"></div>
+      <p>Cargando producto...</p>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div class="pp-error" id="ppError" style="display:none">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h2>Producto no encontrado</h2>
+      <p>No pudimos encontrar el producto solicitado. Intenta desde el catálogo.</p>
+      <a href="catalogo.html" class="btn-gold">
+        <i class="fas fa-th-large"></i> Volver al Catálogo
+      </a>
+    </div>
+
+    <!-- PRODUCT CONTAINER -->
+    <div class="pp-container" id="ppContainer" style="display:none">
+
+      <!-- ===== GALLERY + INFO (DESKTOP ROW) ===== -->
+      <section class="pp-top" aria-label="Producto">
+        <!-- GALERIA -->
+        <div class="pp-gallery">
+          <div class="pp-gallery__thumbs" id="ppThumbs" role="listbox" aria-label="Miniaturas del producto">
+            <!-- Miniaturas dinámicas -->
+          </div>
+          <div class="pp-gallery__main">
+            <div class="pp-gallery__badge" id="ppBadge" style="display:none"></div>
+            <img id="ppMainImage" src="" alt="" loading="eager">
+            <button class="pp-gallery__nav pp-gallery__nav--prev" id="ppNavPrev" aria-label="Imagen anterior">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="pp-gallery__nav pp-gallery__nav--next" id="ppNavNext" aria-label="Imagen siguiente">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- INFO PANEL -->
+        <div class="pp-info">
+          <div class="pp-info__header">
+            <p class="pp-info__brand" id="ppBrand">—</p>
+            <h1 class="pp-info__title" id="ppTitle">—</h1>
+            <div class="pp-info__rating" id="ppRatingWrap">
+              <div class="pp-info__stars" id="ppStars"></div>
+              <span class="pp-info__rating-text" id="ppRatingText"></span>
+            </div>
+          </div>
+
+          <div class="pp-info__price-block">
+            <div class="pp-info__price-row">
+              <span class="pp-info__price" id="ppPrice">$0</span>
+              <span class="pp-info__original-price" id="ppOriginalPrice" style="display:none"></span>
+              <span class="pp-info__discount" id="ppDiscount" style="display:none"></span>
+            </div>
+            <div class="pp-info__installments" id="ppInstallments">
+              <i class="fas fa-credit-card"></i>
+              <span>Hasta 6 cuotas sin interés con tarjeta</span>
+            </div>
+          </div>
+
+          <div class="pp-info__stock">
+            <i class="fas fa-box" aria-hidden="true"></i>
+            <span id="ppStockText">—</span>
+          </div>
+
+          <!-- ACCIONES PRINCIPALES -->
+          <div class="pp-info__actions pp-actions--desktop">
+            <button class="pp-btn pp-btn--addcart" id="ppBtnAddCart">
+              <i class="fas fa-shopping-cart"></i>
+              <span>Agregar al Carrito</span>
+            </button>
+            <div class="pp-info__actions-row">
+              <button class="pp-btn pp-btn--buy" id="ppBtnBuyNow">
+                <i class="fas fa-bolt"></i>
+                <span>Comprar Ahora</span>
+              </button>
+              <button class="pp-btn pp-btn--whatsapp" id="ppBtnWhatsApp">
+                <i class="fab fa-whatsapp"></i>
+                <span>Consultar por WhatsApp</span>
+              </button>
+            </div>
+            <div class="pp-info__security">
+              <div class="pp-info__security-item">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                  <strong>Garantía</strong>
+                  <small id="ppWarrantyText">1 año fabricante</small>
+                </div>
+              </div>
+              <div class="pp-info__security-item">
+                <i class="fas fa-truck"></i>
+                <div>
+                  <strong>Envío seguro</strong>
+                  <small>A todo Colombia</small>
+                </div>
+              </div>
+              <div class="pp-info__security-item">
+                <i class="fas fa-lock"></i>
+                <div>
+                  <strong>Pago protegido</strong>
+                  <small>Pasarela segura</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CONTENT TABS / SECTIONS ===== -->
+      <section class="pp-content">
+
+        <!-- DESCRIPCIÓN -->
+        <div class="pp-section">
+          <div class="pp-section__head">
+            <div class="pp-section__icon"><i class="fas fa-info-circle"></i></div>
+            <h2 class="pp-section__title">Descripción</h2>
+          </div>
+          <div class="pp-section__body">
+            <p class="pp-description" id="ppDescription">Cargando descripción...</p>
+          </div>
+        </div>
+
+        <!-- ESPECIFICACIONES TÉCNICAS -->
+        <div class="pp-section">
+          <div class="pp-section__head">
+            <div class="pp-section__icon"><i class="fas fa-microchip"></i></div>
+            <h2 class="pp-section__title">Especificaciones Técnicas</h2>
+          </div>
+          <div class="pp-section__body" id="ppSpecsBody">
+            <!-- Especificaciones por categorías dinámicas -->
+          </div>
+        </div>
+
+        <!-- ACCESORIOS INCLUIDOS / CAJA -->
+        <div class="pp-section" id="ppBoxSection" style="display:none">
+          <div class="pp-section__head">
+            <div class="pp-section__icon"><i class="fas fa-box-open"></i></div>
+            <h2 class="pp-section__title">Contenido de la Caja</h2>
+          </div>
+          <div class="pp-section__body">
+            <ul class="pp-box-list" id="ppBoxList">
+              <!-- dinámico -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- POLÍTICAS / GARANTÍA -->
+        <div class="pp-section">
+          <div class="pp-section__head">
+            <div class="pp-section__icon"><i class="fas fa-shield-alt"></i></div>
+            <h2 class="pp-section__title">Garantía y Políticas</h2>
+          </div>
+          <div class="pp-section__body">
+            <div class="pp-policies-grid">
+              <div class="pp-policy">
+                <i class="fas fa-award"></i>
+                <h3>Garantía</h3>
+                <p id="ppPolicyWarranty">1 año de garantía contra defectos de fábrica. Aplican términos y condiciones.</p>
+              </div>
+              <div class="pp-policy">
+                <i class="fas fa-undo"></i>
+                <h3>Devoluciones</h3>
+                <p>5 días hábiles para cambio o devolución si el producto llega con fallas o diferente al pedido.</p>
+              </div>
+              <div class="pp-policy">
+                <i class="fas fa-shipping-fast"></i>
+                <h3>Envíos</h3>
+                <p>Cobertura nacional. Tiempos entre 1-5 días hábiles según ciudad de destino.</p>
+              </div>
+              <div class="pp-policy">
+                <i class="fas fa-money-check-alt"></i>
+                <h3>Medios de Pago</h3>
+                <p>Tarjeta de crédito, débito, transferencia bancaria, Nequi, Daviplata y efectivo contra entrega.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER ACCIONES MÓVIL (sticky) -->
+  <div class="pp-mobile-actions" id="ppMobileActions">
+    <button class="pp-btn pp-btn--addcart" id="ppBtnAddCartM">
+      <i class="fas fa-shopping-cart"></i>
+      <span>Agregar</span>
+    </button>
+    <button class="pp-btn pp-btn--buy" id="ppBtnBuyNowM">
+      <i class="fas fa-bolt"></i>
+      <span>Comprar</span>
+    </button>
+    <button class="pp-btn pp-btn--whatsapp" id="ppBtnWhatsAppM">
+      <i class="fab fa-whatsapp"></i>
+      <span>WhatsApp</span>
+    </button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="contacto" role="contentinfo" aria-labelledby="footer-title-prod">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-social">
+          <span id="footer-title-prod">ENCUÉNTRANOS EN</span>
+          <div class="social-links" id="socialLinks" role="list">
+            <!-- renderizado dinámico -->
+          </div>
+        </div>
+        <div class="footer-contact" id="footerContact" role="list" style="scroll-margin-top: 80px">
+          <!-- renderizado dinámico -->
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Punto Digital. Todos los derechos reservados. Jhorman Castellanos.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function cleanCorruptStorage() {
+      const keys = ['puntoDigitalData', 'puntoDigitalData_v2', 'puntoDigitalData_v3'];
+      keys.forEach(key => {
+        try {
+          const saved = localStorage.getItem(key);
+          if (!saved) return;
+          const parsed = JSON.parse(saved);
+          const arraySections = ['features', 'categories', 'products'];
+          const isCorrupt = arraySections.some(k => parsed[k] !== undefined && !Array.isArray(parsed[k]));
+          if (isCorrupt) localStorage.removeItem(key);
+        } catch {
+          localStorage.removeItem(key);
+        }
+      });
+    })();
+  </script>
+  <script src="js/config/environment.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/formatters.js"></script>
+  <script src="js/utils/productBg.js"></script>
+  <script src="js/utils/imageProcessor.js"></script>
+  <script src="js/services/notificationService.js"></script>
+  <script src="js/services/firebaseClient.js"></script>
+  <script src="js/services/cartService.js"></script>
+  <script src="js/services/orderService.js"></script>
+  <script src="js/services/seoManager.js"></script>
+  <script src="js/data/siteData.js"></script>
+  <script src="js/utils/themeManager.js"></script>
+  <script src="js/components/navbar.js"></script>
+  <script src="js/components/checkoutModal.js"></script>
+  <script src="js/producto.js"></script>
+</body>
+</html>

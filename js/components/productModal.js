@@ -151,30 +151,17 @@ class ProductModal {
   }
 
   open(product) {
-    this.lastFocusedElement = document.activeElement;
-    this.currentProduct = product;
-    this.populateModal(product);
-    
-    // Mostrar modal
-    this.modal.classList.add('active');
-    this.modal.setAttribute('aria-hidden', 'false');
-    this.isOpen = true;
-    
-    // Prevenir scroll del body
-    document.body.style.overflow = 'hidden';
-    
-    // Focus en el modal
-    setTimeout(() => {
-      const closeBtn = this.modal.querySelector('.product-modal-close');
-      closeBtn.focus();
-    }, 100);
-    
-    // Tracking
-    this.trackEvent('product_modal_opened', {
-      product_id: product.id,
-      product_name: product.name,
-      product_price: product.price
-    });
+    if (!product || !product.id) {
+      console.warn('ProductModal: producto inválido, no se puede redirigir a página de detalle');
+      return;
+    }
+    // Redirigir a la página dedicada de producto en lugar del modal
+    const url = `producto.html?id=${encodeURIComponent(product.id)}`;
+    try {
+      window.location.assign(url);
+    } catch (_) {
+      window.location.href = url;
+    }
   }
 
   close() {

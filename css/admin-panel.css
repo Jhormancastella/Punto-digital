@@ -954,3 +954,165 @@
   color: var(--gold-primary);
 }
 .ap-featured-toggle.active i { color: var(--gold-primary); }
+
+/* ══════════════════════════════════════════════════════════════
+   ESPECIFICACIONES TÉCNICAS — Acordeones / Grupos
+   ══════════════════════════════════════════════════════════════ */
+.ap-techspecs {
+  margin-top: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.015);
+  overflow: hidden;
+}
+.ap-techspecs > summary,
+.ap-techspecs__summary {
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(212,168,67,0.1), rgba(212,168,67,0.03));
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-weight: 700;
+  color: var(--gold-primary, #d4a843);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  letter-spacing: .3px;
+  transition: background .2s ease;
+  list-style: none;
+}
+.ap-techspecs > summary::-webkit-details-marker { display: none; }
+.ap-techspecs > summary:hover { background: linear-gradient(135deg, rgba(212,168,67,0.16), rgba(212,168,67,0.05)); }
+.ap-techspecs > summary i:first-child { font-size: 13px; transition: transform .25s ease; }
+.ap-techspecs[open] > summary i:first-child { transform: rotate(90deg); }
+.ap-techspecs__body { padding: 18px; }
+
+.ap-ts-group {
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.01);
+}
+.ap-ts-group:last-child { margin-bottom: 0; }
+.ap-ts-group > summary,
+.ap-ts-group__head {
+  padding: 11px 16px;
+  background: rgba(255,255,255,0.025);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-white);
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: .2px;
+  list-style: none;
+}
+.ap-ts-group > summary::-webkit-details-marker { display: none; }
+.ap-ts-group > summary:hover { background: rgba(255,255,255,0.04); }
+.ap-ts-group > summary > i { color: var(--gold-primary, #d4a843); font-size: 13px; }
+.ap-ts-group > summary .chev {
+  margin-left: auto;
+  color: var(--text-gray);
+  font-size: 10.5px;
+  transition: transform .2s ease;
+}
+.ap-ts-group[open] > summary .chev { transform: rotate(90deg); color: var(--gold-primary); }
+.ap-ts-group__body {
+  padding: 14px 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 14px;
+}
+.ap-ts-group .ap-field { margin-bottom: 0; }
+.ap-ts-group .ap-field label {
+  font-size: 11.5px;
+  letter-spacing: .3px;
+  margin-bottom: 4px;
+  color: var(--text-gray);
+  font-weight: 600;
+}
+.ap-ts-group .ap-field input,
+.ap-ts-group .ap-field textarea,
+.ap-ts-group .ap-field select {
+  padding: 9px 11px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.ap-ts-col--full { grid-column: 1 / -1; }
+
+/* ── Contenido de la caja ── */
+.ap-boxlist { margin-top: 0; }
+.ap-boxlist__input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ap-boxlist__input-row input { flex: 1; }
+.ap-boxlist__add {
+  padding: 0 14px;
+  border-radius: 9px;
+  border: 1px solid rgba(212,168,67,0.35);
+  background: rgba(212,168,67,0.1);
+  color: var(--gold-primary);
+  cursor: pointer;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s ease;
+  white-space: nowrap;
+}
+.ap-boxlist__add:hover {
+  background: rgba(212,168,67,0.18);
+  transform: translateY(-1px);
+}
+.ap-boxlist__items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ap-boxlist__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--text-white);
+}
+.ap-boxlist__item i.check { color: #22c55e; font-size: 12px; flex-shrink: 0; }
+.ap-boxlist__item span { flex: 1; }
+.ap-boxlist__item button {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: none;
+  background: rgba(220,53,69,0.12);
+  color: #f87171;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s ease;
+}
+.ap-boxlist__item button:hover { background: rgba(220,53,69,0.25); transform: scale(1.06); }
+.ap-boxlist__empty {
+  color: var(--text-gray);
+  font-size: 12.5px;
+  padding: 8px 2px;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .ap-ts-group__body { grid-template-columns: 1fr; }
+}

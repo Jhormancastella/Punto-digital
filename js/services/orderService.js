@@ -43,6 +43,10 @@ class OrderService {
       transfer: 'Pago por Transferencia',
       cod: 'Contra Entrega'
     };
+    this.PAYMENT_METHOD_STORAGE = {
+      transfer: 'transferencia',
+      cod: 'contraentrega'
+    };
 
     this._initFirestoreSync();
   }
@@ -222,6 +226,9 @@ class OrderService {
   // ── CRUD ──────────────────────────────────────────────────────
 
   async createOrder({ items, customerData, paymentMethod, total }) {
+    const metodoPago = this.PAYMENT_METHOD_STORAGE[paymentMethod] ||
+      (paymentMethod === 'transfer' ? 'transferencia' : 'contraentrega');
+
     const order = {
       id: this.generateOrderId(),
       items: items.map(item => ({
@@ -244,6 +251,7 @@ class OrderService {
         notes: customerData.notes || ''
       },
       paymentMethod,
+      metodo_pago: metodoPago,
       total,
       subtotal: total,
       shippingCost: 0,
@@ -272,12 +280,11 @@ class OrderService {
       notifiedEmail: false
     };
 
-    this.orders.unshift(order);
-    this.save();
+    const firestoreResult = await this._createOrderInFirestore(order);
+    if (!firestoreResult) {
+      throw new Error('No se pudo registrar el pedido en la nube. Verifica tu conexión e intenta de nuevo.');
+    }
 
-    await this._createOrderInFirestore(order);
-
-    this.sendWhatsAppNotification(order);
     this.createTicketInAdmin(order);
 
     return order;
@@ -372,6 +379,43 @@ class OrderService {
         previousStatus: this.STATUS.PENDING,
         timestamp: new Date().toISOString(),
         message: `Pago verificado${transactionReference ? ` · Ref: ${transactionReference}` : ''}`
+      });
+      updates.timeline = order.timeline;
+    }
+    this._updateOrderInFirestore(orderId, updates).catch(e => {});
+    return order;
+  }
+
+  async unverifyPayment(orderId) {
+    const order = this.orders.find(o => o.id === orderId);
+    if (!order) {
+      console.error('[OrderService] unverifyPayment: Pedido no encontrado:', orderId);
+      return null;
+    }
+    order.payment.verified = false;
+    order.payment.verifiedAt = null;
+    order.timeline.push({
+      status: order.status,
+      timestamp: new Date().toISOString(),
+      message: 'Pago desmarcado como verificado. Pendiente de comprobante.'
+    });
+    order.updatedAt = new Date().toISOString();
+    this.save();
+
+    const updates = {
+      'payment.verified': false,
+      'payment.verifiedAt': null,
+      timeline: order.timeline,
+      updatedAt: order.updatedAt
+    };
+    if (order.status === this.STATUS.VERIFYING) {
+      updates.status = this.STATUS.PENDING;
+      order.status = this.STATUS.PENDING;
+      order.timeline.push({
+        status: this.STATUS.PENDING,
+        previousStatus: this.STATUS.VERIFYING,
+        timestamp: new Date().toISOString(),
+        message: 'Estado revertido a Pendiente. Esperando comprobante de pago.'
       });
       updates.timeline = order.timeline;
     }

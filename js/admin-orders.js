@@ -64,6 +64,7 @@
     adminPanel.changeOrderStatus = changeOrderStatus;
     adminPanel._onStatusStepClick = _onStatusStepClick;
     adminPanel.verifyOrderPayment = verifyOrderPayment;
+    adminPanel.unverifyOrderPayment = unverifyOrderPayment;
     adminPanel.setShippingInfo = setShippingInfo;
     adminPanel.sendOrderStatusToWhatsApp = sendOrderStatusToWhatsApp;
     adminPanel._sendShippingWhatsApp = _sendShippingWhatsApp;
@@ -268,7 +269,7 @@
         </ul>
       </div>
       <button class="wa-btn wa-btn-cust" style="margin:-4px 0 12px"
-              onclick="adminPanel.sendOrderStatusToWhatsApp('${order.id}','customer')">
+              onclick="adminPanel.sendOrderStatusToWhatsApp('${order.id}','requestProof')">
         <i class="fab fa-whatsapp"></i> Pedir comprobante a ${Helpers.escapeHtml(order.customer?.fullName || 'cliente')}
       </button>
     ` : '';
@@ -289,10 +290,18 @@
           <label for="verifyRef">Número de referencia / Comprobante</label>
           <input type="text" id="verifyRef" placeholder="Número de transacción o comprobante" value="${Helpers.escapeAttr(order.payment.transactionReference || '')}">
         </div>
-        <button class="ap-btn-save" style="width:auto;margin-top:10px" ${order.payment.verified ? 'disabled' : ''}
-                onclick="adminPanel.verifyOrderPayment('${order.id}', document.getElementById('verifyRef').value)">
-          <i class="fas fa-check-circle"></i> ${order.payment.verified ? 'Pago ya verificado' : 'Marcar pago como verificado'}
-        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <button class="ap-btn-save" style="width:auto" ${!order.payment.verified ? '' : 'disabled'}
+                  onclick="adminPanel.verifyOrderPayment('${order.id}', document.getElementById('verifyRef').value)">
+            <i class="fas fa-check-circle"></i> ${order.payment.verified ? 'Pago ya verificado' : 'Marcar pago como verificado'}
+          </button>
+          ${order.payment.verified ? `
+            <button class="ap-btn-delete" style="width:auto"
+                    onclick="adminPanel.unverifyOrderPayment('${order.id}')">
+              <i class="fas fa-times-circle"></i> Desmarcar pago verificado
+            </button>
+          ` : ''}
+        </div>
       </div>
     ` : `
       <div class="detail-section">
@@ -551,6 +560,24 @@
     }
   }
 
+  async function unverifyOrderPayment(orderId) {
+    if (!OS) {
+      notificationService.error('Servicio de pedidos no disponible');
+      return;
+    }
+    if (!confirm('⚠️ ¿Seguro que deseas desmarcar el pago como verificado?\n\nEl pedido volverá al estado Pendiente y deberás esperar el comprobante de pago del cliente.')) {
+      return;
+    }
+    const order = await OS.unverifyPayment(orderId);
+    if (order) {
+      notificationService.warning('Pago marcado como NO verificado');
+      openOrderDetail(orderId);
+      refreshOrders();
+    } else {
+      notificationService.error('Error al desmarcar el pago');
+    }
+  }
+
   async function setShippingInfo(orderId, carrier, tracking) {
     if (!OS) {
       notificationService.error('Servicio de pedidos no disponible');
@@ -625,7 +652,38 @@
     let message = '';
     const statusLabel = OS.STATUS_LABELS[order.status];
 
-    if (target === 'shipping' || (carrier && tracking)) {
+    if (target === 'requestProof') {
+      const firstName = (order.customer.fullName || '').split(' ')[0] || 'amigo';
+      message = [
+        `¡Hola ${firstName}! 👋`,
+        ``,
+        `🎫 *Confirmación de tu pedido ${order.id}*`,
+        `Queremos recordarte que *tenemos registrado tu pedido* en nuestro sistema y está en estado: *${statusLabel}*.`,
+        ``,
+        `💳 *Estamos a la espera del comprobante de pago*`,
+        `Para poder procesar tu compra y continuar con el proceso de verificación del pago, por favor envía la *captura o foto del ticket de pago* por este medio.`,
+        ``,
+        order.payment.transactionReference ? `📝 Referencia registrada actualmente: *${order.payment.transactionReference}*` : '',
+        ``,
+        `✅ *En cuanto recibamos tu comprobante:*`,
+        `• Realizaremos la verificación del pago de inmediato`,
+        `• Confirmaremos por este mismo medio`,
+        `• Procederemos con el empaquetado y envío de tu pedido`,
+        ``,
+        `💰 *Datos de transferencia por si los necesitas:*`,
+        `Banco: Bancolombia`,
+        `Tipo: Cuenta de Ahorros`,
+        `Número: 123-45678-90`,
+        `Titular: Punto Digital SAS`,
+        `NIT: 123.456.789-0`,
+        `Total a pagar: *${Formatters.formatPrice(order.total)}*`,
+        ``,
+        `Si ya realizaste el pago y enviaste el comprobante, por favor ignora este mensaje. ¡Gracias por tu compra! 💛`,
+        `Punto Digital Colombia 🇨🇴`
+      ].filter(l => l !== '').join('\n');
+    }
+
+    if (!message && (target === 'shipping' || (carrier && tracking))) {
       const showFullShippingBlock = (target === 'shipping') || (carrier && tracking && (order.status === OS.STATUS.SHIPPED || order.status === OS.STATUS.PACKING || order.status === OS.STATUS.COMPLETED || order.status === OS.STATUS.VERIFYING || order.status === OS.STATUS.PENDING));
       if (showFullShippingBlock) {
         message = [

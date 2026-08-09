@@ -399,7 +399,6 @@ class CheckoutModal {
 
       if (window.cartService) {
         window.cartService.closeDrawer();
-        window.cartService.clear();
       }
 
       this.showSuccessModal(order);
@@ -417,13 +416,33 @@ class CheckoutModal {
   showSuccessModal(order) {
     this.close();
     const paymentLabel = window.orderService.PAYMENT_LABELS[order.paymentMethod];
+    const isTransfer = order.paymentMethod === 'transfer';
+
+    const dynamicMessage = isTransfer
+      ? `
+        <div class="success-message success-message--transfer">
+          <div class="success-message-icon"><i class="fas fa-money-check-alt"></i></div>
+          <div class="success-message-title">¡Pedido recibido!</div>
+          <p>Para procesar tu compra, realiza la transferencia y envíanos el comprobante.<br><br>
+          <strong>En breve nos pondremos en contacto contigo</strong> para que nos proporciones la captura o foto del ticket de pago.
+          Realizaremos la comprobación de inmediato para proceder con tu envío.</p>
+        </div>
+      `
+      : `
+        <div class="success-message success-message--cod">
+          <div class="success-message-icon"><i class="fas fa-shipping-fast"></i></div>
+          <div class="success-message-title">¡Tu pedido ha sido confirmado con éxito!</div>
+          <p><strong>En breve nos pondremos en contacto contigo</strong> para coordinar el día y la hora de tu entrega.<br><br>
+          Recuerda tener listo el monto exacto en efectivo al recibir tu producto.</p>
+        </div>
+      `;
 
     const successOverlay = document.createElement('div');
     successOverlay.className = 'checkout-success-overlay';
     successOverlay.innerHTML = `
       <div class="checkout-success-card">
         <div class="success-icon"><i class="fas fa-check-circle"></i></div>
-        <h2>¡Pedido Creado Exitosamente!</h2>
+        <h2>¡Pedido Realizado Exitosamente!</h2>
         <p class="success-order-id">Número de Pedido: <strong>${order.id}</strong></p>
         <div class="success-details">
           <div class="success-row"><i class="fas fa-user"></i><span>${order.customer.fullName}</span></div>
@@ -432,35 +451,36 @@ class CheckoutModal {
           <div class="success-row"><i class="fas fa-map-marker-alt"></i><span>${order.customer.city} - ${order.customer.address}</span></div>
           <div class="success-row success-total"><i class="fas fa-tags"></i><span>${Formatters.formatPrice(order.total)}</span></div>
         </div>
-        <div class="success-message">
-          <i class="fab fa-whatsapp"></i>
-          <p>Te hemos enviado los detalles por WhatsApp. <br>Nuestro equipo se pondrá en contacto contigo muy pronto.</p>
+        ${dynamicMessage}
+        <div class="success-message-contact">
+          <p class="contact-note"><i class="fas fa-comment-dots"></i> En breve recibirás un mensaje por WhatsApp de parte del administrador.</p>
         </div>
         <div class="success-actions">
-          <button class="success-btn success-btn-primary" id="successWhatsappBtn">
-            <i class="fab fa-whatsapp"></i> Abrir WhatsApp
+          <button class="success-btn success-btn-secondary" id="successBrowseBtn">
+            <i class="fas fa-store"></i> Seguir navegando
           </button>
-          <button class="success-btn success-btn-secondary" id="successCloseBtn">
-            <i class="fas fa-home"></i> Volver al Inicio
+          <button class="success-btn success-btn-primary" id="successCloseBtn">
+            <i class="fas fa-times"></i> Cerrar
           </button>
         </div>
       </div>
     `;
     document.body.appendChild(successOverlay);
 
-    const footer = window.siteData?.getSection?.('footer') || {};
-    const adminPhone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
-    const msg = `Hola, acabo de realizar el pedido ${order.id}. Quedo atento(a) a la confirmación.`;
-
-    successOverlay.querySelector('#successWhatsappBtn').addEventListener('click', () => {
-      window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    successOverlay.querySelector('#successBrowseBtn').addEventListener('click', () => {
+      successOverlay.remove();
+      if (window.cartService) window.cartService.clear();
+      window.location.href = 'index.html';
     });
     successOverlay.querySelector('#successCloseBtn').addEventListener('click', () => {
       successOverlay.remove();
-      window.location.href = 'index.html';
+      if (window.cartService) window.cartService.clear();
     });
     successOverlay.addEventListener('click', (e) => {
-      if (e.target === successOverlay) successOverlay.remove();
+      if (e.target === successOverlay) {
+        successOverlay.remove();
+        if (window.cartService) window.cartService.clear();
+      }
     });
   }
 
@@ -817,16 +837,77 @@ class CheckoutModal {
       .success-row.success-total span { font-weight: 800; color: #198754; font-size: 15px; }
 
       .success-message {
-        padding: 14px 18px;
-        background: rgba(37,211,102,0.08);
-        border: 1px solid rgba(37,211,102,0.2);
-        border-radius: 12px;
-        display: flex; align-items: center; gap: 12px;
-        margin-bottom: 22px;
+        padding: 18px 20px;
+        border-radius: 14px;
+        margin-bottom: 16px;
         text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
-      .success-message i { font-size: 28px; color: #25D366; flex-shrink: 0; }
-      .success-message p { margin: 0; font-size: 13px; color: var(--text-white, #fff); line-height: 1.6; }
+      .success-message--transfer {
+        background: rgba(13,110,253,0.08);
+        border: 1px solid rgba(13,110,253,0.2);
+      }
+      .success-message--cod {
+        background: rgba(25,135,84,0.08);
+        border: 1px solid rgba(25,135,84,0.2);
+      }
+      .success-message-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px;
+        margin: 0 auto 4px;
+      }
+      .success-message--transfer .success-message-icon {
+        background: rgba(13,110,253,0.18);
+        color: #0d6efd;
+      }
+      .success-message--cod .success-message-icon {
+        background: rgba(25,135,84,0.18);
+        color: #198754;
+      }
+      .success-message-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-white, #fff);
+        text-align: center;
+        margin-bottom: 2px;
+      }
+      .success-message p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-white, #fff);
+        line-height: 1.65;
+        text-align: center;
+      }
+      .success-message p strong {
+        color: var(--gold-primary);
+        font-weight: 700;
+      }
+
+      .success-message-contact {
+        padding: 12px 16px;
+        background: rgba(212,168,67,0.07);
+        border: 1px solid rgba(212,168,67,0.18);
+        border-radius: 12px;
+        margin-bottom: 22px;
+      }
+      .contact-note {
+        margin: 0;
+        font-size: 12.5px;
+        color: var(--text-gray, #bbb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        line-height: 1.5;
+      }
+      .contact-note i {
+        color: var(--gold-primary);
+        font-size: 14px;
+      }
 
       .success-actions { display: flex; gap: 12px; flex-wrap: wrap; }
       .success-btn {
@@ -839,11 +920,11 @@ class CheckoutModal {
         transition: all 0.25s ease;
       }
       .success-btn-primary {
-        background: linear-gradient(135deg, #25D366, #128C7E);
+        background: linear-gradient(135deg, #6c757d, #495057);
         color: #fff;
-        box-shadow: 0 6px 20px rgba(37,211,102,0.3);
+        box-shadow: 0 6px 20px rgba(108,117,125,0.3);
       }
-      .success-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(37,211,102,0.4); }
+      .success-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(108,117,125,0.4); }
       .success-btn-secondary {
         background: rgba(212,168,67,0.1);
         color: var(--gold-primary);
@@ -873,6 +954,7 @@ class CheckoutModal {
       [data-theme="light"] .transfer-row { background: #f5f5f5; }
       [data-theme="light"] .checkout-header h2,
       [data-theme="light"] .success-message p,
+      [data-theme="light"] .success-message-title,
       [data-theme="light"] .cod-info-list li,
       [data-theme="light"] .transfer-row strong,
       [data-theme="light"] .success-row,
@@ -881,6 +963,20 @@ class CheckoutModal {
       [data-theme="light"] .checkout-disclaimer,
       [data-theme="light"] .payment-hint,
       [data-theme="light"] .summary-row { color: #333; }
+      [data-theme="light"] .success-message--transfer {
+        background: rgba(13,110,253,0.06);
+        border-color: rgba(13,110,253,0.25);
+      }
+      [data-theme="light"] .success-message--cod {
+        background: rgba(25,135,84,0.06);
+        border-color: rgba(25,135,84,0.25);
+      }
+      [data-theme="light"] .success-message-contact {
+        background: rgba(212,168,67,0.08);
+        border-color: rgba(212,168,67,0.25);
+      }
+      [data-theme="light"] .contact-note { color: #666; }
+      [data-theme="light"] .checkout-success-card h2 { color: #1a1a1a; }
 
       /* ── RESPONSIVE ── */
       @media (max-width: 960px) {

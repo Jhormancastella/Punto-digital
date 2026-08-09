@@ -524,14 +524,14 @@ class ProductCatalog {
     `;
 
     card.querySelector('.btn-view-details').addEventListener('click', () => {
-      this.openProductModal(product.id);
+      this.goToProductDetail(product.id);
     });
     card.querySelector('.btn-add-cart').addEventListener('click', (e) => {
       e.stopPropagation();
       this.addToCart(product.id);
     });
     card.addEventListener('click', (e) => {
-      if (!e.target.closest('button')) this.openProductModal(product.id);
+      if (!e.target.closest('button')) this.goToProductDetail(product.id);
     });
 
     const cardImg = card.querySelector('.catalog-card-img img');
@@ -750,22 +750,20 @@ class ProductCatalog {
   }
 
   openProductModal(productId) {
-    // Buscar el objeto completo en los datos del catálogo (más frescos que siteData)
-    const product = this.allProducts.find(p => p.id === productId);
-    if (!product) return;
+    // Redirige a la página de detalle en lugar de abrir el modal
+    this.goToProductDetail(productId);
+  }
 
-    if (window.productModal) {
-      // Pasar el objeto directamente para garantizar que la imagen sea la correcta
-      window.productModal.openProductObject(product);
+  goToProductDetail(productId) {
+    if (!productId) return;
+    const url = `producto.html?id=${encodeURIComponent(productId)}`;
+    // Permitir abrir en pestaña nueva con Ctrl/Cmd + click ya lo maneja el navegador en <a>,
+    // aquí hacemos navegación normal.
+    try {
+      window.location.assign(url);
+    } catch (_) {
+      window.location.href = url;
     }
-
-    this.trackEvent('product_viewed_from_catalog', {
-      product_id: productId,
-      page: this.currentPage,
-      filters_applied: Object.keys(this.filters).some(key =>
-        Array.isArray(this.filters[key]) ? this.filters[key].length > 0 : this.filters[key]
-      )
-    });
   }
 
   addToCart(productId) {

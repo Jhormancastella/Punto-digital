@@ -674,54 +674,205 @@ class AdminPanel {
   }
 
   openAddProductModal(section = 'products', data = {}, index = -1) {
+    // ── Definición de categorías y campos técnicos ──
+    const TS_CATEGORIES = [
+      { key:'pantalla', label:'Pantalla', icon:'fa-display', fields:[
+        { key:'tamano', label:'Tamaño (pulgadas)' },
+        { key:'tecnologia', label:'Tecnología (AMOLED, IPS...)' },
+        { key:'resolucion', label:'Resolución' },
+        { key:'refresco', label:'Tasa de refresco (Hz)' },
+        { key:'brillo', label:'Brillo máximo (nits)' },
+        { key:'proteccion', label:'Protección / HDR' },
+        { key:'otros', label:'Otros', full:true }
+      ]},
+      { key:'rendimiento', label:'Rendimiento', icon:'fa-microchip', fields:[
+        { key:'procesador', label:'Procesador / Chipset' },
+        { key:'gpu', label:'GPU' },
+        { key:'nucleos', label:'Núcleos / Velocidad' },
+        { key:'anTuTu', label:'Benchmark (AnTuTu, Geekbench)', full:true }
+      ]},
+      { key:'memoria', label:'Memoria y Almacenamiento', icon:'fa-sd-card', fields:[
+        { key:'ram', label:'RAM' },
+        { key:'interno', label:'Almacenamiento interno' },
+        { key:'expandible', label:'Expandible (microSD)' },
+        { key:'tipo', label:'Tipo de memoria' }
+      ]},
+      { key:'camara', label:'Cámara', icon:'fa-camera-retro', fields:[
+        { key:'principal', label:'Cámara principal' },
+        { key:'ultragran', label:'Ultra gran angular' },
+        { key:'telefoto', label:'Telefoto / Zoom' },
+        { key:'frontal', label:'Cámara frontal / Selfie' },
+        { key:'video', label:'Grabación de video', full:true },
+        { key:'caracteristicas', label:'Características', full:true }
+      ]},
+      { key:'bateria', label:'Batería y Carga', icon:'fa-battery-full', fields:[
+        { key:'capacidad', label:'Capacidad (mAh)' },
+        { key:'cargaRapida', label:'Carga rápida (W)' },
+        { key:'cargaInalambrica', label:'Carga inalámbrica (W)' },
+        { key:'cargaInversa', label:'Carga inversa' },
+        { key:'autonomia', label:'Autonomía / Duración', full:true }
+      ]},
+      { key:'conectividad', label:'Conectividad', icon:'fa-wifi', fields:[
+        { key:'redes', label:'Redes móviles (5G, 4G...)' },
+        { key:'wifi', label:'Wi-Fi' },
+        { key:'bluetooth', label:'Bluetooth' },
+        { key:'nfc', label:'NFC' },
+        { key:'gps', label:'GPS / Navegación' },
+        { key:'usb', label:'Puerto USB' },
+        { key:'jack', label:'Jack de audio 3.5mm' }
+      ]},
+      { key:'diseno', label:'Diseño y Dimensiones', icon:'fa-ruler-combined', fields:[
+        { key:'dimensiones', label:'Dimensiones (AlxAnxPr mm)' },
+        { key:'peso', label:'Peso (g)' },
+        { key:'materiales', label:'Materiales' },
+        { key:'colores', label:'Colores disponibles', full:true },
+        { key:'resistencia', label:'Certificación IP' },
+        { key:'otros', label:'Otros detalles', full:true }
+      ]},
+      { key:'software', label:'Software', icon:'fa-code', fields:[
+        { key:'sistema', label:'Sistema operativo' },
+        { key:'interfaz', label:'Interfaz / Capa UI' },
+        { key:'actualizaciones', label:'Años de actualizaciones' },
+        { key:'extra', label:'Software adicional', full:true }
+      ]},
+      { key:'audio', label:'Audio', icon:'fa-headphones-alt', fields:[
+        { key:'altavoces', label:'Altavoces' },
+        { key:'microfonos', label:'Micrófonos' },
+        { key:'tecnologia', label:'Tecnología (Dolby, HiFi...)' },
+        { key:'cancelacion', label:'Cancelación de ruido' }
+      ]},
+      { key:'seguridad', label:'Seguridad', icon:'fa-fingerprint', fields:[
+        { key:'huella', label:'Lector de huella' },
+        { key:'reconocimiento', label:'Reconocimiento facial' },
+        { key:'sensores', label:'Sensores', full:true },
+        { key:'otros', label:'Otras medidas', full:true }
+      ]},
+      { key:'otros', label:'General', icon:'fa-star', fields:[
+        { key:'garantia', label:'Garantía' },
+        { key:'origen', label:'País origen / ensamble' },
+        { key:'sku', label:'Modelo / SKU' },
+        { key:'destacadas', label:'Características destacadas', full:true }
+      ]}
+    ];
+
+    const fldId = (cat, key) => `m-ts-${cat}-${key}`;
+    const existingTech = data.techSpecs || {};
+    const existingFlat = data.specifications || {};
+
+    const groupHTML = TS_CATEGORIES.map(cat => {
+      const catData = existingTech[cat.key] || {};
+      const fieldsHTML = cat.fields.map(f => {
+        const rawVal =
+          (catData[f.key] !== undefined && catData[f.key] !== null) ? catData[f.key] :
+          (existingFlat[f.key] !== undefined && existingFlat[f.key] !== null ? existingFlat[f.key] :
+          (existingFlat[`${cat.key} ${f.key}`] !== undefined ? existingFlat[`${cat.key} ${f.key}`] : ''));
+        const val = Helpers.escapeAttr(String(rawVal == null ? '' : rawVal));
+        return `
+          <div class="ap-field ${f.full ? 'ap-ts-col--full' : ''}">
+            <label for="${fldId(cat.key, f.key)}">${f.label}</label>
+            <input type="text" id="${fldId(cat.key, f.key)}" value="${val}" placeholder="${f.label}">
+          </div>
+        `;
+      }).join('');
+      return `
+        <details class="ap-ts-group">
+          <summary>
+            <i class="fas ${cat.icon}"></i>
+            <span>${cat.label}</span>
+            <i class="fas fa-chevron-right chev"></i>
+          </summary>
+          <div class="ap-ts-group__body">${fieldsHTML}</div>
+        </details>
+      `;
+    }).join('');
+
+    // ── Contenido de la caja ──
+    this._boxContents = Array.isArray(data.boxContents) ? [...data.boxContents] : [];
+    const boxHTML = `
+      <div class="ap-field ap-boxlist">
+        <label>Contenido de la caja</label>
+        <div class="ap-boxlist__input-row">
+          <input type="text" id="m-box-input" placeholder="Ej: Cable USB-C, adaptador, manual de usuario...">
+          <button type="button" class="ap-boxlist__add" id="m-box-add">
+            <i class="fas fa-plus"></i> Agregar
+          </button>
+        </div>
+        <div class="ap-boxlist__items" id="m-box-list"></div>
+        <p class="ap-hint" style="margin-top:6px">Lo que se incluye en la caja al comprar el producto.</p>
+      </div>
+    `;
+
     this.openModal(index >= 0 ? 'Editar producto' : 'Nuevo producto', `
       <div class="ap-field"><label>Nombre</label><input type="text" id="m-pName" value="${Helpers.escapeAttr(data.name || '')}"></div>
-      <div class="ap-field"><label>Marca</label><input type="text" id="m-pBrand" value="${Helpers.escapeAttr(data.brand || '')}"></div>
-      <div class="ap-field"><label>Precio (COP, sin puntos)</label><input type="number" id="m-pPrice" value="${Helpers.escapeAttr(data.price || '')}"></div>
-      <div class="ap-field"><label>Precio original (opcional)</label><input type="number" id="m-pOriginal" value="${Helpers.escapeAttr(data.originalPrice || '')}"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="ap-field"><label>Marca</label><input type="text" id="m-pBrand" value="${Helpers.escapeAttr(data.brand || '')}"></div>
+        <div class="ap-field"><label>Categoría</label>
+          <select id="m-pCat">
+            <option value="smartphones" ${data.category==='smartphones'?'selected':''}>Smartphones</option>
+            <option value="auriculares" ${data.category==='auriculares'?'selected':''}>Auriculares</option>
+            <option value="smartwatches" ${data.category==='smartwatches'?'selected':''}>Smartwatches</option>
+            <option value="accesorios" ${data.category==='accesorios'?'selected':''}>Accesorios</option>
+            <option value="tablets" ${data.category==='tablets'?'selected':''}>Tablets</option>
+            <option value="gadgets" ${data.category==='gadgets'?'selected':''}>Gadgets</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="ap-field"><label>Precio (COP, sin puntos)</label><input type="number" id="m-pPrice" value="${Helpers.escapeAttr(data.price || '')}"></div>
+        <div class="ap-field"><label>Precio original (opcional)</label><input type="number" id="m-pOriginal" value="${Helpers.escapeAttr(data.originalPrice || '')}"></div>
+      </div>
       <div class="ap-field">
         <label>Imágenes del producto <span style="color:#dc3545">*</span> (mínimo 3)</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <input type="text" id="m-pImgUrl" placeholder="https://ejemplo.com/imagen.jpg"
-                 style="flex:1;min-width:200px">
-          <button type="button" id="m-pImgAddUrl" class="ap-item-btn ap-item-btn-edit"
-                  style="white-space:nowrap">
+          <input type="text" id="m-pImgUrl" placeholder="https://ejemplo.com/imagen.jpg" style="flex:1;min-width:200px">
+          <button type="button" id="m-pImgAddUrl" class="ap-item-btn ap-item-btn-edit" style="white-space:nowrap">
             <i class="fas fa-link"></i> Agregar
           </button>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <input type="file" id="m-pImgFile" accept="image/*" multiple
-                 style="color:var(--text-white);flex:1">
-          <button type="button" id="m-pImgAddFile" class="ap-item-btn ap-item-btn-edit"
-                  style="white-space:nowrap">
+          <input type="file" id="m-pImgFile" accept="image/*" multiple style="color:var(--text-white);flex:1">
+          <button type="button" id="m-pImgAddFile" class="ap-item-btn ap-item-btn-edit" style="white-space:nowrap">
             <i class="fas fa-upload"></i> Subir
           </button>
         </div>
         <p class="ap-hint" style="margin-top:4px">El fondo blanco/claro se eliminará automáticamente</p>
         <div id="m-pImagesContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:10px">
-          <!-- Miniaturas dinámicas -->
         </div>
       </div>
-      <div class="ap-field"><label>Categoría</label>
-        <select id="m-pCat">
-          <option value="smartphones" ${data.category==='smartphones'?'selected':''}>Smartphones</option>
-          <option value="auriculares" ${data.category==='auriculares'?'selected':''}>Auriculares</option>
-          <option value="smartwatches" ${data.category==='smartwatches'?'selected':''}>Smartwatches</option>
-          <option value="accesorios" ${data.category==='accesorios'?'selected':''}>Accesorios</option>
-        </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="ap-field"><label>Badge (ej: Nuevo, Oferta)</label><input type="text" id="m-pBadge" value="${Helpers.escapeAttr(data.badge || '')}"></div>
+        <div class="ap-field"><label>Rating (0-5)</label><input type="number" id="m-pRating" min="0" max="5" step="0.1" value="${Helpers.escapeAttr(data.rating || 4.5)}"></div>
       </div>
-      <div class="ap-field"><label>Badge (ej: Nuevo, Oferta)</label><input type="text" id="m-pBadge" value="${Helpers.escapeAttr(data.badge || '')}"></div>
-      <div class="ap-field"><label>Descripción</label><textarea id="m-pDesc" rows="3">${Helpers.escapeHtml(data.description || '')}</textarea></div>
-      <div class="ap-field"><label>Stock</label><input type="number" id="m-pStock" value="${Helpers.escapeAttr(data.stock || 10)}"></div>
-      <div class="ap-field"><label>Rating (0-5)</label><input type="number" id="m-pRating" min="0" max="5" step="0.1" value="${Helpers.escapeAttr(data.rating || 4.5)}"></div>
-      <div class="ap-field" style="display:flex;align-items:center;gap:12px;padding:8px 0">
-        <input type="checkbox" id="m-pFeatured" ${data.featured ? 'checked' : ''}
-               style="width:18px;height:18px;accent-color:var(--gold-primary)">
-        <label for="m-pFeatured" style="font-size:14px;color:var(--text-white);cursor:pointer;text-transform:none;letter-spacing:0">
-          <i class="fas fa-star" style="color:var(--gold-primary);margin-right:6px"></i>
-          Marcar como producto destacado
-        </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="ap-field"><label>Stock (unidades)</label><input type="number" id="m-pStock" value="${Helpers.escapeAttr(data.stock ?? 10)}"></div>
+        <div class="ap-field" style="padding:8px 0;display:flex;align-items:center;gap:12px">
+          <input type="checkbox" id="m-pFeatured" ${data.featured ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--gold-primary)">
+          <label for="m-pFeatured" style="font-size:14px;color:var(--text-white);cursor:pointer;text-transform:none;letter-spacing:0;margin:0">
+            <i class="fas fa-star" style="color:var(--gold-primary);margin-right:6px"></i>
+            Marcar como producto destacado
+          </label>
+        </div>
       </div>
+      <div class="ap-field">
+        <label>Descripción general</label>
+        <textarea id="m-pDesc" rows="4" placeholder="Descripción comercial del producto...">${Helpers.escapeHtml(data.description || '')}</textarea>
+      </div>
+
+      ${boxHTML}
+
+      <details class="ap-techspecs" ${Object.keys(existingTech).length || Object.keys(existingFlat).length ? 'open' : ''}>
+        <summary>
+          <i class="fas fa-chevron-right"></i>
+          <i class="fas fa-microchip" style="margin-left:2px"></i>
+          <span>Especificaciones Técnicas Detalladas</span>
+          <span style="margin-left:auto;font-size:11.5px;font-weight:500;color:var(--text-gray);opacity:.85">
+            <i class="fas fa-layer-group"></i> ${TS_CATEGORIES.length} categorías
+          </span>
+        </summary>
+        <div class="ap-techspecs__body">
+          ${groupHTML}
+        </div>
+      </details>
     `, async () => {
       const name = this.getVal('m-pName');
       if (!name) { notificationService.error('El nombre es requerido'); return false; }
@@ -732,9 +883,34 @@ class AdminPanel {
         return false;
       }
 
+      // ── Recolectar especificaciones técnicas categorizadas ──
+      const techSpecs = {};
+      const specificationsFlat = {};
+      for (const cat of TS_CATEGORIES) {
+        let hasAny = false;
+        const catObj = {};
+        for (const f of cat.fields) {
+          const el = document.getElementById(fldId(cat.key, f.key));
+          const v = el ? el.value.trim() : '';
+          if (v) {
+            catObj[f.key] = v;
+            specificationsFlat[`${cat.label.toLowerCase()} / ${f.label.toLowerCase()}`] = v;
+            specificationsFlat[f.label] = v;
+            hasAny = true;
+          }
+        }
+        if (hasAny) techSpecs[cat.key] = catObj;
+      }
+
+      const boxContents = (this._boxContents || []).filter(Boolean);
+
+      const id = data.id || name.toLowerCase().replace(/\s+/g,'-') + '-' + Date.now();
+      const reviews = typeof data.reviews === 'number' ? data.reviews : (parseInt(data.reviews,10) || 0);
+
       const item = {
-        id: data.id || name.toLowerCase().replace(/\s+/g,'-') + '-' + Date.now(),
-        name, brand: this.getVal('m-pBrand'),
+        id,
+        name,
+        brand: this.getVal('m-pBrand'),
         price: this.getVal('m-pPrice'),
         originalPrice: this.getVal('m-pOriginal') || null,
         image: images[0],
@@ -742,23 +918,75 @@ class AdminPanel {
         category: this.getVal('m-pCat'),
         badge: this.getVal('m-pBadge') || null,
         description: this.getVal('m-pDesc'),
-        stock: parseInt(this.getVal('m-pStock')) || 10,
+        stock: parseInt(this.getVal('m-pStock')) || 0,
         rating: parseFloat(this.getVal('m-pRating')) || 4.5,
-        reviews: data.reviews || 0,
+        reviews,
         featured: document.getElementById('m-pFeatured')?.checked || false,
-        specifications: data.specifications || {}
+        // Retener compatibilidad: flat + categorizado
+        specifications: { ...(data.specifications || {}), ...specificationsFlat },
+        techSpecs,
+        boxContents
       };
+
       const list = window.siteData.getSection('products') || [];
-      if (index >= 0) list[index] = item; else list.push(item);
+      if (index >= 0) {
+        // Preservar reviews si viene con valor previo
+        item.reviews = list[index]?.reviews ?? reviews ?? 0;
+        list[index] = item;
+      } else {
+        list.push(item);
+      }
       window.siteData.updateSection('products', list);
       this.loadProducts();
-      notificationService.success('Producto guardado');
+      notificationService.success('Producto guardado correctamente');
     });
 
-    // Inicializar gestor de imágenes múltiples
+    // ── Inicializar gestores: imágenes + contenido caja ──
     setTimeout(() => {
       window.adminPanel._initProductImages(data);
-    }, 100);
+      window.adminPanel._initBoxContents();
+    }, 80);
+  }
+
+  _initBoxContents() {
+    const input = document.getElementById('m-box-input');
+    const addBtn = document.getElementById('m-box-add');
+    const list = document.getElementById('m-box-list');
+    if (!input || !addBtn || !list) return;
+    const render = () => {
+      if (!this._boxContents || !this._boxContents.length) {
+        list.innerHTML = '<p class="ap-boxlist__empty">Aún no has agregado ningún elemento. El campo es opcional.</p>';
+        return;
+      }
+      list.innerHTML = this._boxContents.map((item, i) => `
+        <div class="ap-boxlist__item">
+          <i class="fas fa-check-circle check"></i>
+          <span>${Helpers.escapeHtml(item)}</span>
+          <button type="button" data-idx="${i}" title="Quitar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `).join('');
+      list.querySelectorAll('button[data-idx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.dataset.idx, 10);
+          this._boxContents.splice(i, 1);
+          render();
+        });
+      });
+    };
+    const add = () => {
+      const v = input.value.trim();
+      if (!v) return;
+      this._boxContents.push(v);
+      input.value = '';
+      render();
+    };
+    addBtn.addEventListener('click', add);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); add(); }
+    });
+    render();
   }
 
   _initProductImages(data) {
