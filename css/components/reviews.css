@@ -614,6 +614,10 @@
 /* Responsive móvil - modal no se corta y scrollea */
 @media (max-width: 600px) {
   .ap-modal-overlay { padding: 8px; align-items: flex-end; }
+  .ap-modal-overlay.video-player-modal,
+  .ap-modal-overlay.image-viewer-modal {
+    align-items: center;
+  }
   .ap-modal {
     border-radius: 20px 20px 0 0;
     max-height: 94vh;
