@@ -98,39 +98,15 @@ class ProductCatalog {
   renderFooter() {
     const footerData = window.siteData?.getSection('footer');
     const socialData = window.siteData?.getSection('social');
+    const whatsappUrl = Helpers.whatsappUrl(footerData?.whatsapp || footerData?.phone);
     this.renderFooterContact(footerData);
-    this.renderSocialLinks(socialData);
+    this.renderSocialLinks(whatsappUrl ? { ...(socialData || {}), whatsapp: whatsappUrl } : socialData);
     const slogan = window.siteData?.getSection('slogan') || 'Siempre Conectados';
     document.querySelectorAll('#navSloganText').forEach(el => { el.textContent = slogan; });
   }
 
   renderFooterContact(footerData) {
-    const container = document.getElementById('footerContact');
-    if (!container || !footerData) return;
-
-    container.innerHTML = `
-      <a href="tel:${footerData.phone}" class="contact-item">
-        <i class="fas fa-phone" aria-hidden="true"></i>
-        <span>${Helpers.escapeHtml(footerData.phone)}</span>
-      </a>
-      <a href="mailto:${Helpers.escapeAttr(footerData.email)}" class="contact-item">
-        <i class="fas fa-envelope" aria-hidden="true"></i>
-        <span>${Helpers.escapeHtml(footerData.email)}</span>
-      </a>
-      ${footerData.address ? `
-        <div class="contact-item">
-          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-          <span>${Helpers.escapeHtml(footerData.address)}</span>
-        </div>
-      ` : ''}
-      ${footerData.whatsapp ? `
-        <a href="https://wa.me/${footerData.whatsapp.replace(/\D/g, '')}" 
-           class="contact-item" target="_blank" rel="noopener">
-          <i class="fab fa-whatsapp" aria-hidden="true"></i>
-          <span>WhatsApp</span>
-        </a>
-      ` : ''}
-    `;
+    Helpers.renderFooterContact(footerData);
   }
 
   renderSocialLinks(socialData) {

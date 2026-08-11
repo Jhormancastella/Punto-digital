@@ -413,6 +413,52 @@
 .ap-qa-btn i { color: var(--gold-primary); font-size: 16px; }
 .ap-qa-btn:hover { background: rgba(212,168,67,0.08); border-color: var(--gold-primary); transform: translateY(-2px); }
 
+/* Dashboard charts */
+.ap-dashboard-charts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+.ap-chart-card {
+  background: var(--black-card);
+  border: 1px solid rgba(212,168,67,0.1);
+  border-radius: 16px;
+  padding: 18px;
+  min-width: 0;
+}
+.ap-chart-card--wide { grid-column: span 2; }
+.ap-chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ap-chart-head h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+.ap-chart-head p {
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  color: var(--text-gray);
+}
+.ap-chart-head span {
+  color: var(--gold-primary);
+  font-weight: 800;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.ap-chart-card canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  background: transparent;
+}
+
 /* ── Cards ────────────────────────────────────────────────────── */
 .ap-grid-2 {
   display: grid;
@@ -669,22 +715,52 @@
 .ap-modal-footer .ap-btn-save { width: auto; padding: 11px 28px; margin-top: 0; }
 
 /* ── Light theme ──────────────────────────────────────────────── */
-/* Sidebar y Topbar SON SIEMPRE oscuros (estilo de marca Punto Digital) */
-.ap-topbar,
-.ap-sidebar { background: #0b0b0d; }
-.ap-sidebar { border-right-color: rgba(212,168,67,0.12); }
-.ap-sidebar-user { border-bottom-color: rgba(212,168,67,0.1); }
+[data-theme="light"] .ap-topbar {
+  background: #ffffff;
+  border-bottom-color: #e9ecef;
+  box-shadow: 0 2px 18px rgba(15,23,42,0.08);
+}
+[data-theme="light"] .ap-sidebar {
+  background: #ffffff;
+  border-right-color: #e9ecef;
+}
 [data-theme="light"] .ap-sidebar-user,
-[data-theme="light"] .ap-sidebar-brand { border-bottom-color: rgba(212,168,67,0.1); }
-[data-theme="light"] .ap-sidebar { border-right-color: rgba(212,168,67,0.12); }
-[data-theme="light"] .ap-user-name { color: #f1f3f5 !important; }
+[data-theme="light"] .ap-sidebar-brand {
+  background: linear-gradient(135deg, rgba(212,168,67,0.08), transparent);
+  border-bottom-color: #eef0f2;
+}
+[data-theme="light"] .ap-sidebar-footer { border-top-color: #eef0f2; }
+[data-theme="light"] .ap-user-name { color: #1f2937 !important; }
+[data-theme="light"] .ap-nav-label { color: #6b7280; }
+[data-theme="light"] .ap-nav-item { color: #4b5563; }
+[data-theme="light"] .ap-nav-item:hover {
+  background: rgba(212,168,67,0.08);
+  color: #1f2937;
+}
+[data-theme="light"] .ap-nav-item.active {
+  background: rgba(212,168,67,0.14);
+  color: var(--gold-dark);
+}
+[data-theme="light"] .ap-icon-btn,
+[data-theme="light"] .ap-sidebar-toggle {
+  background: #f8f9fa;
+  border-color: #e5e7eb;
+  color: #4b5563;
+}
+[data-theme="light"] .ap-icon-btn:hover,
+[data-theme="light"] .ap-sidebar-toggle:hover {
+  background: rgba(212,168,67,0.12);
+  border-color: rgba(212,168,67,0.3);
+  color: var(--gold-dark);
+}
 
 [data-theme="light"] .ap-card,
 [data-theme="light"] .ap-stat-card,
 [data-theme="light"] .ap-item,
 [data-theme="light"] .ap-product-card,
 [data-theme="light"] .ap-modal,
-[data-theme="light"] .ap-qa-btn { background: #ffffff; }
+[data-theme="light"] .ap-qa-btn,
+[data-theme="light"] .ap-chart-card { background: #ffffff; }
 [data-theme="light"] .admin-body { background: #f1f3f5; }
 [data-theme="light"] .ap-field input,
 [data-theme="light"] .ap-field textarea,
@@ -719,6 +795,8 @@
 
   .ap-main { padding: 20px 16px; }
   .ap-stats { grid-template-columns: repeat(2, 1fr); }
+  .ap-dashboard-charts { grid-template-columns: 1fr; }
+  .ap-chart-card--wide { grid-column: auto; }
 }
 
 /* Backdrop móvil al abrir sidebar */
@@ -815,6 +893,10 @@
   /* ── Quick actions ── */
   .ap-qa-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
   .ap-qa-btn { padding: 12px 10px; font-size: 13px; gap: 6px; border-radius: 10px; }
+  .ap-dashboard-charts { gap: 12px; margin-top: 20px; }
+  .ap-chart-card { padding: 14px; border-radius: 12px; }
+  .ap-chart-head h3 { font-size: 13.5px; }
+  .ap-chart-head p { font-size: 11px; }
 
   /* ── Cards ── */
   .ap-card { padding: 16px 14px; border-radius: 14px; }

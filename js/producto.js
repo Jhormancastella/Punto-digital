@@ -442,7 +442,7 @@ class ProductPage {
       window.checkoutModal.open(window.cartService.items, window.cartService.getTotal());
     } else {
       const footer = window.siteData?.getSection?.('footer') || {};
-      const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+      const phone = Helpers.phoneToWhatsappNumber(footer.whatsapp || footer.phone || '+57 301 7059737');
       const price = typeof p.price === 'string' ? parseInt(p.price) : p.price;
       const msg = [
         'Hola! Quiero comprar este producto en Punto Digital:',
@@ -465,7 +465,7 @@ class ProductPage {
     const price = typeof p.price === 'string' ? parseInt(p.price) : p.price;
     const message = `Hola! Me interesa el *${p.name}* por ${Formatters.formatPrice(price)}. ¿Podrías darme más información, disponibilidad y envío a mi ciudad?`;
     const footer = window.siteData?.getSection?.('footer') || {};
-    const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+    const phone = Helpers.phoneToWhatsappNumber(footer.whatsapp || footer.phone || '+57 301 7059737');
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     this.trackEvent('whatsapp_from_product_page', {
       product_id: p.id, product_name: p.name
@@ -475,32 +475,15 @@ class ProductPage {
   renderFooter() {
     const footer = window.siteData?.getSection?.('footer');
     const social = window.siteData?.getSection?.('social');
+    const whatsappUrl = Helpers.whatsappUrl(footer?.whatsapp || footer?.phone);
     this.renderFooterContact(footer);
-    this.renderSocialLinks(social);
+    this.renderSocialLinks(whatsappUrl ? { ...(social || {}), whatsapp: whatsappUrl } : social);
     const slogan = window.siteData?.getSection?.('slogan') || 'Siempre Conectados';
     document.querySelectorAll('#navSloganText').forEach(el => { el.textContent = slogan; });
   }
 
   renderFooterContact(footerData) {
-    const container = document.getElementById('footerContact');
-    if (!container || !footerData) return;
-    const build = (html, icon, label, url, external) => external
-      ? `${html}<a href="${Helpers.escapeAttr(url)}" class="contact-item" target="_blank" rel="noopener"><i class="fas ${icon}"></i><span>${Helpers.escapeHtml(label)}</span></a>`
-      : `${html}<div class="contact-item"><i class="fas ${icon}"></i><span>${Helpers.escapeHtml(label)}</span></div>`;
-    let html = '';
-    if (footerData.phone) {
-      html += `<a href="tel:${Helpers.escapeAttr(footerData.phone)}" class="contact-item"><i class="fas fa-phone"></i><span>${Helpers.escapeHtml(footerData.phone)}</span></a>`;
-    }
-    if (footerData.email) {
-      html += `<a href="mailto:${Helpers.escapeAttr(footerData.email)}" class="contact-item"><i class="fas fa-envelope"></i><span>${Helpers.escapeHtml(footerData.email)}</span></a>`;
-    }
-    if (footerData.address) {
-      html = build(html, 'fa-map-marker-alt', footerData.address);
-    }
-    if (footerData.whatsapp) {
-      html = build(html, 'fa-whatsapp', 'WhatsApp', `https://wa.me/${footerData.whatsapp.replace(/\D/g, '')}`, true);
-    }
-    container.innerHTML = html;
+    Helpers.renderFooterContact(footerData);
   }
 
   renderSocialLinks(socialData) {

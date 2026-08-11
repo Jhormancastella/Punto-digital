@@ -400,6 +400,7 @@ class ReviewService {
 
   load() {
     try {
+      if (this._isAdminMode()) return [];
       const raw = localStorage.getItem(this.storageKey);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
@@ -410,6 +411,10 @@ class ReviewService {
   }
 
   save() {
+    if (this._isAdminMode()) {
+      this.notify('reviewsUpdated', this.reviews);
+      return;
+    }
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.reviews));
       this.notify('reviewsUpdated', this.reviews);
@@ -420,8 +425,14 @@ class ReviewService {
     }
   }
 
+  _isAdminMode() {
+    const fbUser = window.firebaseClient?.getCurrentUser?.();
+    return !!(fbUser && String(fbUser.email || '').toLowerCase() === 'puntodigitalti@gmail.com');
+  }
+
   setupCrossTabSync() {
     window.addEventListener('storage', (e) => {
+      if (this._isAdminMode()) return;
       if (e.key === this.storageKey) {
         this.reviews = this.load();
         this.notify('reviewsUpdated', this.reviews);

@@ -194,6 +194,7 @@ class OrderService {
 
   load() {
     try {
+      if (this._isAdminMode()) return [];
       const raw = localStorage.getItem(this.storageKey);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
@@ -204,6 +205,10 @@ class OrderService {
   }
 
   save() {
+    if (this._isAdminMode()) {
+      this.notify('ordersUpdated', this.orders);
+      return;
+    }
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.orders));
       this.notify('ordersUpdated', this.orders);
@@ -214,8 +219,14 @@ class OrderService {
     }
   }
 
+  _isAdminMode() {
+    const fbUser = window.firebaseClient?.getCurrentUser?.();
+    return !!(fbUser && String(fbUser.email || '').toLowerCase() === 'puntodigitalti@gmail.com');
+  }
+
   setupCrossTabSync() {
     window.addEventListener('storage', (e) => {
+      if (this._isAdminMode()) return;
       if (e.key === this.storageKey) {
         this.orders = this.load();
         this.notify('ordersUpdated', this.orders);
@@ -505,7 +516,7 @@ class OrderService {
 
   sendWhatsAppNotification(order) {
     const footer = window.siteData?.getSection?.('footer') || {};
-    const adminPhone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+    const adminPhone = Helpers.phoneToWhatsappNumber(footer.whatsapp || footer.phone || '+57 301 7059737');
 
     const itemsText = order.items.map((item, idx) =>
       `${idx + 1}. ${item.name} x${item.qty} - ${Formatters.formatPrice(item.subtotal)}`

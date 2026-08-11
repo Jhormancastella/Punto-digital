@@ -81,6 +81,7 @@
     renderAll() {
       this.renderStats();
       this.renderTable();
+      window.adminPanel?.updateStats?.();
     },
 
     renderStats() {

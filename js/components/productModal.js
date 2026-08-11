@@ -402,7 +402,7 @@ class ProductModal {
       window.checkoutModal.open(window.cartService.items, window.cartService.getTotal());
     } else {
       const footer = window.siteData?.getSection?.('footer') || {};
-      const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+      const phone = Helpers.phoneToWhatsappNumber(footer.whatsapp || footer.phone || '+57 301 7059737');
       const message = [
         'Hola, quiero comprar este producto en Punto Digital:',
         '',
@@ -428,7 +428,7 @@ class ProductModal {
     
     const message = `Hola! Me interesa el ${this.currentProduct.name} por ${this.formatPrice(this.currentProduct.price)}. ¿Podrías darme más información?`;
     const footer = window.siteData?.getSection?.('footer') || {};
-    const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+    const phone = Helpers.phoneToWhatsappNumber(footer.whatsapp || footer.phone || '+57 301 7059737');
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');

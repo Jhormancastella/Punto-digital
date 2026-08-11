@@ -128,27 +128,53 @@ class Helpers {
   }
 
   /* ── Footer / Contacto / Social (compartido: index, reseñas, catálogo) ── */
+  static phoneDigits(value) {
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  static phoneToTelHref(value) {
+    const digits = Helpers.phoneDigits(value);
+    return digits ? `tel:+${digits.startsWith('57') ? digits : `57${digits}`}` : '';
+  }
+
+  static phoneToWhatsappNumber(value) {
+    const digits = Helpers.phoneDigits(value);
+    if (!digits) return '';
+    return digits.startsWith('57') ? digits : `57${digits}`;
+  }
+
+  static whatsappUrl(value) {
+    const phone = Helpers.phoneToWhatsappNumber(value);
+    return phone ? `https://wa.me/${phone}` : '';
+  }
+
   static renderFooterContact(footerData) {
     const container = document.getElementById('footerContact');
     if (!container || !footerData) return;
+    const telHref = Helpers.phoneToTelHref(footerData.phone);
+    const whatsappHref = Helpers.whatsappUrl(footerData.whatsapp || footerData.phone);
 
     container.innerHTML = `
-      <a href="tel:${footerData.phone}" class="contact-item" role="listitem">
+      ${footerData.phone ? `
+      <a href="${Helpers.escapeAttr(telHref)}" class="contact-item" role="listitem">
         <i class="fas fa-phone" aria-hidden="true"></i>
         <span>${Helpers.escapeHtml(footerData.phone)}</span>
       </a>
+      ` : ''}
+      ${footerData.email ? `
       <a href="mailto:${Helpers.escapeAttr(footerData.email)}" class="contact-item" role="listitem">
         <i class="fas fa-envelope" aria-hidden="true"></i>
         <span>${Helpers.escapeHtml(footerData.email)}</span>
       </a>
+      ` : ''}
       ${footerData.address ? `
         <div class="contact-item" role="listitem">
           <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
           <span>${Helpers.escapeHtml(footerData.address)}</span>
         </div>
       ` : ''}
-      ${footerData.whatsapp ? `
-        <a href="https://wa.me/${footerData.whatsapp.replace(/\D/g, '')}"
+      ${whatsappHref ? `
+        <a href="${Helpers.escapeAttr(whatsappHref)}"
            class="contact-item" target="_blank" rel="noopener" role="listitem">
           <i class="fab fa-whatsapp" aria-hidden="true"></i>
           <span>WhatsApp</span>
@@ -194,8 +220,9 @@ class Helpers {
     if (!window.siteData || typeof window.siteData.getSection !== 'function') return;
     const footerData = window.siteData.getSection('footer');
     const socialData = window.siteData.getSection('social');
+    const whatsappUrl = Helpers.whatsappUrl(footerData?.whatsapp || footerData?.phone);
     Helpers.renderFooterContact(footerData);
-    Helpers.renderSocialLinks(socialData);
+    Helpers.renderSocialLinks(whatsappUrl ? { ...(socialData || {}), whatsapp: whatsappUrl } : socialData);
   }
 }
 

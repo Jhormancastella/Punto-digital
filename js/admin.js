@@ -247,10 +247,18 @@ class AdminPanel {
         localStorage.removeItem('puntoDigitalOrders');
         window.orderService.notify('ordersUpdated', []);
       }
+      if (window.reviewService) {
+        window.reviewService.reviews = [];
+        localStorage.removeItem('puntoDigitalReviews');
+        window.reviewService.notify('reviewsUpdated', []);
+      }
     } catch (_) {}
     document.getElementById('adminLoginScreen')?.remove();
     if (window.orderService?._ensureAdminFirestoreListener) {
       window.orderService._ensureAdminFirestoreListener();
+    }
+    if (window.reviewService?._ensureFirestoreListener) {
+      window.reviewService._ensureFirestoreListener();
     }
     this.init();
   }
@@ -263,6 +271,10 @@ class AdminPanel {
     this.loadAllSections();
     this.updateStats();
     window.siteData.addObserver(() => this.updateStats());
+    window.addEventListener('resize', () => {
+      clearTimeout(this._chartResizeTimer);
+      this._chartResizeTimer = setTimeout(() => this.updateDashboardCharts(), 150);
+    });
   }
 
   isAuthenticated() {
@@ -322,6 +334,326 @@ class AdminPanel {
     set('stat-categories', (window.siteData.getSection('categories') || []).length);
     const hero = window.siteData.getSection('hero');
     set('stat-images', Array.isArray(hero?.images) ? hero.images.length : 0);
+
+    const orderStats = window.orderService?.getStats?.();
+    if (orderStats) {
+      const activeOrders =
+        (orderStats.pending || 0) +
+        (orderStats.verifying || 0) +
+        (orderStats.packing || 0) +
+        (orderStats.shipped || 0);
+      set('dash-orders-active', activeOrders);
+      set('dash-orders-revenue', Formatters.formatPrice(orderStats.totalRevenue || 0));
+    }
+
+    const reviewStats = window.reviewService?.getStats?.();
+    if (reviewStats) {
+      set('dash-reviews-pending', reviewStats.pending || 0);
+      set('dash-reviews-avg', (reviewStats.avgRating || 0).toFixed(1));
+    }
+    this.updateDashboardCharts();
+  }
+
+  updateDashboardCharts() {
+    const orders = Array.isArray(window.orderService?.orders) ? window.orderService.orders : [];
+    const activeOrders = orders.filter(o => o.status !== 'cancelled');
+    const completedLike = orders.filter(o => ['completed', 'shipped', 'packing', 'verifying'].includes(o.status));
+    const products = window.siteData?.getSection?.('products') || [];
+    const categories = window.siteData?.getSection?.('categories') || [];
+    const hero = window.siteData?.getSection?.('hero') || {};
+    const orderStats = window.orderService?.getStats?.() || {};
+    const reviewStats = window.reviewService?.getStats?.() || {};
+    const activeOrderCount =
+      (orderStats.pending || 0) +
+      (orderStats.verifying || 0) +
+      (orderStats.packing || 0) +
+      (orderStats.shipped || 0);
+
+    const dashboardSummary = [
+      { label: 'Productos', value: products.length },
+      { label: 'Destacados', value: products.filter(p => p.featured).length },
+      { label: 'Categorías', value: categories.length },
+      { label: 'Hero', value: Array.isArray(hero.images) ? hero.images.length : 0 },
+      { label: 'Pedidos activos', value: activeOrderCount },
+      { label: 'Reseñas pendientes', value: reviewStats.pending || 0 },
+      { label: 'Promedio reseñas', value: reviewStats.avgRating || 0 }
+    ];
+    this._drawHorizontalBars('chartDashboardSummary', dashboardSummary, { color: '#d4a843', valueFormatter: v => String(v) });
+
+    const contentSummary = [
+      { label: 'Productos', value: products.length, color: '#d4a843' },
+      { label: 'Destacados', value: products.filter(p => p.featured).length, color: '#7c3aed' },
+      { label: 'Categorías', value: categories.length, color: '#059669' },
+      { label: 'Imágenes Hero', value: Array.isArray(hero.images) ? hero.images.length : 0, color: '#dc2626' }
+    ];
+    this._drawDonutChart('chartContentSummary', contentSummary);
+
+    const revenueDays = this._lastDays(7).map(day => ({
+      label: day.label,
+      value: activeOrders
+        .filter(o => this._dateKey(o.createdAt) === day.key)
+        .reduce((sum, o) => sum + this._num(o.total), 0)
+    }));
+    const revenueTotal = completedLike.reduce((sum, o) => sum + this._num(o.total), 0);
+    const revenueTotalEl = document.getElementById('chartRevenueTotal');
+    if (revenueTotalEl) revenueTotalEl.textContent = Formatters.formatPrice(revenueTotal);
+    this._drawBarChart('chartRevenue7d', revenueDays, { money: true, color: '#d4a843' });
+
+    const statusLabels = window.orderService?.STATUS_LABELS || {};
+    const statusColors = window.orderService?.STATUS_COLORS || {};
+    const statusData = ['pending', 'verifying', 'packing', 'shipped', 'completed', 'cancelled']
+      .map(status => ({
+        label: statusLabels[status] || status,
+        value: orders.filter(o => o.status === status).length,
+        color: statusColors[status] || '#888'
+      }));
+    this._drawDonutChart('chartOrderStatus', statusData);
+
+    const paymentLabels = window.orderService?.PAYMENT_LABELS || {};
+    const paymentData = ['transfer', 'cod'].map(method => ({
+      label: paymentLabels[method] || method,
+      value: orders.filter(o => o.paymentMethod === method).length,
+      color: method === 'transfer' ? '#0dcaf0' : '#22c55e'
+    }));
+    this._drawDonutChart('chartPaymentMethods', paymentData);
+
+    const productMap = new Map();
+    orders.forEach(order => {
+      (order.items || []).forEach(item => {
+        const name = item.name || 'Producto';
+        productMap.set(name, (productMap.get(name) || 0) + this._num(item.qty || 1));
+      });
+    });
+    const topProducts = [...productMap.entries()]
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+    this._drawHorizontalBars('chartTopProducts', topProducts, { color: '#7c3aed' });
+
+    const ratingStats = window.reviewService?.getStats?.()?.ratingDistribution || {};
+    const ratingData = [5, 4, 3, 2, 1].map(stars => ({
+      label: `${stars} estrella${stars === 1 ? '' : 's'}`,
+      value: ratingStats[stars] || 0
+    }));
+    this._drawHorizontalBars('chartReviewRatings', ratingData, { color: '#f97316' });
+
+    const deliveryZoneMap = new Map();
+    orders.forEach(order => {
+      const department = order.customer?.department || 'Sin departamento';
+      const city = order.customer?.city || 'Sin ciudad';
+      const deliveryZone = `${department}|||${city}`;
+      deliveryZoneMap.set(deliveryZone, (deliveryZoneMap.get(deliveryZone) || 0) + 1);
+    });
+    const deliveryZones = [...deliveryZoneMap.entries()]
+      .map(([key, value]) => {
+        const [department, city] = key.split('|||');
+        return { label: department, sublabel: city, value };
+      })
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+    this._drawHorizontalBars('chartDepartments', deliveryZones, { color: '#059669' });
+  }
+
+  _prepareCanvas(id) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const width = Math.max(280, Math.floor(rect.width || canvas.parentElement?.clientWidth || 320));
+    const height = parseInt(canvas.getAttribute('height'), 10) || 220;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.height = `${height}px`;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    return { canvas, ctx, width, height };
+  }
+
+  _drawEmpty(ctx, width, height, text = 'Sin datos') {
+    ctx.fillStyle = this._chartMuted();
+    ctx.font = '600 13px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, width / 2, height / 2);
+  }
+
+  _drawBarChart(id, data, opts = {}) {
+    const ready = this._prepareCanvas(id);
+    if (!ready) return;
+    const { ctx, width, height } = ready;
+    const values = data.map(d => d.value || 0);
+    const max = Math.max(...values, 1);
+    if (!values.some(Boolean)) return this._drawEmpty(ctx, width, height);
+
+    const pad = { left: 14, right: 12, top: 16, bottom: 34 };
+    const chartW = width - pad.left - pad.right;
+    const chartH = height - pad.top - pad.bottom;
+    const gap = 8;
+    const barW = Math.max(14, (chartW - gap * (data.length - 1)) / data.length);
+
+    ctx.strokeStyle = this._chartGrid();
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 3; i++) {
+      const y = pad.top + chartH * (i / 3);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(width - pad.right, y);
+      ctx.stroke();
+    }
+
+    data.forEach((d, i) => {
+      const x = pad.left + i * (barW + gap);
+      const h = Math.max(2, chartH * ((d.value || 0) / max));
+      const y = pad.top + chartH - h;
+      ctx.fillStyle = opts.color || '#d4a843';
+      this._roundRect(ctx, x, y, barW, h, 6);
+      ctx.fill();
+      ctx.fillStyle = this._chartText();
+      ctx.font = '600 10.5px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(d.label, x + barW / 2, height - 12);
+    });
+  }
+
+  _drawDonutChart(id, data) {
+    const ready = this._prepareCanvas(id);
+    if (!ready) return;
+    const { ctx, width, height } = ready;
+    const total = data.reduce((sum, d) => sum + (d.value || 0), 0);
+    if (!total) return this._drawEmpty(ctx, width, height);
+
+    const cx = width * 0.35;
+    const cy = height * 0.48;
+    const radius = Math.min(width, height) * 0.26;
+    let start = -Math.PI / 2;
+    data.filter(d => d.value > 0).forEach(d => {
+      const angle = (d.value / total) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, start, start + angle);
+      ctx.closePath();
+      ctx.fillStyle = d.color || '#d4a843';
+      ctx.fill();
+      start += angle;
+    });
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.58, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = this._chartText();
+    ctx.font = '800 20px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(total), cx, cy + 7);
+
+    const legendX = width * 0.62;
+    let y = 34;
+    ctx.textAlign = 'left';
+    data.filter(d => d.value > 0).slice(0, 5).forEach(d => {
+      ctx.fillStyle = d.color || '#d4a843';
+      ctx.beginPath();
+      ctx.arc(legendX, y - 4, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = this._chartText();
+      ctx.font = '600 11px Poppins, sans-serif';
+      ctx.fillText(`${this._shortLabel(d.label, 18)} (${d.value})`, legendX + 12, y);
+      y += 24;
+    });
+  }
+
+  _drawHorizontalBars(id, data, opts = {}) {
+    const ready = this._prepareCanvas(id);
+    if (!ready) return;
+    const { ctx, width, height } = ready;
+    const max = Math.max(...data.map(d => d.value || 0), 1);
+    if (!data.some(d => d.value > 0)) return this._drawEmpty(ctx, width, height);
+
+    const pad = { left: 12, right: 28, top: 12, bottom: 10 };
+    const hasSublabels = data.some(d => d.sublabel);
+    const rowH = Math.min(hasSublabels ? 44 : 36, (height - pad.top - pad.bottom) / Math.max(data.length, 1));
+    data.forEach((d, i) => {
+      const y = pad.top + i * rowH;
+      const label = this._shortLabel(d.label, 24);
+      ctx.fillStyle = this._chartText();
+      ctx.font = '600 11px Poppins, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, pad.left, y + 12);
+      if (d.sublabel) {
+        ctx.fillStyle = this._chartMuted();
+        ctx.font = '500 10px Poppins, sans-serif';
+        ctx.fillText(this._shortLabel(d.sublabel, 28), pad.left, y + 25);
+      }
+      const barX = pad.left;
+      const barY = y + (d.sublabel ? 30 : 18);
+      const barW = (width - pad.left - pad.right) * ((d.value || 0) / max);
+      ctx.fillStyle = this._chartGrid();
+      this._roundRect(ctx, barX, barY, width - pad.left - pad.right, 8, 5);
+      ctx.fill();
+      ctx.fillStyle = opts.color || '#d4a843';
+      this._roundRect(ctx, barX, barY, Math.max(4, barW), 8, 5);
+      ctx.fill();
+      ctx.fillStyle = this._chartMuted();
+      ctx.font = '700 11px Poppins, sans-serif';
+      ctx.textAlign = 'right';
+      const valueText = typeof opts.valueFormatter === 'function' ? opts.valueFormatter(d.value || 0) : String(d.value || 0);
+      ctx.fillText(valueText, width - 8, barY + 8);
+    });
+  }
+
+  _lastDays(count) {
+    const days = [];
+    for (let i = count - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      days.push({
+        key: this._dateKey(d.toISOString()),
+        label: d.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', '')
+      });
+    }
+    return days;
+  }
+
+  _dateKey(value) {
+    const d = new Date(value);
+    if (isNaN(d)) return '';
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  _num(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  _shortLabel(label, max) {
+    const s = String(label || '');
+    return s.length > max ? `${s.slice(0, max - 1)}...` : s;
+  }
+
+  _roundRect(ctx, x, y, w, h, r) {
+    const radius = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+  }
+
+  _chartText() {
+    return document.documentElement.dataset.theme === 'light' ? '#1f2937' : '#f8f9fa';
+  }
+
+  _chartMuted() {
+    return document.documentElement.dataset.theme === 'light' ? '#6b7280' : '#9ca3af';
+  }
+
+  _chartGrid() {
+    return document.documentElement.dataset.theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
   }
 
   /* ── Load all sections ──────────────────────────────────────── */
@@ -1423,12 +1755,19 @@ class AdminPanel {
   }
 
   async saveFooter() {
+    const phone = this.getVal('footerPhone');
+    const whatsapp = this.getVal('footerWhatsapp');
     await window.siteData.updateSection('footer', {
-      phone: this.getVal('footerPhone'),
+      phone,
       email: this.getVal('footerEmail'),
       address: this.getVal('footerAddress'),
-      whatsapp: this.getVal('footerWhatsapp'),
+      whatsapp,
     });
+    if (whatsapp) {
+      const whatsappUrl = Helpers.whatsappUrl(whatsapp);
+      await window.siteData.updateSection('social', { whatsapp: whatsappUrl });
+      this.setVal('socialWhatsapp', whatsappUrl);
+    }
     window.dispatchEvent(new CustomEvent('siteFooterUpdated'));
     notificationService.success('Contacto guardado');
   }
@@ -1450,7 +1789,7 @@ class AdminPanel {
     const raw = String(value || '').trim();
     if (!raw || raw === '#') return '';
     if (platform === 'whatsapp' && /^\+?\d[\d\s().-]+$/.test(raw)) {
-      return `https://wa.me/${raw.replace(/\D/g, '')}`;
+      return Helpers.whatsappUrl(raw);
     }
     if (/^(https?:|mailto:|tel:)/i.test(raw)) return raw;
     return `https://${raw.replace(/^\/+/, '')}`;
@@ -1517,6 +1856,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Theme toggle
   document.getElementById('themeToggle')?.addEventListener('click', () => {
     window.themeManager?.toggleTheme();
+    setTimeout(() => window.adminPanel?.updateDashboardCharts?.(), 80);
   });
 
   // Close modal on overlay click

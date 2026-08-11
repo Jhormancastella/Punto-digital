@@ -123,6 +123,9 @@
   function refreshOrders() {
     updateOrderStats();
     renderOrders();
+    if (window.adminPanel?.updateStats) {
+      window.adminPanel.updateStats();
+    }
   }
 
   function getFilteredOrders() {
@@ -434,9 +437,6 @@
 
             <h4 class="space-h4"><i class="fab fa-whatsapp"></i> Acciones Rápidas</h4>
             <div class="detail-wa-btns">
-              <button class="wa-btn wa-btn-admin" onclick="adminPanel.sendOrderStatusToWhatsApp('${order.id}','admin')">
-                <i class="fab fa-whatsapp"></i> Abrir chat admin
-              </button>
               <button class="wa-btn wa-btn-cust" onclick="adminPanel.sendOrderStatusToWhatsApp('${order.id}','customer')">
                 <i class="fab fa-whatsapp"></i> Abrir chat cliente
               </button>
@@ -632,7 +632,7 @@
     const order = OS.getOrderById(orderId);
     if (!order) return;
     const phoneRaw = target === 'admin'
-      ? (window.siteData?.getSection?.('footer')?.whatsapp || '573012345678')
+      ? Helpers.phoneToWhatsappNumber(window.siteData?.getSection?.('footer')?.whatsapp || window.siteData?.getSection?.('footer')?.phone || '+57 301 7059737')
       : order.customer.phone;
     const phone = String(phoneRaw).replace(/\D/g, '');
 

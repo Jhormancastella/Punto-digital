@@ -258,8 +258,8 @@ class SiteDataManager {
         { name: 'Cargadores y Accesorios',description: 'Accesorios esenciales para tus dispositivos',image: '' }
       ],
       products: [],
-      footer:     { phone: '+57 301 234 5678', email: 'puntodigitalti@gmail.com', address: 'Colombia', whatsapp: '+57 301 234 5678' },
-      social:     { facebook: 'https://facebook.com/puntodigital', instagram: 'https://instagram.com/puntodigital', whatsapp: 'https://wa.me/573012345678', twitter: 'https://twitter.com/puntodigital', youtube: 'https://youtube.com/puntodigital' },
+      footer:     { phone: '+57 301 7059737', email: 'puntodigitalti@gmail.com', address: 'Colombia', whatsapp: '+57 301 7059737' },
+      social:     { facebook: 'https://facebook.com/puntodigital', instagram: 'https://instagram.com/puntodigital', whatsapp: 'https://wa.me/573017059737', twitter: 'https://twitter.com/puntodigital', youtube: 'https://youtube.com/puntodigital' },
       typography: { fontFamily: 'Poppins', heroTitleSize: 58, sectionTitleSize: 28, baseSize: 16 },
       seo:        { title: 'Punto Digital | Tecnología y Telefonía', description: 'Tienda especializada en tecnología y telefonía.', keywords: 'smartphones, tecnología, telefonía' },
       slogan:     'Siempre Conectados'

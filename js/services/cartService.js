@@ -269,7 +269,7 @@ class CartService {
       window.checkoutModal.open(this.items, this.getTotal());
     } else {
       const footer = window.siteData?.getSection?.('footer') || {};
-      const phone = String(footer.whatsapp || footer.phone || '+573012345678').replace(/\D/g, '');
+      const phone = Helpers.phoneToWhatsappNumber(footer.whatsapp || footer.phone || '+57 301 7059737');
       const lines = this.items.map((item, index) => {
         const subtotal = parseInt(item.price) * item.qty;
         return `${index + 1}. ${item.name} x${item.qty} - ${Formatters.formatPrice(subtotal)}`;
