@@ -270,10 +270,17 @@ class AdminPanel {
     this.setupColorSync();
     this.loadAllSections();
     this.updateStats();
+    this._debouncedChartUpdate = this._debounce(() => this.updateDashboardCharts(), 250);
     window.siteData.addObserver(() => this.updateStats());
     window.addEventListener('resize', () => {
       clearTimeout(this._chartResizeTimer);
       this._chartResizeTimer = setTimeout(() => this.updateDashboardCharts(), 150);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        this.updateStats();
+        this.updateDashboardCharts();
+      }
     });
   }
 
@@ -351,7 +358,10 @@ class AdminPanel {
       set('dash-reviews-pending', reviewStats.pending || 0);
       set('dash-reviews-avg', (reviewStats.avgRating || 0).toFixed(1));
     }
-    this.updateDashboardCharts();
+
+    if (this._debouncedChartUpdate) {
+      this._debouncedChartUpdate();
+    }
   }
 
   updateDashboardCharts() {
@@ -458,9 +468,10 @@ class AdminPanel {
     const canvas = document.getElementById(id);
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
-    const width = Math.max(280, Math.floor(rect.width || canvas.parentElement?.clientWidth || 320));
+    const width = Math.max(0, Math.floor(rect.width || canvas.parentElement?.clientWidth || 320));
     const height = parseInt(canvas.getAttribute('height'), 10) || 220;
-    const dpr = window.devicePixelRatio || 1;
+    if (!width || !height) return null;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     canvas.style.height = `${height}px`;
@@ -1826,6 +1837,13 @@ class AdminPanel {
   /* ── Helpers ────────────────────────────────────────────────── */
   getVal(id) { return document.getElementById(id)?.value?.trim() || ''; }
   setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+  _debounce(fn, ms) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
 }
 
 /* ── Globals ──────────────────────────────────────────────────── */

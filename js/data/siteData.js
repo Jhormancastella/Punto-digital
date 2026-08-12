@@ -42,12 +42,16 @@ class SiteDataManager {
   }
 
   async _loadFromFirestore() {
-    // Reintentar hasta 3 veces con espera entre intentos
+    const withTimeout = (promise, ms = 8000) => Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         const [config, products] = await Promise.all([
-          this._loadSiteConfig(),
-          this._loadProducts()
+          withTimeout(this._loadSiteConfig(), 12000),
+          withTimeout(this._loadProducts(), 12000)
         ]);
 
         this.data = { ...this._getDefaultData(), ...config, products };
@@ -106,8 +110,11 @@ class SiteDataManager {
       const corrupt = arraySections.some(k => parsed[k] !== undefined && !Array.isArray(parsed[k]));
       if (corrupt) { localStorage.removeItem(this.storageKey); return this._getDefaultData(); }
       return this._mergeWithDefaults(parsed);
-    } catch {
-      localStorage.removeItem(this.storageKey);
+    } catch (e) {
+      if (e?.name === 'SecurityError') {
+        console.warn('[SiteData] localStorage bloqueado (modo privado iOS?). Usando datos por defecto.');
+      }
+      try { localStorage.removeItem(this.storageKey); } catch (_) {}
       return this._getDefaultData();
     }
   }
@@ -116,10 +123,10 @@ class SiteDataManager {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this._stripBase64(this.data)));
     } catch (e) {
-      if (e.name === 'QuotaExceededError') {
+      if (e?.name === 'QuotaExceededError' || e?.name === 'SecurityError') {
         try {
           localStorage.setItem(this.storageKey, JSON.stringify(this._minimalData(this.data)));
-        } catch { /* sin espacio */ }
+        } catch (_) {}
       }
     }
   }

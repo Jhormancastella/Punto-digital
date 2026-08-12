@@ -199,7 +199,10 @@ class OrderService {
       if (!raw) return [];
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : [];
-    } catch {
+    } catch (e) {
+      if (e?.name === 'SecurityError') {
+        console.warn('[OrderService] localStorage bloqueado (modo privado iOS?). Usando array vacío.');
+      }
       return [];
     }
   }
@@ -213,8 +216,8 @@ class OrderService {
       localStorage.setItem(this.storageKey, JSON.stringify(this.orders));
       this.notify('ordersUpdated', this.orders);
     } catch (e) {
-      if (e.name === 'QuotaExceededError') {
-        console.warn('[OrderService] localStorage lleno. No se pudo guardar los pedidos.');
+      if (e?.name === 'QuotaExceededError' || e?.name === 'SecurityError') {
+        console.warn('[OrderService] localStorage lleno o bloqueado. No se pudo guardar los pedidos.');
       }
     }
   }

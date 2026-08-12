@@ -88,7 +88,10 @@ class ReviewService {
       if (!raw) return [];
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : [];
-    } catch {
+    } catch (e) {
+      if (e?.name === 'SecurityError') {
+        console.warn('[ReviewService] localStorage bloqueado (modo privado iOS?).');
+      }
       return [];
     }
   }
@@ -97,7 +100,9 @@ class ReviewService {
     try {
       localStorage.setItem(this.pendingOpsKey, JSON.stringify(this._pendingOps));
     } catch (e) {
-      console.warn('[ReviewService] No se pudo guardar cola de operaciones pendientes:', e?.message);
+      if (e?.name === 'QuotaExceededError' || e?.name === 'SecurityError') {
+        console.warn('[ReviewService] No se pudo guardar cola de operaciones pendientes:', e?.message);
+      }
     }
   }
 
@@ -405,7 +410,10 @@ class ReviewService {
       if (!raw) return [];
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : [];
-    } catch {
+    } catch (e) {
+      if (e?.name === 'SecurityError') {
+        console.warn('[ReviewService] localStorage bloqueado (modo privado iOS?). Usando array vacío.');
+      }
       return [];
     }
   }
@@ -419,8 +427,8 @@ class ReviewService {
       localStorage.setItem(this.storageKey, JSON.stringify(this.reviews));
       this.notify('reviewsUpdated', this.reviews);
     } catch (e) {
-      if (e.name === 'QuotaExceededError') {
-        console.warn('[ReviewService] localStorage lleno. No se pudo guardar las reseñas.');
+      if (e?.name === 'QuotaExceededError' || e?.name === 'SecurityError') {
+        console.warn('[ReviewService] localStorage lleno o bloqueado. No se pudo guardar las reseñas.');
       }
     }
   }
