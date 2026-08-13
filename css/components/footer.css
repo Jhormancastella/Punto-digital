@@ -107,6 +107,38 @@
   font-size: 14px;
 }
 
+.footer-dev-link {
+  color: var(--gold-primary);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-normal);
+}
+
+.footer-dev-link:hover,
+.footer-dev-link:focus {
+  color: var(--gold-light);
+  text-decoration: underline;
+  transform: translateY(-2px);
+}
+
+.footer-dev-favicon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: transparent;
+  vertical-align: middle;
+  box-shadow: 0 0 0 1px rgba(212,168,67,0.2);
+  transition: transform var(--transition-normal);
+}
+
+.footer-dev-link:hover .footer-dev-favicon {
+  transform: scale(1.2) rotate(-5deg);
+}
+
 /* Responsive footer */
 @media (max-width: 768px) {
   .footer-content {
