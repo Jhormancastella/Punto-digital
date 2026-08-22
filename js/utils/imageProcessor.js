@@ -21,7 +21,7 @@ class ImageProcessor {
   }
 
   async processImage(input, opts = {}) {
-    const { folder = 'puntodigital/products', tolerance = 35, outputSize = 600, smooth = 3 } = opts;
+    const { folder = 'puntodigital/products', tolerance = 35, outputSize = 1200, smooth = 3 } = opts;
     try {
       const img     = await this.loadImage(input);
       const dataUrl = this._compose(img, tolerance, outputSize, smooth);
@@ -77,7 +77,7 @@ class ImageProcessor {
         this._processedCache.set(cacheKey, url);
         return url;
       }
-      const processed = this._compose(img, opts.tolerance || 35, opts.outputSize || 600);
+      const processed = this._compose(img, opts.tolerance || 35, opts.outputSize || 1200);
       this._processedCache.set(cacheKey, processed);
       return processed;
     } catch {
@@ -95,7 +95,7 @@ class ImageProcessor {
     const res  = await fetch(url, { method: 'POST', body });
     if (!res.ok) throw new Error('Cloudinary error: ' + res.status);
     const json = await res.json();
-    return json.secure_url.replace('/upload/', '/upload/f_webp,q_auto,w_800/');
+    return json.secure_url.replace('/upload/', '/upload/f_auto,q_auto:best/');
   }
 
   _createDefaultBg() {
@@ -104,7 +104,7 @@ class ImageProcessor {
       img.src = window.productBgDataUrl;
       return img;
     }
-    const size = 600;
+    const size = 1200;
     const c    = document.createElement('canvas');
     c.width = size; c.height = size;
     const ctx  = c.getContext('2d');

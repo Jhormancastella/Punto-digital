@@ -197,6 +197,27 @@ class ProductPage {
 
   renderGallery() {
     const mainImg = document.getElementById('ppMainImage');
+    const galleryMain = document.querySelector('.pp-gallery__main');
+
+    // Cursor zoom para indicar que se puede hacer click
+    if (mainImg) {
+      mainImg.style.cursor = 'zoom-in';
+    }
+
+    // Click en imagen principal para abrir lightbox con zoom
+    if (galleryMain) {
+      galleryMain.addEventListener('click', (e) => {
+        // No abrir si se hizo click en los botones de navegación
+        if (e.target.closest('.pp-gallery__nav')) return;
+        if (!this.currentProduct) return;
+
+        const images = ImageLightbox.extractImages(this.currentProduct);
+        if (images.length && window.imageLightbox) {
+          window.imageLightbox.open(images, this._currentImageIndex, this.currentProduct.name);
+        }
+      });
+    }
+
     this._loadMainImage(mainImg);
     this._renderThumbs();
     document.getElementById('ppNavPrev').addEventListener('click', () => this._prevImage());
@@ -238,7 +259,7 @@ class ProductPage {
     mainImg.src = '';
 
     if (window.imageProcessor?.processImageForCatalog) {
-      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 900 })
+      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 1920 })
         .then(processed => {
           if (this.currentProduct?.id === product.id) {
             mainImg.src = processed || originalSrc;

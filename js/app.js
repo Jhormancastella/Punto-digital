@@ -258,10 +258,11 @@ class PuntoDigitalApp {
       <div class="product-card" role="gridcell" tabindex="0" 
            aria-label="Producto: ${Helpers.escapeAttr(product.name)}"
            data-index="${index}" data-product-id="${product.id}" style="--index: ${index}">
-        <div class="product-image">
+        <div class="product-image" data-lightbox-img>
            <img src="${Helpers.sanitizeUrl(product.images?.[0] || product.image)}" alt="${Helpers.escapeAttr(product.name)}" loading="lazy"
                 onload="this.classList.add('loaded')"
-                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'">
+                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'"
+                style="cursor:zoom-in">
            ${product.badge ? `<span class="product-badge">${Helpers.escapeHtml(product.badge)}</span>` : ''}
         </div>
         <div class="product-content">
@@ -321,10 +322,11 @@ class PuntoDigitalApp {
       <div class="product-card featured-card" role="gridcell" tabindex="0" 
            aria-label="Producto destacado: ${Helpers.escapeAttr(product.name)}"
            data-index="${index}" data-product-id="${product.id}" style="--index: ${index}">
-        <div class="product-image">
+        <div class="product-image" data-lightbox-img>
            <img src="${Helpers.sanitizeUrl(product.images?.[0] || product.image)}" alt="${Helpers.escapeAttr(product.name)}" loading="lazy"
                 onload="this.classList.add('loaded')"
-                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'">
+                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCIgdmlld0JveD0iMCAwIDIwMCAyMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMWExYTFhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNkNGE4NDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlByb2R1Y3RvPC90ZXh0Pgo8L3N2Zz4K'"
+                style="cursor:zoom-in">
            ${product.badge ? `<span class="product-badge">${Helpers.escapeHtml(product.badge)}</span>` : ''}
            <span class="featured-badge">Destacado</span>
         </div>
@@ -372,6 +374,36 @@ class PuntoDigitalApp {
           }
         })
         .catch(() => {});
+    });
+
+    // Agregar click handler para lightbox/zoom en imágenes de productos
+    this.setupProductImageLightbox(container);
+  }
+
+  /**
+   * Configura el lightbox de imágenes en los contenedores de productos renderizados
+   */
+  setupProductImageLightbox(container) {
+    const imgContainers = container.querySelectorAll('[data-lightbox-img]');
+    imgContainers.forEach(imgContainer => {
+      const productId = imgContainer.closest('[data-product-id]')?.dataset.productId;
+      if (!productId || imgContainer.dataset.lbBound) return;
+      imgContainer.dataset.lbBound = 'true';
+
+      imgContainer.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Buscar el producto
+        const products = window.siteData?.getSection?.('products') || [];
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+
+        const images = ImageLightbox.extractImages(product);
+        if (images.length && window.imageLightbox) {
+          window.imageLightbox.open(images, 0, product.name);
+        }
+      });
     });
   }
 

@@ -477,9 +477,10 @@ class ProductCatalog {
     const safeBadge = Helpers.escapeHtml(product.badge || '');
 
     card.innerHTML = `
-      <div class="catalog-card-img">
+      <div class="catalog-card-img" data-lightbox-img>
         <img src="${safeImage}" alt="${safeNameAttr}" loading="lazy"
-             onerror="this.src='https://placehold.co/300x220?text=?'">
+             onerror="this.src='https://placehold.co/300x220?text=?'"
+             style="cursor:zoom-in">
         ${product.badge ? `<span class="product-badge">${safeBadge}</span>` : ''}
         ${discount ? `<span class="product-discount">-${discount}%</span>` : ''}
       </div>
@@ -498,6 +499,21 @@ class ProductCatalog {
         </div>
       </div>
     `;
+
+    // Click en imagen para abrir lightbox con zoom
+    const imgContainer = card.querySelector('[data-lightbox-img]');
+    const img = card.querySelector('.catalog-card-img img');
+    if (imgContainer && img) {
+      imgContainer.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const images = ImageLightbox.extractImages(product);
+        if (images.length && window.imageLightbox) {
+          window.imageLightbox.open(images, 0, product.name);
+        }
+      });
+    }
 
     card.querySelector('.btn-view-details').addEventListener('click', () => {
       this.goToProductDetail(product.id);

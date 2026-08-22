@@ -1354,7 +1354,7 @@ class AdminPanel {
         urlInput.disabled = true;
         addUrlBtn.disabled = true;
         notificationService.info('Procesando imagen...');
-        const processed = await window.imageProcessor.processImage(url, { tolerance: 35, outputSize: 700, smooth: 3 });
+        const processed = await window.imageProcessor.processImage(url, { tolerance: 35, outputSize: 1920, smooth: 3 });
         this._openImageEditor(url, processed, { tolerance: 35, smooth: 3, isUrl: true });
       } catch (e) {
         console.error(e);
@@ -1483,10 +1483,10 @@ class AdminPanel {
           <div class="ap-image-editor__slider">
             <div class="ap-image-editor__slider-head">
               <label>Tamaño de salida</label>
-              <span class="ap-chip" id="chipSize">700px</span>
+              <span class="ap-chip" id="chipSize">1200px</span>
             </div>
-            <input type="range" id="sliderSize" min="500" max="900" value="700" step="50">
-            <small>Resolución al subir a Cloudinary</small>
+            <input type="range" id="sliderSize" min="800" max="1920" value="1200" step="100">
+            <small>800px = rápido · 1200px = HD · 1920px = FHD (máxima calidad)</small>
           </div>
         </div>
 
