@@ -36,7 +36,7 @@
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
     <div class="nav-container">
-      <a href="index.html" class="nav-logo js-hard-reload-logo">
+      <a href="index.html" class="nav-logo">
         <img src="img/logo.png" alt="Punto Digital" class="nav-logo-image" loading="eager" decoding="async">
         <div class="nav-slogan">
           <span class="nav-slogan-brand">Punto Digital</span>
@@ -50,6 +50,7 @@
         <li role="none"><a href="index.html#destacados" class="nav-link" role="menuitem">Destacados</a></li>
         <li role="none"><a href="reseñas.html" class="nav-link nav-cta-active" role="menuitem">Reseñas</a></li>
         <li role="none"><a href="catalogo.html" class="nav-link nav-cta" role="menuitem">Ver Catálogo</a></li>
+        <li role="none"><a href="#contacto" class="nav-link" role="menuitem">Contáctanos</a></li>
       </ul>
 
       <div class="nav-actions">
@@ -334,18 +335,5 @@
   <script src="js/components/navbar.js"></script>
   <script src="js/components/loginModal.js"></script>
   <script src="js/reviews.js"></script>
-  <script>
-    (function bindHardReloadLogo() {
-      const logos = document.querySelectorAll('.js-hard-reload-logo');
-      logos.forEach((logo) => {
-        const hardReload = (e) => {
-          e.preventDefault();
-          window.location.reload();
-        };
-        logo.addEventListener('click', hardReload);
-        logo.addEventListener('touchend', hardReload, { passive: false });
-      });
-    })();
-  </script>
 </body>
 </html>

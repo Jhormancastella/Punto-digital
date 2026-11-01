@@ -21,6 +21,9 @@ class ProductPage {
     } else {
       window.addEventListener('siteDataReady', siteReady, { once: true });
     }
+    window.addEventListener('siteDataReady', () => {
+      if (this.currentProduct) this.renderRecommendations(this.currentProduct);
+    }, { once: true });
 
     this.setupKeyboard();
   }
@@ -121,6 +124,9 @@ class ProductPage {
     // Contenido de la caja
     this.renderBoxContent(product);
 
+    // Recomendaciones
+    this.renderRecommendations(product);
+
     // Garantía
     const warranty = product.techSpecs?.garantia || product.specifications?.garantia || '1 año fabricante';
     document.getElementById('ppWarrantyText').textContent = warranty;
@@ -135,6 +141,7 @@ class ProductPage {
 
     // Setup event listeners de botones
     this.setupActionButtons();
+    this.setupCloseDetail();
 
     // Tracking
     this.trackEvent('product_page_viewed', {
@@ -259,7 +266,10 @@ class ProductPage {
     mainImg.src = '';
 
     if (window.imageProcessor?.processImageForCatalog) {
-      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 1920 })
+      window.imageProcessor.processImageForCatalog(originalSrc, {
+        outputSize: 1920,
+        background: product.imageBackgrounds?.[this._currentImageIndex] || 'site'
+      })
         .then(processed => {
           if (this.currentProduct?.id === product.id) {
             mainImg.src = processed || originalSrc;
@@ -418,6 +428,82 @@ class ProductPage {
     list.innerHTML = items.map(item => `
       <li><i class="fas fa-check-circle"></i> ${Helpers.escapeHtml(item)}</li>
     `).join('');
+  }
+
+  renderRecommendations(product) {
+    const section = document.getElementById('ppRecommendations');
+    const grid = document.getElementById('ppRecommendationsGrid');
+    if (!section || !grid) return;
+
+    const products = window.siteData?.getSection?.('products') || [];
+    const related = products
+      .filter(item => String(item.id) !== String(product.id))
+      .map((item, index) => {
+        let score = item.featured ? 1 : 0;
+        if (product.category && item.category === product.category) score += 4;
+        if (product.brand && item.brand === product.brand) score += 2;
+        return { item, index, score };
+      })
+      .sort((a, b) => b.score - a.score || a.index - b.index)
+      .slice(0, 4)
+      .map(entry => entry.item);
+
+    if (!related.length) {
+      section.style.display = 'none';
+      grid.replaceChildren();
+      return;
+    }
+
+    section.style.display = 'block';
+    grid.innerHTML = related.map(item => {
+      const image = item.images?.[0] || item.image || 'https://placehold.co/320x240?text=Producto';
+      const safeImage = Helpers.sanitizeUrl(image, 'https://placehold.co/320x240?text=Producto');
+      const imageBackground = item.imageBackgrounds?.[0] === 'white' ? 'is-white' : '';
+      const productUrl = `producto.html?id=${encodeURIComponent(item.id)}`;
+      const price = typeof item.price === 'string' ? parseInt(item.price, 10) : item.price;
+      return `
+        <a class="pp-recommendation-card" href="${Helpers.escapeAttr(productUrl)}">
+          <span class="pp-recommendation-card__image ${imageBackground}">
+            <img src="${Helpers.escapeAttr(safeImage)}"
+                 alt="${Helpers.escapeAttr(item.name)}" loading="lazy"
+                 onerror="this.src='https://placehold.co/320x240?text=Producto'">
+          </span>
+          <span class="pp-recommendation-card__name">${Helpers.escapeHtml(item.name)}</span>
+          <span class="pp-recommendation-card__price">${Formatters.formatPrice(price)}</span>
+          <span class="pp-recommendation-card__link">Ver producto <i class="fas fa-arrow-right"></i></span>
+        </a>
+      `;
+    }).join('');
+
+    if (!window.imageProcessor?.processImageForCatalog) return;
+    grid.querySelectorAll('.pp-recommendation-card__image img').forEach((img, index) => {
+      const item = related[index];
+      const originalSrc = img.getAttribute('src');
+      window.imageProcessor.processImageForCatalog(originalSrc, {
+        outputSize: 500,
+        background: item.imageBackgrounds?.[0] || 'site'
+      }).then(processed => {
+        if (processed && img.getAttribute('src') === originalSrc) img.src = processed;
+      }).catch(() => {});
+    });
+  }
+
+  setupCloseDetail() {
+    const link = document.getElementById('ppCloseDetail');
+    if (!link || link.dataset.bound) return;
+    link.dataset.bound = 'true';
+    link.addEventListener('click', event => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      try {
+        const previousPage = new URL(document.referrer);
+        if (previousPage.origin === window.location.origin && /\/catalogo\.html$/.test(previousPage.pathname)) {
+          event.preventDefault();
+          window.history.back();
+        }
+      } catch {
+        // The catalog link remains the fallback when there is no usable referrer.
+      }
+    });
   }
 
   setupActionButtons() {

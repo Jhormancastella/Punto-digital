@@ -21,10 +21,10 @@ class ImageProcessor {
   }
 
   async processImage(input, opts = {}) {
-    const { folder = 'puntodigital/products', tolerance = 35, outputSize = 1200, smooth = 3 } = opts;
+    const { folder = 'puntodigital/products', tolerance = 35, outputSize = 1200, smooth = 3, background = 'site' } = opts;
     try {
       const img     = await this.loadImage(input);
-      const dataUrl = this._compose(img, tolerance, outputSize, smooth);
+      const dataUrl = this._compose(img, tolerance, outputSize, smooth, background);
       if (this.cloudinaryCloud && this.cloudinaryPreset) {
         return await this._uploadToCloudinary(dataUrl, folder);
       }
@@ -46,10 +46,10 @@ class ImageProcessor {
   }
 
   async previewRemoveBackground(input, opts = {}) {
-    const { tolerance = 35, outputSize = 520, smooth = 3, applyBg = false } = opts;
+    const { tolerance = 35, outputSize = 520, smooth = 3, applyBg = false, background = 'site' } = opts;
     const img = await this.loadImage(input);
     return applyBg
-      ? this._compose(img, tolerance, outputSize, smooth)
+      ? this._compose(img, tolerance, outputSize, smooth, background)
       : this._cutoutOnly(img, tolerance, smooth);
   }
 
@@ -69,6 +69,7 @@ class ImageProcessor {
   async processImageForCatalog(url, opts = {}) {
     if (!url || typeof url !== 'string') return url;
     if (url.startsWith('data:'))         return url;
+    if (opts.background === 'white') return url;
     const cacheKey = `${url}#v${this._processVersion}`;
     if (this._processedCache.has(cacheKey)) return this._processedCache.get(cacheKey);
     try {
@@ -134,7 +135,7 @@ class ImageProcessor {
     return img;
   }
 
-  _compose(img, tolerance, outputSize, smooth = 3) {
+  _compose(img, tolerance, outputSize, smooth = 3, background = 'site') {
     const w = outputSize, h = outputSize;
     this._setupCanvas(img.naturalWidth || img.width, img.naturalHeight || img.height);
     this.ctx.drawImage(img, 0, 0);
@@ -144,7 +145,10 @@ class ImageProcessor {
     this._softenEdges(id, Math.max(1, smooth));
     this.ctx.putImageData(id, 0, 0);
     this.bgCanvas.width = w; this.bgCanvas.height = h;
-    if (this.defaultBgImg && this.defaultBgImg.src) {
+    if (background === 'white') {
+      this.bgCtx.fillStyle = '#fff';
+      this.bgCtx.fillRect(0, 0, w, h);
+    } else if (this.defaultBgImg && this.defaultBgImg.src) {
       this.bgCtx.drawImage(this.defaultBgImg, 0, 0, w, h);
     } else {
       var grad = this.bgCtx.createLinearGradient(0,0,w,h);

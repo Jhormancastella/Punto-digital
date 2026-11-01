@@ -367,7 +367,12 @@ class PuntoDigitalApp {
     images.forEach((img) => {
       const originalSrc = img.getAttribute('src');
       if (!originalSrc) return;
-      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 500 })
+      const productId = img.closest('[data-product-id]')?.dataset.productId;
+      const product = (window.siteData.getSection('products') || []).find(item => String(item.id) === productId);
+      window.imageProcessor.processImageForCatalog(originalSrc, {
+        outputSize: 500,
+        background: product?.imageBackgrounds?.[0] || 'site'
+      })
         .then((processedSrc) => {
           if (processedSrc && img.getAttribute('src') === originalSrc) {
             img.src = processedSrc;

@@ -17,7 +17,6 @@ class Navbar {
     this.setupMobileMenu();
     this.setupSmoothScroll();
     this.setupKeyboardNavigation();
-    this.setupHardReloadLogo();
   }
 
   /**
@@ -185,18 +184,6 @@ class Navbar {
             break;
         }
       });
-    });
-  }
-
-  setupHardReloadLogo() {
-    const logos = document.querySelectorAll('.js-hard-reload-logo');
-    logos.forEach((logo) => {
-      const hardReload = (e) => {
-        e.preventDefault();
-        window.location.reload();
-      };
-      logo.addEventListener('click', hardReload);
-      logo.addEventListener('touchend', hardReload, { passive: false });
     });
   }
 

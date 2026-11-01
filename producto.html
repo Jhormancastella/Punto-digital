@@ -47,7 +47,7 @@
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
     <div class="nav-container">
-      <a href="index.html" class="nav-logo js-hard-reload-logo" aria-label="Punto Digital - Volver al inicio">
+      <a href="index.html" class="nav-logo" aria-label="Punto Digital - Volver al inicio">
         <img src="img/logo.png" alt="Punto Digital" class="nav-logo-image" loading="eager" decoding="async">
         <div class="nav-slogan">
           <span class="nav-slogan-brand">Punto Digital</span>
@@ -110,9 +110,13 @@
 
     <!-- PRODUCT CONTAINER -->
     <div class="pp-container" id="ppContainer" style="display:none">
-
       <!-- ===== GALLERY + INFO (DESKTOP ROW) ===== -->
       <section class="pp-top" aria-label="Producto">
+        <a href="catalogo.html" class="pp-close-detail" id="ppCloseDetail"
+           aria-label="Cerrar producto y volver al catálogo" title="Volver al catálogo">
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </a>
+
         <!-- GALERIA -->
         <div class="pp-gallery">
           <div class="pp-gallery__thumbs" id="ppThumbs" role="listbox" aria-label="Miniaturas del producto">
@@ -236,6 +240,17 @@
             <ul class="pp-box-list" id="ppBoxList">
               <!-- dinámico -->
             </ul>
+          </div>
+        </div>
+
+        <!-- PRODUCTOS RECOMENDADOS -->
+        <div class="pp-section pp-recommendations" id="ppRecommendations" style="display:none">
+          <div class="pp-section__head">
+            <div class="pp-section__icon"><i class="fas fa-layer-group"></i></div>
+            <h2 class="pp-section__title">También te puede interesar</h2>
+          </div>
+          <div class="pp-section__body">
+            <div class="pp-recommendations__grid" id="ppRecommendationsGrid"></div>
           </div>
         </div>
 

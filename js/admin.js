@@ -1178,7 +1178,7 @@ class AdminPanel {
             <i class="fas fa-upload"></i> Subir
           </button>
         </div>
-        <p class="ap-hint" style="margin-top:4px">El fondo blanco/claro se eliminará automáticamente</p>
+        <p class="ap-hint" style="margin-top:4px">Elige el fondo final al procesar cada imagen: fondo del sitio o blanco.</p>
         <div id="m-pImagesContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:10px">
         </div>
       </div>
@@ -1258,6 +1258,7 @@ class AdminPanel {
         originalPrice: this.getVal('m-pOriginal') || null,
         image: images[0],
         images: images,
+        imageBackgrounds: window.adminPanel._productImageBackgrounds || images.map(() => 'site'),
         category: this.getVal('m-pCat'),
         badge: this.getVal('m-pBadge') || null,
         description: this.getVal('m-pDesc'),
@@ -1337,6 +1338,7 @@ class AdminPanel {
       ? data.images
       : (data.image ? [data.image] : []);
     this._productImages = existing;
+    this._productImageBackgrounds = existing.map((_, i) => data.imageBackgrounds?.[i] === 'white' ? 'white' : 'site');
     this._productImageSettings = {};
 
     const container = document.getElementById('m-pImagesContainer');
@@ -1354,8 +1356,7 @@ class AdminPanel {
         urlInput.disabled = true;
         addUrlBtn.disabled = true;
         notificationService.info('Procesando imagen...');
-        const processed = await window.imageProcessor.processImage(url, { tolerance: 35, outputSize: 1920, smooth: 3 });
-        this._openImageEditor(url, processed, { tolerance: 35, smooth: 3, isUrl: true });
+        this._openImageEditor(url, { tolerance: 35, smooth: 3, isUrl: true, background: 'site' });
       } catch (e) {
         console.error(e);
         notificationService.error('Error al procesar la URL. Verifica que sea pública y permita CORS.');
@@ -1381,8 +1382,7 @@ class AdminPanel {
             reader.onerror = reject;
             reader.readAsDataURL(file);
           });
-          const previewProcessed = await window.imageProcessor.previewRemoveBackground(dataUrl, { tolerance: 35, smooth: 3 });
-          this._openImageEditor(dataUrl, previewProcessed, { tolerance: 35, smooth: 3, fileName: file.name, isFile: true });
+          this._openImageEditor(dataUrl, { tolerance: 35, smooth: 3, fileName: file.name, isFile: true, background: 'site' });
         } catch {
           notificationService.error(`Error procesando: ${file.name}`);
         }
@@ -1401,10 +1401,14 @@ class AdminPanel {
                alt="Producto imagen ${i + 1}"
                onerror="this.src='https://placehold.co/100x100?text=?'">
           ${i === 0 ? '<div class="ap-product-img-primary">Principal</div>' : ''}
+          <div class="ap-product-img-primary" style="top:auto;bottom:6px;left:6px">
+            ${this._productImageBackgrounds?.[i] === 'white' ? 'Fondo blanco' : 'Fondo del sitio'}
+          </div>
         </div>
         <div class="ap-product-img-actions">
-          <button type="button" class="ap-product-img-btn" onclick="adminPanel._editProductImage(${i})" title="Ajustar transparencia">
-            <i class="fas fa-magic"></i>
+          <button type="button" class="ap-product-img-btn" onclick="adminPanel._editProductImage(${i})"
+                  title="Editar imagen y fondo" aria-label="Editar imagen ${i + 1} y su fondo">
+            <i class="fas fa-edit"></i>
           </button>
           ${i > 0 ? `<button type="button" class="ap-product-img-btn" onclick="adminPanel._reorderProductImage(${i}, ${i - 1})" title="Mover izquierda"><i class="fas fa-chevron-left"></i></button>` : ''}
           ${i < this._productImages.length - 1 ? `<button type="button" class="ap-product-img-btn" onclick="adminPanel._reorderProductImage(${i}, ${i + 1})" title="Mover derecha"><i class="fas fa-chevron-right"></i></button>` : ''}
@@ -1416,22 +1420,32 @@ class AdminPanel {
     `).join('');
     const count = this._productImages.length;
     const hint = document.querySelector('.ap-hint');
-    if (hint) hint.innerHTML = `Puedes ajustar la transparencia individualmente con <i class="fas fa-magic"></i> · <strong>${count}/3</strong> mínimas`;
+    if (hint) hint.innerHTML = `Usa <i class="fas fa-edit"></i> para editar la imagen y su fondo · <strong>${count}/3</strong> mínimas`;
   }
 
   _reorderProductImage(from, to) {
     const arr = this._productImages;
     [arr[from], arr[to]] = [arr[to], arr[from]];
+    [this._productImageBackgrounds[from], this._productImageBackgrounds[to]] =
+      [this._productImageBackgrounds[to], this._productImageBackgrounds[from]];
     this._renderProductImages();
   }
 
   _editProductImage(idx) {
     const currentUrl = this._productImages[idx];
     const settings = this._productImageSettings[idx] || { tolerance: 35, smooth: 3 };
-    this._openImageEditor(currentUrl, null, { ...settings, editIndex: idx, existing: true });
+    const background = this._productImageBackgrounds?.[idx] || 'site';
+    this._openImageEditor(currentUrl, {
+      ...settings,
+      background,
+      canChangeBackground: background === 'white',
+      editIndex: idx,
+      existing: true
+    });
   }
 
-  async _openImageEditor(originalSrc, initialProcessed, opts = {}) {
+  async _openImageEditor(originalSrc, opts = {}) {
+    opts = opts || {};
     const toleranceDefault = opts.tolerance ?? 35;
     const smoothDefault    = opts.smooth    ?? 3;
 
@@ -1440,7 +1454,7 @@ class AdminPanel {
     overlay.innerHTML = `
       <div class="ap-image-editor">
         <div class="ap-image-editor__header">
-          <h3><i class="fas fa-magic" style="color:var(--gold-primary);margin-right:8px"></i>Ajustar Quitar Fondo</h3>
+          <h3><i class="fas fa-edit" style="color:var(--gold-primary);margin-right:8px"></i>Editar imagen</h3>
           <button type="button" class="ap-image-editor__close" title="Cancelar">
             <i class="fas fa-times"></i>
           </button>
@@ -1455,12 +1469,21 @@ class AdminPanel {
           </div>
           <div class="ap-image-editor__col">
             <div class="ap-image-editor__label ap-image-editor__label--ok">
-              Sin Fondo <span class="ap-img-check">●</span>
+              Vista previa <span class="ap-img-check">●</span>
             </div>
             <div class="ap-image-editor__canvas ap-image-editor__canvas--checker">
               <img class="ap-img-processed" src="" alt="Procesada">
             </div>
           </div>
+        </div>
+
+        <div class="ap-image-editor__slider">
+          <label for="imageBackground">Fondo de la imagen</label>
+          <select id="imageBackground" ${opts.editIndex !== undefined && !opts.canChangeBackground ? 'disabled' : ''}>
+            <option value="site" ${opts.background === 'white' ? '' : 'selected'}>Fondo actual del sitio</option>
+            <option value="white" ${opts.background === 'white' ? 'selected' : ''}>Fondo blanco</option>
+          </select>
+          ${opts.editIndex !== undefined && !opts.canChangeBackground ? '<small>Para cambiar el fondo de esta imagen, vuelve a subir el archivo original.</small>' : ''}
         </div>
 
         <div class="ap-image-editor__controls">
@@ -1507,6 +1530,7 @@ class AdminPanel {
     const sliderTol   = el('#sliderTol');
     const sliderSmooth= el('#sliderSmooth');
     const sliderSize  = el('#sliderSize');
+    const backgroundSelect = el('#imageBackground');
     const chipTol     = el('#chipTol');
     const chipSmooth  = el('#chipSmooth');
     const chipSize    = el('#chipSize');
@@ -1519,13 +1543,20 @@ class AdminPanel {
     const rerenderProcessed = async () => {
       const tol    = +sliderTol.value;
       const smooth = +sliderSmooth.value;
+      const background = backgroundSelect.value;
       chipTol.textContent    = tol;
       chipSmooth.textContent = smooth;
       chipSize.textContent   = sliderSize.value + 'px';
       lastT = tol; lastS = smooth;
       try {
         imgProc.style.opacity = '0.55';
-        const dataUrl = await window.imageProcessor.previewRemoveBackground(imgOrig.src, { tolerance: tol, smooth, outputSize: +sliderSize.value });
+        const dataUrl = await window.imageProcessor.previewRemoveBackground(imgOrig.src, {
+          tolerance: tol,
+          smooth,
+          outputSize: +sliderSize.value,
+          applyBg: true,
+          background
+        });
         imgProc.src = dataUrl;
         imgProc.style.opacity = '1';
         btnConfirm.disabled = false;
@@ -1542,19 +1573,13 @@ class AdminPanel {
       debounceTimer = setTimeout(rerenderProcessed, 120);
     };
 
-    imgOrig.onload = async () => {
-      if (initialProcessed) {
-        imgProc.src = initialProcessed;
-        btnConfirm.disabled = false;
-      } else {
-        await rerenderProcessed();
-      }
-    };
+    imgOrig.onload = rerenderProcessed;
     imgOrig.src = originalSrc;
 
     sliderTol.addEventListener('input', onSliderInput);
     sliderSmooth.addEventListener('input', onSliderInput);
     sliderSize.addEventListener('change', rerenderProcessed);
+    backgroundSelect.addEventListener('change', rerenderProcessed);
 
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeEditor();
@@ -1576,14 +1601,22 @@ class AdminPanel {
         const tol    = +sliderTol.value;
         const smooth = +sliderSmooth.value;
         const size   = +sliderSize.value;
-        const finalUrl = await window.imageProcessor.processImage(originalSrc, { tolerance: tol, smooth, outputSize: size });
+        const background = backgroundSelect.value;
+        const finalUrl = await window.imageProcessor.processImage(originalSrc, {
+          tolerance: tol,
+          smooth,
+          outputSize: size,
+          background
+        });
         if (typeof opts.editIndex === 'number') {
           this._productImages[opts.editIndex] = finalUrl;
           this._productImageSettings[opts.editIndex] = { tolerance: tol, smooth };
+          this._productImageBackgrounds[opts.editIndex] = background;
         } else {
           if (this._productImages.includes(finalUrl)) { closeEditor(); return; }
           this._productImages.push(finalUrl);
           this._productImageSettings[this._productImages.length - 1] = { tolerance: tol, smooth };
+          this._productImageBackgrounds.push(background);
         }
         this._renderProductImages();
         notificationService.success(opts.editIndex !== undefined ? 'Imagen ajustada' : 'Imagen agregada');
@@ -1600,11 +1633,13 @@ class AdminPanel {
     if (!src) return;
     if (this._productImages.includes(src)) return;
     this._productImages.push(src);
+    this._productImageBackgrounds.push('site');
     this._renderProductImages();
   }
 
   _removeProductImage(index) {
     this._productImages.splice(index, 1);
+    this._productImageBackgrounds.splice(index, 1);
     const settings = [];
     Object.keys(this._productImageSettings || {}).forEach(k => {
       const ki = +k;

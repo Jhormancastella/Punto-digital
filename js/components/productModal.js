@@ -337,7 +337,10 @@ class ProductModal {
     img.alt = product.name;
 
     if (canProcess) {
-      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 700 })
+      window.imageProcessor.processImageForCatalog(originalSrc, {
+        outputSize: 700,
+        background: product.imageBackgrounds?.[index] || 'site'
+      })
         .then((processedSrc) => {
           const stillSameProduct = this.currentProduct && this.currentProduct.id === product.id
             && this._currentImageIndex === index;

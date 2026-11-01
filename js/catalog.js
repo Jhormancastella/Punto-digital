@@ -529,7 +529,10 @@ class ProductCatalog {
     const cardImg = card.querySelector('.catalog-card-img img');
     if (cardImg && window.imageProcessor?.processImageForCatalog) {
       const originalSrc = cardImg.getAttribute('src');
-      window.imageProcessor.processImageForCatalog(originalSrc, { outputSize: 500 })
+      window.imageProcessor.processImageForCatalog(originalSrc, {
+        outputSize: 500,
+        background: product.imageBackgrounds?.[0] || 'site'
+      })
         .then((processedSrc) => {
           if (processedSrc && cardImg.getAttribute('src') === originalSrc) {
             cardImg.src = processedSrc;
